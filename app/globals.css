@@ -58,36 +58,58 @@
 }
 
 @layer utilities {
-  /* Gradients para Gradient Flow */
-  .gradient-flow {
+  /* Gradients para Luxe Noir - Elegancia Sofisticada */
+  .gradient-luxe {
+    background: linear-gradient(
+      135deg,
+      #2C2C2C 0%,
+      #3A3A3A 50%,
+      #2C2C2C 100%
+    );
+  }
+
+  .gradient-luxe-gold {
     background: linear-gradient(
       to right,
-      rgb(147 51 234),
-      rgb(236 72 153),
-      rgb(249 115 22)
+      #2C2C2C,
+      #3A3A3A,
+      #D4AF37
     );
   }
 
-  .gradient-flow-subtle {
+  .gradient-luxe-subtle {
     background: linear-gradient(
       to bottom right,
-      rgb(245 243 255),
-      rgb(253 244 247),
-      rgb(255 247 237)
+      #F5F5F0,
+      #FFFFFF,
+      #FAF7F0
     );
   }
 
-  /* Gradient Text */
+  /* Gradient Text - Charcoal to Gold */
   .gradient-text {
     background: linear-gradient(
       to right,
-      rgb(147 51 234),
-      rgb(236 72 153),
-      rgb(249 115 22)
+      #2C2C2C,
+      #666666,
+      #D4AF37
     );
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
+  }
+
+  .gradient-text-gold {
+    background: linear-gradient(
+      135deg,
+      #FFD700,
+      #FFC857,
+      #FFD700
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: brightness(1.2);
   }
 
   /* Animations */

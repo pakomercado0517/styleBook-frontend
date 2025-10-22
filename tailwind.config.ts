@@ -13,29 +13,42 @@ const config: Config = {
         playfair: ['var(--font-playfair)', 'serif'],
       },
       colors: {
+        // LUXE NOIR Palette - Elegancia y Sofisticación
         primary: {
-          50: '#fdf2f8',
-          100: '#fce7f3',
-          200: '#fbcfe8',
-          300: '#f9a8d4',
-          400: '#f472b6',
-          500: '#ec4899',
-          600: '#db2777',
-          700: '#be185d',
-          800: '#9d174d',
-          900: '#831843',
+          50: '#F5F5F5',
+          100: '#E5E5E5',
+          200: '#CCCCCC',
+          300: '#B3B3B3',
+          400: '#999999',
+          500: '#808080',
+          600: '#666666',
+          700: '#4D4D4D',
+          800: '#2C2C2C', // Charcoal principal
+          900: '#1A1A1A',
         },
-        secondary: {
-          50: '#f5f3ff',
-          100: '#ede9fe',
-          200: '#ddd6fe',
-          300: '#c4b5fd',
-          400: '#a78bfa',
-          500: '#8b5cf6',
-          600: '#7c3aed',
-          700: '#6d28d9',
-          800: '#5b21b6',
-          900: '#4c1d95',
+        accent: {
+          50: '#FAF7F0',
+          100: '#F5EFE1',
+          200: '#EBDFC3',
+          300: '#E1CFA5',
+          400: '#D7BF87',
+          500: '#D4AF37', // Champagne/Gold
+          600: '#B8952D',
+          700: '#8C7122',
+          800: '#604D17',
+          900: '#34290C',
+        },
+        neutral: {
+          50: '#F5F5F0', // Cream
+          100: '#E8E8E3',
+          200: '#D1D1C7',
+          300: '#BABAAB',
+          400: '#A3A38F',
+          500: '#8C8C73',
+          600: '#64748B', // Slate
+          700: '#52525C',
+          800: '#3A3A3A',
+          900: '#222222',
         },
       },
       borderRadius: {

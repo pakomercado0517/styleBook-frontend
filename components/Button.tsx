@@ -9,14 +9,13 @@ const buttonVariants = cva(
     variants: {
       variant: {
         primary:
-          'bg-purple-600 text-white hover:bg-purple-700 hover:shadow-lg active:scale-95',
+          'bg-primary-800 text-white hover:bg-primary-900 hover:shadow-xl hover:shadow-primary-800/20 active:scale-95',
         secondary:
-          'bg-white text-purple-600 hover:bg-purple-50 hover:shadow-md active:bg-purple-100',
-        gradient:
-          'bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 text-white hover:shadow-lg hover:from-purple-700 hover:via-pink-600 hover:to-orange-600 active:scale-95',
+          'bg-white text-primary-800 border-2 border-white hover:bg-neutral-50 hover:shadow-2xl hover:shadow-white/30 active:bg-neutral-100 shadow-xl',
+        gold: 'bg-accent-500 text-primary-900 hover:bg-accent-400 hover:shadow-2xl hover:shadow-accent-500/60 active:scale-95 shadow-xl shadow-accent-500/50 font-bold',
         outline:
-          'border-2 border-purple-600 text-purple-600 hover:bg-purple-50 active:bg-purple-100',
-        ghost: 'text-purple-600 hover:bg-purple-50 active:bg-purple-100',
+          'border-2 border-accent-400 text-accent-400 bg-transparent hover:bg-accent-500/10 active:bg-accent-500/20 shadow-lg shadow-accent-400/30',
+        ghost: 'text-primary-800 hover:bg-neutral-100 active:bg-neutral-200',
       },
       size: {
         sm: 'px-4 py-2 text-sm',
