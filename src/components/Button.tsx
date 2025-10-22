@@ -9,14 +9,12 @@ const buttonVariants = cva(
     variants: {
       variant: {
         primary:
-          'bg-purple-600 text-white hover:bg-purple-700 hover:shadow-lg active:scale-95',
-        secondary:
-          'bg-white text-purple-600 hover:bg-purple-50 hover:shadow-md active:bg-purple-100',
-        gradient:
           'bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 text-white hover:shadow-lg hover:from-purple-700 hover:via-pink-600 hover:to-orange-600 active:scale-95',
         outline:
           'border-2 border-purple-600 text-purple-600 hover:bg-purple-50 active:bg-purple-100',
         ghost: 'text-purple-600 hover:bg-purple-50 active:bg-purple-100',
+        secondary:
+          'bg-white border-2 border-gray-200 text-slate-900 hover:border-purple-600 hover:text-purple-600 active:bg-gray-50',
       },
       size: {
         sm: 'px-4 py-2 text-sm',

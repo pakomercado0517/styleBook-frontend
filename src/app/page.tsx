@@ -83,13 +83,13 @@ export default function Home(): React.ReactNode {
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12 animate-slide-up">
             <Button size="lg">Comenzar Ahora</Button>
-            <Button variant="secondary" size="lg">
+            <Button variant="outline" size="lg">
               Ver Demo
             </Button>
           </div>
 
           {/* Divider Line */}
-          <div className="w-full h-1 bg-linear-to-r from-transparent via-white to-transparent my-12 opacity-30"></div>
+          <div className="w-full h-1 bg-gradient-to-r from-transparent via-white to-transparent my-12 opacity-30"></div>
 
           {/* Role Selector */}
           <div className="flex flex-col md:flex-row items-center justify-center gap-4 mb-12 px-4">
@@ -119,7 +119,7 @@ export default function Home(): React.ReactNode {
               </button>
             </div>
             <span className="text-white font-poppins font-semibold">
-              ¿O proveedor?
+              ¿O providor?
             </span>
           </div>
         </div>
