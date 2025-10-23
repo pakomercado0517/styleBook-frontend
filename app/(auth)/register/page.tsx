@@ -8,12 +8,10 @@ import { Button } from '@/components/Button';
 import { Input } from '@/components/Input';
 import { Badge } from '@/components/Badge';
 import { register } from '@/lib/api/auth';
-import { useAuthStore } from '@/store/authStore';
 import type { UserRole } from '@/lib/types/auth';
 
 export default function RegisterPage(): React.ReactNode {
   const router = useRouter();
-  const setAuth = useAuthStore((state) => state.setAuth);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -78,16 +76,18 @@ export default function RegisterPage(): React.ReactNode {
       return;
     }
 
-    // Guardar usuario y token en el store
-    setAuth(result.data.user, result.data.token);
+    // NO guardar en store - usuario debe verificar email primero
+    // NO llamar setAuth()
 
     // Mostrar éxito
-    toast.success('¡Cuenta creada exitosamente! Bienvenido a StyleBook');
+    toast.success(
+      '¡Cuenta creada exitosamente! Revisa tu email para verificar tu cuenta'
+    );
 
-    // Redirigir según el rol del usuario
-    const redirectPath =
-      result.data.user.role === 'client' ? '/client' : '/provider';
-    router.push(redirectPath);
+    // Redirigir a página de verificación pendiente con el email
+    router.push(
+      `/verify-email-pending?email=${encodeURIComponent(formData.email)}`
+    );
   };
 
   return (

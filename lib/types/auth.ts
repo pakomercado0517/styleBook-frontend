@@ -16,6 +16,7 @@ export interface User {
   address?: string;
   timezone?: string;
   memberSince?: string; // Timestamp cuando se creó la cuenta (del login)
+  verified?: boolean; // Si el email está verificado
 }
 
 /**
@@ -44,7 +45,8 @@ export interface RegisterData {
  */
 export interface AuthData {
   user: User;
-  token: string;
+  token: string; // Access token (30 min)
+  refreshToken: string; // Refresh token (7 días)
 }
 
 /**
@@ -60,4 +62,24 @@ export interface ForgotPasswordData {
 export interface ResetPasswordData {
   token: string;
   password: string;
+}
+
+/**
+ * Datos para reenviar email de verificación
+ */
+export interface ResendVerificationData {
+  email: string;
+}
+
+/**
+ * Respuesta de verificación de email
+ */
+export interface VerifyEmailResponse {
+  message: string;
+  user: {
+    id: number;
+    name: string;
+    email: string;
+    verified: boolean;
+  };
 }

@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/Button';
 import { Input } from '@/components/Input';
 import { Badge } from '@/components/Badge';
-import { login } from '@/lib/api/auth';
+import { login, resendVerificationEmail } from '@/lib/api/auth';
 import { useAuthStore } from '@/store/authStore';
 
 export default function LoginPage(): React.ReactNode {
@@ -17,6 +17,8 @@ export default function LoginPage(): React.ReactNode {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showResendButton, setShowResendButton] = useState(false);
+  const [isResending, setIsResending] = useState(false);
 
   /**
    * Maneja el envío del formulario de login
@@ -25,13 +27,29 @@ export default function LoginPage(): React.ReactNode {
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     setIsLoading(true);
+    setShowResendButton(false); // Ocultar botón de reenvío al intentar login
 
     // Llamar a la API de login
     const result = await login({ email, password });
 
     if (!result.success) {
-      // Mostrar error si falla
-      toast.error(result.error || 'Error al iniciar sesión');
+      // Verificar si el error es por email no verificado
+      const isEmailNotVerified =
+        result.error?.includes('verifica tu email') ||
+        result.error?.includes('verificar') ||
+        result.error?.includes('verify');
+
+      if (isEmailNotVerified) {
+        // Mostrar error y botón para reenviar verificación
+        toast.error(
+          'Por favor verifica tu email antes de iniciar sesión. Revisa tu bandeja de entrada'
+        );
+        setShowResendButton(true);
+      } else {
+        // Otros errores
+        toast.error(result.error || 'Error al iniciar sesión');
+      }
+
       setIsLoading(false);
       return;
     }
@@ -46,6 +64,32 @@ export default function LoginPage(): React.ReactNode {
     const redirectPath =
       result.data.user.role === 'client' ? '/client' : '/provider';
     router.push(redirectPath);
+  };
+
+  /**
+   * Reenvía el email de verificación
+   */
+  const handleResendVerification = async (): Promise<void> => {
+    if (!email) {
+      toast.error('Por favor ingresa tu email');
+      return;
+    }
+
+    setIsResending(true);
+
+    const result = await resendVerificationEmail({ email });
+
+    if (!result.success) {
+      toast.error(result.error || 'Error al reenviar email de verificación');
+      setIsResending(false);
+      return;
+    }
+
+    toast.success(
+      'Email de verificación enviado. Revisa tu bandeja de entrada'
+    );
+    setShowResendButton(false);
+    setIsResending(false);
   };
 
   return (
@@ -102,6 +146,28 @@ export default function LoginPage(): React.ReactNode {
                 ¿Olvidaste tu contraseña?
               </Link>
             </div>
+
+            {/* Botón de reenviar verificación (solo si email no verificado) */}
+            {showResendButton && (
+              <div className="p-4 rounded-lg bg-accent-50 border border-accent-200">
+                <p className="text-sm text-primary-800 font-poppins mb-3">
+                  ⚠️ Tu email no está verificado. Revisa tu bandeja de entrada o
+                  reenvía el email de verificación.
+                </p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleResendVerification}
+                  disabled={isResending}
+                  className="w-full"
+                >
+                  {isResending
+                    ? 'Reenviando...'
+                    : '📧 Reenviar Email de Verificación'}
+                </Button>
+              </div>
+            )}
 
             <Button
               type="submit"

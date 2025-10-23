@@ -66,8 +66,16 @@ export const resetPasswordSchema = z
     path: ['confirmPassword'],
   });
 
+/**
+ * Schema para reenviar email de verificación
+ */
+export const resendVerificationSchema = z.object({
+  email: z.string().min(1, 'El email es requerido').email('Email inválido'),
+});
+
 // Exportar tipos inferidos de los schemas
 export type LoginInput = z.infer<typeof loginSchema>;
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
+export type ResendVerificationInput = z.infer<typeof resendVerificationSchema>;

@@ -76,11 +76,15 @@ export default function ForgotPasswordPage(): React.ReactNode {
                 />
 
                 {/* Info adicional */}
-                <div className="p-4 rounded-lg bg-accent-50 border border-accent-100">
-                  <p className="text-sm text-neutral-700 font-poppins">
-                    💡 Recibirás un email con las instrucciones para restablecer
-                    tu contraseña. Revisa también tu carpeta de spam.
+                <div className="p-4 rounded-lg bg-accent-50 border border-accent-200">
+                  <p className="text-sm text-primary-800 font-poppins font-medium mb-2">
+                    💡 ¿Cómo funciona?
                   </p>
+                  <ul className="text-sm text-neutral-700 font-poppins space-y-1">
+                    <li>• Recibirás un email con un enlace seguro</li>
+                    <li>• El enlace expirará en 1 hora</li>
+                    <li>• Revisa también tu carpeta de spam</li>
+                  </ul>
                 </div>
 
                 <Button
@@ -126,11 +130,16 @@ export default function ForgotPasswordPage(): React.ReactNode {
                   </span>
                 </p>
 
-                <div className="p-4 rounded-lg bg-accent-50 border border-accent-100 mb-8">
-                  <p className="text-sm text-neutral-700 font-poppins">
-                    El enlace expirará en 1 hora. Si no recibes el email en los
-                    próximos minutos, revisa tu carpeta de spam.
+                <div className="p-4 rounded-lg bg-accent-50 border border-accent-200 mb-8">
+                  <p className="text-sm font-poppins font-medium text-primary-800 mb-2">
+                    📧 ¿Qué hacer ahora?
                   </p>
+                  <ul className="text-sm text-neutral-700 font-poppins space-y-1">
+                    <li>• Revisa tu bandeja de entrada</li>
+                    <li>• Haz clic en el enlace del email</li>
+                    <li>• El enlace expirará en 1 hora</li>
+                    <li>• Si no lo encuentras, revisa spam</li>
+                  </ul>
                 </div>
 
                 <div className="space-y-3">

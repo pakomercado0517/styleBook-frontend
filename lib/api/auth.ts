@@ -1,121 +1,115 @@
-import { post } from './client';
 import type {
   LoginData,
   RegisterData,
   AuthData,
   ForgotPasswordData,
   ResetPasswordData,
+  ResendVerificationData,
+  VerifyEmailResponse,
   User,
 } from '@/lib/types/auth';
 import type { Result } from '@/lib/types/common';
-import { STORAGE_KEYS, API_BASE_URL } from '@/lib/constants';
+import { API_BASE_URL, STORAGE_KEYS } from '@/lib/constants';
 import { getUserTimezone } from '@/lib/utils/dateUtils';
-import { setTokenCookie, removeTokenCookie } from '@/lib/utils/token';
+import { saveAuthData } from '@/lib/utils/auth';
+import { removeTokenCookie } from '@/lib/utils/token';
 
 /**
  * Realiza el login del usuario
  * Envía credenciales al backend y retorna usuario + token
  */
 export async function login(credentials: LoginData): Promise<Result<AuthData>> {
-  // Hacer la petición con el cliente que retorna ApiResponse<AuthData>
-  const response = await fetch(`${API_BASE_URL}/auth/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(credentials),
-  });
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(credentials),
+    });
 
-  const apiResponse = await response.json();
+    const apiResponse = await response.json();
 
-  if (!response.ok || !apiResponse.success) {
+    if (!response.ok || !apiResponse.success) {
+      return {
+        success: false,
+        error: apiResponse.message || 'Error al iniciar sesión',
+      };
+    }
+
+    // Extraer datos
+    const { user, token, refreshToken } = apiResponse.data;
+    const memberSince = apiResponse.timestamp;
+
+    // Agregar memberSince al usuario
+    const userWithTimestamp = { ...user, memberSince };
+
+    // Guardar tokens y datos
+    saveAuthData(userWithTimestamp, token, refreshToken);
+
+    return {
+      success: true,
+      data: {
+        user: userWithTimestamp,
+        token,
+        refreshToken,
+      },
+    };
+  } catch {
     return {
       success: false,
-      error: apiResponse.message || 'Error al iniciar sesión',
+      error: 'Error de red al iniciar sesión',
     };
   }
-
-  // Extraer datos y timestamp
-  const { user, token } = apiResponse.data;
-  const memberSince = apiResponse.timestamp;
-
-  // Agregar memberSince al usuario
-  const userWithTimestamp = { ...user, memberSince };
-
-  // Guardar token en localStorage y cookie
-  if (typeof window !== 'undefined') {
-    localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, token);
-    localStorage.setItem(
-      STORAGE_KEYS.USER_DATA,
-      JSON.stringify(userWithTimestamp)
-    );
-    // Guardar en cookie para que el middleware pueda accederlo
-    setTokenCookie(token);
-  }
-
-  // Retornar datos del usuario con memberSince
-  return {
-    success: true,
-    data: {
-      user: userWithTimestamp,
-      token,
-    },
-  };
 }
 
 /**
  * Registra un nuevo usuario
- * Crea la cuenta y retorna usuario + token automáticamente
+ * Crea la cuenta y envía email de verificación
+ * NOTA: El usuario NO puede iniciar sesión hasta verificar su email
  */
 export async function register(
   userData: RegisterData
 ): Promise<Result<AuthData>> {
-  // Agregar timezone del usuario automáticamente
-  const dataWithTimezone = {
-    ...userData,
-    timezone: userData.timezone || getUserTimezone(),
-  };
+  try {
+    // Agregar timezone del usuario automáticamente
+    const dataWithTimezone = {
+      ...userData,
+      timezone: userData.timezone || getUserTimezone(),
+    };
 
-  // Hacer la petición
-  const response = await fetch(`${API_BASE_URL}/auth/register`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(dataWithTimezone),
-  });
+    // Hacer la petición
+    const response = await fetch(`${API_BASE_URL}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(dataWithTimezone),
+    });
 
-  const apiResponse = await response.json();
+    const apiResponse = await response.json();
 
-  if (!response.ok || !apiResponse.success) {
+    if (!response.ok || !apiResponse.success) {
+      return {
+        success: false,
+        error: apiResponse.message || 'Error al registrarse',
+      };
+    }
+
+    // Extraer datos
+    const { user, token, refreshToken } = apiResponse.data;
+
+    // NO guardamos tokens ni usuario - debe verificar email primero
+    return {
+      success: true,
+      data: {
+        user,
+        token, // Token informativo, no se guarda
+        refreshToken, // Token informativo, no se guarda
+      },
+    };
+  } catch {
     return {
       success: false,
-      error: apiResponse.message || 'Error al registrarse',
+      error: 'Error de red al registrarse',
     };
   }
-
-  // Extraer datos y timestamp
-  const { user, token } = apiResponse.data;
-  const memberSince = apiResponse.timestamp;
-
-  // Agregar memberSince al usuario
-  const userWithTimestamp = { ...user, memberSince };
-
-  // Guardar token en localStorage y cookie
-  if (typeof window !== 'undefined') {
-    localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, token);
-    localStorage.setItem(
-      STORAGE_KEYS.USER_DATA,
-      JSON.stringify(userWithTimestamp)
-    );
-    // Guardar en cookie para que el middleware pueda accederlo
-    setTokenCookie(token);
-  }
-
-  // Retornar datos del usuario con memberSince
-  return {
-    success: true,
-    data: {
-      user: userWithTimestamp,
-      token,
-    },
-  };
 }
 
 /**
@@ -138,7 +132,32 @@ export function logout(): void {
 export async function forgotPassword(
   data: ForgotPasswordData
 ): Promise<Result<{ message: string }>> {
-  return post<{ message: string }>('/auth/forgot-password', data);
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+
+    const apiResponse = await response.json();
+
+    if (!response.ok || !apiResponse.success) {
+      return {
+        success: false,
+        error: apiResponse.message || 'Error al solicitar recuperación',
+      };
+    }
+
+    return {
+      success: true,
+      data: { message: apiResponse.data.message },
+    };
+  } catch {
+    return {
+      success: false,
+      error: 'Error de red al solicitar recuperación',
+    };
+  }
 }
 
 /**
@@ -147,7 +166,32 @@ export async function forgotPassword(
 export async function resetPassword(
   data: ResetPasswordData
 ): Promise<Result<{ message: string }>> {
-  return post<{ message: string }>('/auth/reset-password', data);
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/reset-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+
+    const apiResponse = await response.json();
+
+    if (!response.ok || !apiResponse.success) {
+      return {
+        success: false,
+        error: apiResponse.message || 'Error al restablecer contraseña',
+      };
+    }
+
+    return {
+      success: true,
+      data: { message: apiResponse.data.message },
+    };
+  } catch {
+    return {
+      success: false,
+      error: 'Error de red al restablecer contraseña',
+    };
+  }
 }
 
 /**
@@ -181,4 +225,77 @@ export function getAuthToken(): string | undefined {
  */
 export function isAuthenticated(): boolean {
   return !!getAuthToken();
+}
+
+/**
+ * Verifica el email del usuario con el token recibido por correo
+ * @param token Token de verificación de 64 caracteres
+ */
+export async function verifyEmail(
+  token: string
+): Promise<Result<VerifyEmailResponse>> {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/auth/verify-email?token=${token}`,
+      {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
+
+    const apiResponse = await response.json();
+
+    if (!response.ok || !apiResponse.success) {
+      return {
+        success: false,
+        error:
+          apiResponse.message || 'Error al verificar email. Token inválido',
+      };
+    }
+
+    return {
+      success: true,
+      data: apiResponse.data,
+    };
+  } catch {
+    return {
+      success: false,
+      error: 'Error de red al verificar email',
+    };
+  }
+}
+
+/**
+ * Reenvía el email de verificación con un nuevo token
+ * @param email Email del usuario registrado
+ */
+export async function resendVerificationEmail(
+  data: ResendVerificationData
+): Promise<Result<{ message: string }>> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/resend-verification`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+
+    const apiResponse = await response.json();
+
+    if (!response.ok || !apiResponse.success) {
+      return {
+        success: false,
+        error: apiResponse.message || 'Error al reenviar email de verificación',
+      };
+    }
+
+    return {
+      success: true,
+      data: { message: apiResponse.message },
+    };
+  } catch {
+    return {
+      success: false,
+      error: 'Error de red al reenviar email',
+    };
+  }
 }
