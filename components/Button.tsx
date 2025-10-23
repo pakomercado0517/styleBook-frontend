@@ -9,13 +9,14 @@ const buttonVariants = cva(
     variants: {
       variant: {
         primary:
-          'bg-primary-800 text-white hover:bg-primary-900 hover:shadow-xl hover:shadow-primary-800/20 active:scale-95',
+          'bg-primary-800 text-white border-2 border-accent-500/30 hover:bg-primary-900 hover:border-accent-500/50 hover:shadow-xl hover:shadow-primary-800/20 active:scale-95',
         secondary:
-          'bg-white text-primary-800 border-2 border-white hover:bg-neutral-50 hover:shadow-2xl hover:shadow-white/30 active:bg-neutral-100 shadow-xl',
-        gold: 'bg-accent-500 text-primary-900 hover:bg-accent-400 hover:shadow-2xl hover:shadow-accent-500/60 active:scale-95 shadow-xl shadow-accent-500/50 font-bold',
+          'bg-white text-primary-800 border-2 border-primary-800/20 hover:bg-neutral-50 hover:border-primary-800/30 hover:shadow-2xl hover:shadow-neutral-900/10 active:bg-neutral-100 shadow-lg',
+        gold: 'bg-accent-500 text-primary-900 border-2 border-accent-600 hover:bg-accent-400 hover:border-accent-700 hover:shadow-2xl hover:shadow-accent-500/60 active:scale-95 shadow-xl shadow-accent-500/50 font-bold',
         outline:
-          'border-2 border-accent-400 text-accent-400 bg-transparent hover:bg-accent-500/10 active:bg-accent-500/20 shadow-lg shadow-accent-400/30',
-        ghost: 'text-primary-800 hover:bg-neutral-100 active:bg-neutral-200',
+          'border-2 border-accent-500 text-accent-600 bg-transparent hover:bg-accent-500/10 hover:border-accent-600 active:bg-accent-500/20 shadow-md shadow-accent-400/20',
+        ghost:
+          'text-primary-800 border-2 border-transparent hover:bg-neutral-100 hover:border-neutral-200 active:bg-neutral-200',
       },
       size: {
         sm: 'px-4 py-2 text-sm',

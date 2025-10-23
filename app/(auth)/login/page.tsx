@@ -1,25 +1,51 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { toast } from 'sonner';
 import { Button } from '@/components/Button';
 import { Input } from '@/components/Input';
 import { Badge } from '@/components/Badge';
+import { login } from '@/lib/api/auth';
+import { useAuthStore } from '@/store/authStore';
 
 export default function LoginPage(): React.ReactNode {
+  const router = useRouter();
+  const setAuth = useAuthStore((state) => state.setAuth);
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  /**
+   * Maneja el envío del formulario de login
+   * Valida credenciales y redirige según el rol del usuario
+   */
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulación de login
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    console.log('Login:', { email, password });
+    // Llamar a la API de login
+    const result = await login({ email, password });
 
-    setIsLoading(false);
+    if (!result.success) {
+      // Mostrar error si falla
+      toast.error(result.error || 'Error al iniciar sesión');
+      setIsLoading(false);
+      return;
+    }
+
+    // Guardar usuario y token en el store
+    setAuth(result.data.user, result.data.token);
+
+    // Mostrar éxito
+    toast.success('¡Bienvenido de vuelta!');
+
+    // Redirigir según el rol del usuario
+    const redirectPath =
+      result.data.user.role === 'client' ? '/client' : '/provider';
+    router.push(redirectPath);
   };
 
   return (

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { Badge } from '@/components/Badge';
+import Link from 'next/link';
 
 export default function Home(): React.ReactNode {
   const [selectedRole, setSelectedRole] = useState<'client' | 'provider'>(
@@ -90,9 +91,11 @@ export default function Home(): React.ReactNode {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16 animate-slide-up">
-            <Button variant="gold" size="lg">
-              Comenzar Ahora
-            </Button>
+            <Link href="/login">
+              <Button variant="gold" size="lg">
+                Comenzar Ahora
+              </Button>
+            </Link>
             <Button variant="secondary" size="lg">
               Ver Servicios
             </Button>

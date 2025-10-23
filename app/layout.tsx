@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import { Poppins, Playfair_Display } from 'next/font/google';
+import { QueryProvider } from '@/lib/providers/QueryProvider';
+import { Toaster } from 'sonner';
 import './globals.css';
 
 const poppins = Poppins({
@@ -41,8 +43,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }): React.ReactNode {
   return (
-    <html lang="es" className={`${poppins.variable} ${playfair.variable}`}>
-      <body className="font-poppins antialiased">{children}</body>
+    <html
+      lang="es"
+      className={`${poppins.variable} ${playfair.variable}`}
+      data-scroll-behavior="smooth"
+    >
+      <body className="font-poppins antialiased">
+        <QueryProvider>
+          {children}
+          {/* Toast notifications */}
+          <Toaster position="top-right" richColors />
+        </QueryProvider>
+      </body>
     </html>
   );
 }
