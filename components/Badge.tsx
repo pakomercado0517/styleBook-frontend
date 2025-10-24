@@ -1,32 +1,41 @@
-import { type ReactNode } from 'react';
+import { cn } from '@/lib/utils/cn';
 
-interface BadgeProps {
-  children: ReactNode;
-  variant?: 'primary' | 'secondary' | 'outline';
-  icon?: ReactNode;
+export type BadgeVariant =
+  | 'primary'
+  | 'secondary'
+  | 'success'
+  | 'warning'
+  | 'error'
+  | 'info';
+
+export interface BadgeProps {
+  children: React.ReactNode;
+  variant?: BadgeVariant;
   className?: string;
 }
+
+const variantStyles: Record<BadgeVariant, string> = {
+  primary: 'bg-primary-800 text-accent-500 border-accent-500/30',
+  secondary: 'bg-neutral-100 text-neutral-800 border-neutral-200',
+  success: 'bg-green-50 text-green-700 border-green-200',
+  warning: 'bg-yellow-50 text-yellow-700 border-yellow-200',
+  error: 'bg-red-50 text-red-700 border-red-200',
+  info: 'bg-blue-50 text-blue-700 border-blue-200',
+};
 
 export function Badge({
   children,
   variant = 'primary',
-  icon,
-  className = '',
-}: BadgeProps): React.ReactNode {
-  const baseClasses =
-    'inline-flex items-center gap-2 font-poppins font-semibold rounded-full px-4 py-2 text-sm transition-all duration-300';
-
-  const variantClasses = {
-    primary:
-      'bg-primary-900 text-accent-400 border-2 border-accent-500/50 shadow-lg shadow-accent-500/30 backdrop-blur-sm',
-    secondary: 'bg-accent-100 text-accent-700 shadow-md',
-    outline:
-      'border-2 border-accent-400 text-accent-400 bg-transparent hover:bg-accent-50 shadow-md shadow-accent-400/20',
-  };
-
+  className,
+}: BadgeProps) {
   return (
-    <span className={`${baseClasses} ${variantClasses[variant]} ${className}`}>
-      {icon && <span className="text-base">{icon}</span>}
+    <span
+      className={cn(
+        'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border',
+        variantStyles[variant],
+        className
+      )}
+    >
       {children}
     </span>
   );

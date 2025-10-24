@@ -1,38 +1,19 @@
 /**
  * Tipo genérico para respuestas de la API
- * Permite manejar éxito y error de forma type-safe
+ * - success: true → data contiene el resultado
+ * - success: false → error contiene el mensaje de error
  */
 export type Result<T> =
-  | { success: true; data: T }
+  | { success: true; data: T; message?: string }
   | { success: false; error: string };
 
 /**
- * Respuesta estándar del backend
- */
-export interface ApiResponse<T> {
-  success?: boolean;
-  status?: number;
-  data?: T;
-  message?: string;
-  timestamp?: string;
-  errors?: Array<{ field: string; message: string }>; // Errores de validación del backend
-}
-
-/**
- * Opciones de paginación
- */
-export interface PaginationParams {
-  page?: number;
-  limit?: number;
-}
-
-/**
- * Respuesta paginada
+ * Tipo para respuestas paginadas genéricas
  */
 export interface PaginatedResponse<T> {
   data: T[];
   total: number;
-  page: number;
+  count: number;
   limit: number;
-  totalPages: number;
+  offset: number;
 }
