@@ -1,5 +1,4 @@
 import type {
-  Appointment,
   CreateAppointmentData,
   UpdateAppointmentData,
   GetAppointmentsResponse,
@@ -11,6 +10,7 @@ import type {
 
 import { API_BASE_URL } from '@/lib/constants';
 import { getAuthHeaders, hasActiveSession } from '@/lib/api/client';
+import { fetchWithAuth } from '@/lib/api/interceptor';
 
 /**
  * Obtiene todas las citas del usuario autenticado
@@ -24,11 +24,8 @@ export async function getAppointments(
       return { success: false, error: 'No hay sesión activa' };
     }
 
-    const response = await fetch(
-      `${API_BASE_URL}/appointments?limit=${limit}&offset=${offset}`,
-      {
-        headers: getAuthHeaders(),
-      }
+    const response = await fetchWithAuth(
+      `${API_BASE_URL}/appointments?limit=${limit}&offset=${offset}`
     );
 
     if (!response.ok) {

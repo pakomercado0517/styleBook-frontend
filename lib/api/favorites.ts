@@ -8,6 +8,7 @@ import type {
 } from '@/lib/types/favorites';
 
 import { API_BASE_URL } from '@/lib/constants';
+import { fetchWithAuth } from '@/lib/api/interceptor';
 
 /**
  * Obtiene todos los favoritos del usuario
@@ -17,13 +18,8 @@ export async function getFavorites(
   offset = 0
 ): Promise<GetFavoritesResponse> {
   try {
-    const response = await fetch(
-      `${API_BASE_URL}/favorites?limit=${limit}&offset=${offset}`,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
+    const response = await fetchWithAuth(
+      `${API_BASE_URL}/favorites?limit=${limit}&offset=${offset}`
     );
 
     if (!response.ok) {
@@ -31,7 +27,7 @@ export async function getFavorites(
     }
 
     const data = await response.json();
-    return { success: true, data };
+    return { success: true, data: data.data };
   } catch (error) {
     return { success: false, error: 'Error de red' };
   }
@@ -45,13 +41,8 @@ export async function getProviderFavorites(
   offset = 0
 ): Promise<GetProviderFavoritesResponse> {
   try {
-    const response = await fetch(
-      `${API_BASE_URL}/favorites/providers?limit=${limit}&offset=${offset}`,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
+    const response = await fetchWithAuth(
+      `${API_BASE_URL}/favorites/providers?limit=${limit}&offset=${offset}`
     );
 
     if (!response.ok) {
@@ -76,13 +67,8 @@ export async function getServiceFavorites(
   offset = 0
 ): Promise<GetServiceFavoritesResponse> {
   try {
-    const response = await fetch(
-      `${API_BASE_URL}/favorites/services?limit=${limit}&offset=${offset}`,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
+    const response = await fetchWithAuth(
+      `${API_BASE_URL}/favorites/services?limit=${limit}&offset=${offset}`
     );
 
     if (!response.ok) {
@@ -103,13 +89,10 @@ export async function addProviderToFavorites(
   providerId: number
 ): Promise<AddFavoriteResponse> {
   try {
-    const response = await fetch(
+    const response = await fetchWithAuth(
       `${API_BASE_URL}/favorites/provider/${providerId}`,
       {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
       }
     );
 
@@ -135,13 +118,10 @@ export async function addServiceToFavorites(
   serviceId: number
 ): Promise<AddFavoriteResponse> {
   try {
-    const response = await fetch(
+    const response = await fetchWithAuth(
       `${API_BASE_URL}/favorites/service/${serviceId}`,
       {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
       }
     );
 
@@ -167,13 +147,8 @@ export async function isProviderFavorite(
   providerId: number
 ): Promise<IsFavoriteCheckResponse> {
   try {
-    const response = await fetch(
-      `${API_BASE_URL}/favorites/provider/${providerId}/is-favorite`,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
+    const response = await fetchWithAuth(
+      `${API_BASE_URL}/favorites/provider/${providerId}/is-favorite`
     );
 
     if (!response.ok) {
@@ -194,13 +169,8 @@ export async function isServiceFavorite(
   serviceId: number
 ): Promise<IsFavoriteCheckResponse> {
   try {
-    const response = await fetch(
-      `${API_BASE_URL}/favorites/service/${serviceId}/is-favorite`,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
+    const response = await fetchWithAuth(
+      `${API_BASE_URL}/favorites/service/${serviceId}/is-favorite`
     );
 
     if (!response.ok) {
@@ -221,11 +191,8 @@ export async function deleteFavorite(
   id: number
 ): Promise<DeleteFavoriteResponse> {
   try {
-    const response = await fetch(`${API_BASE_URL}/favorites/${id}`, {
+    const response = await fetchWithAuth(`${API_BASE_URL}/favorites/${id}`, {
       method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      },
     });
 
     if (!response.ok) {
@@ -250,13 +217,10 @@ export async function deleteProviderFromFavorites(
   providerId: number
 ): Promise<DeleteFavoriteResponse> {
   try {
-    const response = await fetch(
+    const response = await fetchWithAuth(
       `${API_BASE_URL}/favorites/provider/${providerId}`,
       {
         method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
       }
     );
 
@@ -282,13 +246,10 @@ export async function deleteServiceFromFavorites(
   serviceId: number
 ): Promise<DeleteFavoriteResponse> {
   try {
-    const response = await fetch(
+    const response = await fetchWithAuth(
       `${API_BASE_URL}/favorites/service/${serviceId}`,
       {
         method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
       }
     );
 

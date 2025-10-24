@@ -5,6 +5,7 @@ import type {
 } from '@/lib/types/profile';
 import type { Result } from '@/lib/types/common';
 import { API_BASE_URL, STORAGE_KEYS } from '@/lib/constants';
+import { fetchWithAuth } from '@/lib/api/interceptor';
 
 /**
  * Actualiza los datos del perfil del usuario
@@ -15,11 +16,8 @@ export async function updateProfile(
   data: UpdateProfileData
 ): Promise<Result<ProfileUpdateResponse>> {
   try {
-    const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
+    const response = await fetchWithAuth(`${API_BASE_URL}/users/${userId}`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify(data),
     });
 
@@ -65,13 +63,13 @@ export async function changePassword(
   data: ChangePasswordData
 ): Promise<Result<{ message: string }>> {
   try {
-    const response = await fetch(`${API_BASE_URL}/auth/change-password`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
+    const response = await fetchWithAuth(
+      `${API_BASE_URL}/auth/change-password`,
+      {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }
+    );
 
     if (!response.ok) {
       const error = await response.json();
