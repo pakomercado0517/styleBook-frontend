@@ -1,4 +1,6 @@
 import { API_BASE_URL, STORAGE_KEYS } from '@/lib/constants';
+import { useAuthStore } from '@/store/authStore';
+import { saveAuthData, clearAuthData, getCurrentUser } from '@/lib/utils/auth';
 
 interface RefreshTokenResponse {
   success: boolean;
@@ -12,11 +14,12 @@ interface RefreshTokenResponse {
 /**
  * Intenta renovar el token de acceso usando el refresh token
  */
-async function refreshAccessToken(): Promise<boolean> {
+export async function refreshAccessToken(): Promise<boolean> {
   try {
     const refreshToken = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
 
     if (!refreshToken) {
+      clearAuthData();
       return false;
     }
 
@@ -31,19 +34,49 @@ async function refreshAccessToken(): Promise<boolean> {
     const data: RefreshTokenResponse = await response.json();
 
     if (!data.success || !data.data) {
-      // Si falla la renovación, limpiar tokens
-      localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
-      localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+      clearAuthData();
       return false;
     }
 
-    // Guardar nuevos tokens
-    localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, data.data.access_token);
-    localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, data.data.refresh_token);
+    // Obtener el usuario actual
+    const currentUser = getCurrentUser();
+    if (!currentUser) {
+      clearAuthData();
+      return false;
+    }
+
+    // Guardar nuevos tokens y actualizar todo
+    const { access_token, refresh_token } = data.data;
+    saveAuthData(currentUser, access_token, refresh_token);
+
+    // Actualizar el store
+    const store = useAuthStore.getState();
+    store.setAuth(currentUser, access_token, refreshToken);
+
     return true;
   } catch (error) {
+    clearAuthData();
     return false;
   }
+}
+
+/**
+ * Lista de rutas públicas que no requieren token ni refresh
+ */
+const PUBLIC_ROUTES = [
+  '/auth/register',
+  '/auth/login',
+  '/auth/verify-email',
+  '/auth/forgot-password',
+  '/auth/reset-password',
+  '/auth/resend-verification',
+];
+
+/**
+ * Verifica si una URL es una ruta pública
+ */
+function isPublicRoute(url: string): boolean {
+  return PUBLIC_ROUTES.some((route) => url.includes(route));
 }
 
 /**
@@ -57,7 +90,12 @@ export async function fetchWithAuth(
   const headers = new Headers(options.headers || {});
   headers.set('Content-Type', 'application/json');
 
-  // Agregar token si existe
+  // Si es una ruta pública, hacer la petición sin token
+  if (isPublicRoute(url)) {
+    return fetch(url, { ...options, headers });
+  }
+
+  // Para rutas protegidas, agregar token si existe
   const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
   if (token) {
     headers.set('Authorization', `Bearer ${token}`);
@@ -66,8 +104,8 @@ export async function fetchWithAuth(
   // Hacer la petición
   let response = await fetch(url, { ...options, headers });
 
-  // Si es error 401 (Unauthorized), intentar renovar el token
-  if (response.status === 401) {
+  // Si es error 401 y NO es ruta pública, intentar renovar el token
+  if (response.status === 401 && !isPublicRoute(url)) {
     const refreshSuccess = await refreshAccessToken();
 
     if (refreshSuccess) {

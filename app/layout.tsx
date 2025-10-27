@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Poppins, Playfair_Display } from 'next/font/google';
 import { QueryProvider } from '@/lib/providers/QueryProvider';
-import { Toaster } from 'sonner';
+import { AppContent } from './components/AppContent';
 import './globals.css';
 
 const poppins = Poppins({
@@ -50,9 +50,7 @@ export default function RootLayout({
     >
       <body className="font-poppins antialiased">
         <QueryProvider>
-          {children}
-          {/* Toast notifications */}
-          <Toaster position="top-right" richColors />
+          <AppContent>{children}</AppContent>
         </QueryProvider>
       </body>
     </html>

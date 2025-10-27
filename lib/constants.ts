@@ -1,9 +1,12 @@
 /**
- * URL base de la API
- * Se obtiene de las variables de entorno
+ * URLs base
+ * Se obtienen de las variables de entorno
  */
 export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+
+export const FRONTEND_URL =
+  process.env.NEXT_PUBLIC_FRONTEND_URL || 'http://localhost:3000';
 
 /**
  * Configuración de paginación

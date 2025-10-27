@@ -1,36 +1,43 @@
 'use client';
 
+import { PropsWithChildren } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useState } from 'react';
-import { CACHE_TIME } from '@/lib/constants';
+import { refreshAccessToken } from '@/lib/api/interceptor';
+
+// Crear una instancia de QueryClient con retry logic personalizada
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: async (failureCount, error: any) => {
+        // Si el error es 401, intentar renovar el token
+        if (error?.response?.status === 401) {
+          const refreshSuccess = await refreshAccessToken();
+          // Si se renovó el token, reintentar la petición
+          return refreshSuccess;
+        }
+
+        // Para otros errores, reintentar máximo 3 veces
+        return failureCount < 3;
+      },
+      // Stale time de 5 minutos
+      staleTime: 5 * 60 * 1000,
+      // Cache time de 10 minutos
+      cacheTime: 10 * 60 * 1000,
+      // Refetch en focus después de 5 minutos
+      refetchOnWindowFocus: true,
+      refetchOnMount: true,
+      refetchOnReconnect: true,
+    },
+    mutations: {
+      retry: false, // No reintentar mutaciones
+    },
+  },
+});
 
 /**
- * Provider de React Query
- * Configura el cliente de React Query para toda la aplicación
+ * Proveedor de React Query con configuración personalizada
  */
-export function QueryProvider({ children }: { children: React.ReactNode }) {
-  // Crear instancia de QueryClient (solo una vez)
-  const [queryClient] = useState(
-    () =>
-      new QueryClient({
-        defaultOptions: {
-          queries: {
-            // Tiempo que los datos se consideran "frescos" (no refetch automático)
-            staleTime: CACHE_TIME.MEDIUM, // 5 minutos
-
-            // Tiempo que los datos se mantienen en cache
-            gcTime: CACHE_TIME.LONG, // 30 minutos (antes era cacheTime)
-
-            // Reintentos en caso de error
-            retry: 1,
-
-            // No refetch automático cuando la ventana recupera el foco
-            refetchOnWindowFocus: false,
-          },
-        },
-      })
-  );
-
+export function QueryProvider({ children }: PropsWithChildren) {
   return (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );

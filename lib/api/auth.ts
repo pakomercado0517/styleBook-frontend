@@ -235,13 +235,27 @@ export async function verifyEmail(
   token: string
 ): Promise<Result<VerifyEmailResponse>> {
   try {
-    const response = await fetch(
-      `${API_BASE_URL}/auth/verify-email?token=${token}`,
-      {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-      }
-    );
+    if (!token?.trim()) {
+      return {
+        success: false,
+        error: 'Token no proporcionado',
+      };
+    }
+
+    // Asegurarnos de que el token esté limpio
+    const cleanToken = token.split('/verify-email')[0].trim();
+
+    // Construir URL completa para verificación
+    const url = new URL('/api/auth/verify-email', API_BASE_URL);
+    url.searchParams.set('token', cleanToken);
+
+    // Hacer la petición directamente sin pasar por el interceptor
+    const response = await fetch(url.toString(), {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
     const apiResponse = await response.json();
 

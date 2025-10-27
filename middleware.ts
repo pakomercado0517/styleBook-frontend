@@ -36,6 +36,8 @@ export function middleware(request: NextRequest) {
   // ============================================
   // 1. RUTAS PÚBLICAS (Auth) - /login, /register, /forgot-password
   // ============================================
+  // Rutas públicas que no requieren autenticación
+
   const isAuthRoute =
     pathname.startsWith('/login') ||
     pathname.startsWith('/register') ||
@@ -56,7 +58,7 @@ export function middleware(request: NextRequest) {
   }
 
   // ============================================
-  // 2. RUTAS PROTEGIDAS - /client/* y /provider/*
+  // 3. RUTAS PROTEGIDAS - /client/* y /provider/*
   // ============================================
   const isClientRoute = pathname.startsWith('/client');
   const isProviderRoute = pathname.startsWith('/provider');
@@ -94,7 +96,7 @@ export function middleware(request: NextRequest) {
   }
 
   // ============================================
-  // 3. OTRAS RUTAS (Home, páginas públicas)
+  // 4. OTRAS RUTAS (Home, páginas públicas)
   // ============================================
   return NextResponse.next();
 }
@@ -107,11 +109,12 @@ export const config = {
   matcher: [
     /*
      * Aplicar middleware a todas las rutas EXCEPTO:
+     * - /verify-email (verificación de email)
      * - /api (API routes)
      * - /_next/static (archivos estáticos)
      * - /_next/image (optimización de imágenes)
      * - /favicon.ico, /file.svg, etc. (archivos públicos)
      */
-    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.svg|.*\\.png|.*\\.jpg|.*\\.jpeg|.*\\.gif|.*\\.webp).*)',
+    '/((?!verify-email|api|_next/static|_next/image|favicon.ico|.*\\.svg|.*\\.png|.*\\.jpg|.*\\.jpeg|.*\\.gif|.*\\.webp).*)',
   ],
 };
