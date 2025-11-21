@@ -9,5 +9,14 @@ export * from './auth.schema';
 // Profile schemas
 export * from './profile.schema';
 
-//Response schemas
+// Appointments schemas
+export * from './appointments.schema';
+
+// Services schemas
+export * from './services.schema';
+
+// Favorites schemas
+export * from './favorites.schema';
+
+// Response schemas
 export * from './response.schemas';

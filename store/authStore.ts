@@ -46,7 +46,7 @@ interface AuthActions {
 export const useAuthStore = create<AuthState & AuthActions>()(
   subscribeWithSelector(
     persist(
-      (set, get) => ({
+      (set) => ({
         // Estado inicial
         user: undefined,
         token: undefined,
@@ -119,12 +119,20 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 useAuthStore.subscribe(
   (state) => state.isAuthenticated,
   (isAuthenticated) => {
-    // Si se pierde la autenticación, invalidar todas las queries
-    if (!isAuthenticated) {
-      // Aquí podríamos emitir un evento para que los componentes se actualicen
+    // Si se pierde la autenticación, emitir evento
+    if (!isAuthenticated && typeof window !== 'undefined') {
       window.dispatchEvent(
         new CustomEvent('auth-changed', { detail: { isAuthenticated } })
       );
     }
   }
 );
+
+// Escuchar eventos de error de autenticación para limpiar el store
+if (typeof window !== 'undefined') {
+  window.addEventListener('auth-error', () => {
+    // Limpiar el store cuando hay error de autenticación
+    const store = useAuthStore.getState();
+    store.logout();
+  });
+}

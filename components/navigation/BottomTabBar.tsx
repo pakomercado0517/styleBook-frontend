@@ -32,10 +32,10 @@ export function BottomTabBar({ role }: BottomTabBarProps): ReactNode {
       activePatterns: ['/client$'],
     },
     {
-      icon: '🔍',
-      label: 'Buscar',
-      href: '/client/search',
-      activePatterns: ['/client/search'],
+      icon: '🛍️',
+      label: 'Servicios',
+      href: '/client/services',
+      activePatterns: ['/client/services'],
     },
     {
       icon: '📅',

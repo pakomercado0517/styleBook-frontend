@@ -2,18 +2,19 @@
 
 import { PropsWithChildren } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { refreshAccessToken } from '@/lib/api/interceptor';
+import { isAuthError } from '@/lib/utils/authErrorHandler';
 
-// Crear una instancia de QueryClient con retry logic personalizada
+/**
+ * Crear instancia de QueryClient con manejo de errores 401
+ * IMPORTANTE: NO reintenta en errores 401 porque fetchWithAuth ya maneja refresh
+ */
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: async (failureCount, error: any) => {
-        // Si el error es 401, intentar renovar el token
-        if (error?.response?.status === 401) {
-          const refreshSuccess = await refreshAccessToken();
-          // Si se renovó el token, reintentar la petición
-          return refreshSuccess;
+      retry: (failureCount, error) => {
+        // NO reintentar si es error 401 (ya manejado por fetchWithAuth)
+        if (isAuthError(error)) {
+          return false;
         }
 
         // Para otros errores, reintentar máximo 3 veces
@@ -21,15 +22,22 @@ const queryClient = new QueryClient({
       },
       // Stale time de 5 minutos
       staleTime: 5 * 60 * 1000,
-      // Cache time de 10 minutos
-      cacheTime: 10 * 60 * 1000,
+      // Cache time de 10 minutos (deprecated en v5, usar gcTime)
+      gcTime: 10 * 60 * 1000,
       // Refetch en focus después de 5 minutos
       refetchOnWindowFocus: true,
       refetchOnMount: true,
       refetchOnReconnect: true,
     },
     mutations: {
-      retry: false, // No reintentar mutaciones
+      retry: (_failureCount, error) => {
+        // NO reintentar mutaciones si es error 401
+        if (isAuthError(error)) {
+          return false;
+        }
+        // No reintentar otras mutaciones
+        return false;
+      },
     },
   },
 });

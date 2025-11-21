@@ -31,10 +31,10 @@ export function DesktopSidebar({ role }: DesktopSidebarProps): ReactNode {
       activePatterns: ['/client$'],
     },
     {
-      icon: '🔍',
-      label: 'Buscar Servicios',
-      href: '/client/search',
-      activePatterns: ['/client/search'],
+      icon: '🛍️',
+      label: 'Catálogo de Servicios',
+      href: '/client/services',
+      activePatterns: ['/client/services'],
     },
     {
       icon: '📅',

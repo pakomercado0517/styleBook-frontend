@@ -39,10 +39,10 @@ export default function ClientDashboardPage(): ReactNode {
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           <QuickActionCard
-            icon="🔍"
-            title="Buscar Servicios"
-            description="Encuentra los mejores servicios cerca de ti"
-            href="/client/search"
+            icon="🛍️"
+            title="Catálogo de Servicios"
+            description="Explora y reserva los mejores servicios de belleza"
+            href="/client/services"
           />
           <QuickActionCard
             icon="📅"
