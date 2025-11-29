@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { Button } from '@/components/Button';
 
 type FilterType = 'all' | 'providers' | 'services';
@@ -11,8 +10,18 @@ const filters: { value: FilterType; label: string }[] = [
   { value: 'services', label: 'Servicios' },
 ];
 
-export function FavoritesFilters() {
-  const [activeFilter, setActiveFilter] = useState<FilterType>('all');
+interface FavoritesFiltersProps {
+  activeFilter: FilterType;
+  onFilterChange: (filter: FilterType) => void;
+}
+
+export function FavoritesFilters({
+  activeFilter,
+  onFilterChange,
+}: FavoritesFiltersProps) {
+  const handleFilterClick = (filter: FilterType): void => {
+    onFilterChange(filter);
+  };
 
   return (
     <div className="flex flex-wrap gap-3">
@@ -20,7 +29,9 @@ export function FavoritesFilters() {
         <Button
           key={value}
           variant={activeFilter === value ? 'primary' : 'outline'}
-          onClick={() => setActiveFilter(value)}
+          onClick={() => handleFilterClick(value)}
+          aria-label={`Filtrar por ${label}`}
+          aria-pressed={activeFilter === value}
         >
           {label}
         </Button>

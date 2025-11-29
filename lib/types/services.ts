@@ -2,16 +2,23 @@ import type { Result } from './common';
 
 /**
  * Categoría de servicio
+ * Enum que coincide con el modelo del backend
  */
 export type ServiceCategory =
-  | 'hair' // Cabello
+  | 'corte' // Corte de cabello
+  | 'tinte' // Tinte de cabello
+  | 'peinado' // Peinado
+  | 'manicure' // Manicure
+  | 'pedicure' // Pedicure
+  | 'tratamiento_capilar' // Tratamiento capilar
+  | 'barba' // Barba
+  | 'afeitado' // Afeitado
+  | 'masaje' // Masaje
   | 'facial' // Facial
-  | 'nails' // Uñas
-  | 'makeup' // Maquillaje
-  | 'massage' // Masajes
-  | 'spa' // Tratamientos spa
-  | 'barber' // Barbería
-  | 'other'; // Otros
+  | 'corporal' // Corporal
+  | 'aromaterapia' // Aromaterapia
+  | 'limpieza_dental' // Limpieza dental
+  | 'estetica_dental'; // Estética dental
 
 /**
  * Información básica del proveedor en servicio
@@ -75,18 +82,15 @@ export interface UpdateServiceData {
 
 /**
  * Respuesta paginada de servicios
+ * Estructura real del backend
  */
 export interface ServicesPaginatedResponse {
   success: true;
   message: string;
   data: {
-    services: Service[];
-    pagination: {
-      page: number;
-      limit: number;
-      total: number;
-      pages: number;
-    };
+    total: number;
+    count: number;
+    data: Service[];
   };
   timestamp: string;
 }

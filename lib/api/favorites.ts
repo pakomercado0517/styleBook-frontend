@@ -63,8 +63,8 @@ export async function getProviderFavorites(
  * Obtiene solo los servicios favoritos
  */
 export async function getServiceFavorites(
-  limit = 20,
-  offset = 0
+  limit: number,
+  offset: number
 ): Promise<GetServiceFavoritesResponse> {
   try {
     const response = await fetchWithAuth(

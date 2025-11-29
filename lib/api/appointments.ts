@@ -13,20 +13,51 @@ import { getAuthHeaders, hasActiveSession } from '@/lib/api/client';
 import { fetchWithAuth } from '@/lib/api/interceptor';
 
 /**
- * Obtiene todas las citas del usuario autenticado
+ * Parámetros para filtrar citas
+ */
+export interface GetAppointmentsParams {
+  limit?: number;
+  offset?: number;
+  status?: string;
+  start_date?: string;
+  end_date?: string;
+  page?: number;
+  include?: string; // Para incluir relaciones: "service,employee,provider"
+}
+
+/**
+ * Obtiene todas las citas del usuario autenticado con filtros opcionales
  */
 export async function getAppointments(
-  limit = 10,
-  offset = 0
+  params?: GetAppointmentsParams
 ): Promise<GetAppointmentsResponse> {
   try {
     if (!hasActiveSession()) {
       return { success: false, error: 'No hay sesión activa' };
     }
 
-    const response = await fetchWithAuth(
-      `${API_BASE_URL}/appointments?limit=${limit}&offset=${offset}`
-    );
+    // Construir query params
+    const queryParams = new URLSearchParams();
+    
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.offset) queryParams.append('offset', params.offset.toString());
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.status) queryParams.append('status', params.status);
+    if (params?.start_date) queryParams.append('start_date', params.start_date);
+    if (params?.end_date) queryParams.append('end_date', params.end_date);
+    // Incluir relaciones por defecto
+    if (params?.include) {
+      queryParams.append('include', params.include);
+    } else {
+      queryParams.append('include', 'service,employee,provider');
+    }
+
+    const queryString = queryParams.toString();
+    const url = queryString
+      ? `${API_BASE_URL}/appointments?${queryString}`
+      : `${API_BASE_URL}/appointments`;
+
+    const response = await fetchWithAuth(url);
 
     if (!response.ok) {
       return { success: false, error: 'Error al obtener citas' };
@@ -46,18 +77,14 @@ export async function getAppointment(
   id: number
 ): Promise<GetAppointmentResponse> {
   try {
-    const response = await fetch(`${API_BASE_URL}/appointments/${id}`, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    const response = await fetchWithAuth(`${API_BASE_URL}/appointments/${id}`);
 
     if (!response.ok) {
       return { success: false, error: 'Error al obtener la cita' };
     }
 
     const data = await response.json();
-    return { success: true, data };
+    return { success: true, data: data.data };
   } catch (error) {
     return { success: false, error: 'Error de red' };
   }
@@ -72,7 +99,7 @@ export async function createAppointment(
   data: CreateAppointmentData
 ): Promise<CreateAppointmentResponse> {
   try {
-    const response = await fetch(`${API_BASE_URL}/appointments`, {
+    const response = await fetchWithAuth(`${API_BASE_URL}/appointments`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -104,7 +131,7 @@ export async function updateAppointment(
   data: UpdateAppointmentData
 ): Promise<UpdateAppointmentResponse> {
   try {
-    const response = await fetch(`${API_BASE_URL}/appointments/${id}`, {
+    const response = await fetchWithAuth(`${API_BASE_URL}/appointments/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -134,11 +161,8 @@ export async function cancelAppointment(
   id: number
 ): Promise<DeleteAppointmentResponse> {
   try {
-    const response = await fetch(`${API_BASE_URL}/appointments/${id}`, {
+    const response = await fetchWithAuth(`${API_BASE_URL}/appointments/${id}`, {
       method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      },
     });
 
     if (!response.ok) {

@@ -25,7 +25,6 @@ function VerifyEmailContent(): React.ReactNode {
     isVerifying,
     isResending,
     verifyError,
-    verificationState,
     redirectCountdown,
   } = useVerifyEmail();
 
@@ -43,6 +42,7 @@ function VerifyEmailContent(): React.ReactNode {
 
     setHasStartedVerification(true);
     verifyEmailMutation.mutate(token);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]); // Solo depender del token para la verificación inicial
 
   /**

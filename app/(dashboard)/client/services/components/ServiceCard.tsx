@@ -55,14 +55,20 @@ export const ServiceCard = ({
 
   // Mapeo de categorías a español
   const categoryLabels: Record<string, string> = {
-    hair: 'Cabello',
+    corte: 'Corte',
+    tinte: 'Tinte',
+    peinado: 'Peinado',
+    manicure: 'Manicure',
+    pedicure: 'Pedicure',
+    tratamiento_capilar: 'Tratamiento Capilar',
+    barba: 'Barba',
+    afeitado: 'Afeitado',
+    masaje: 'Masaje',
     facial: 'Facial',
-    nails: 'Uñas',
-    makeup: 'Maquillaje',
-    massage: 'Masajes',
-    spa: 'Spa',
-    barber: 'Barbería',
-    other: 'Otros',
+    corporal: 'Corporal',
+    aromaterapia: 'Aromaterapia',
+    limpieza_dental: 'Limpieza Dental',
+    estetica_dental: 'Estética Dental',
   };
 
   return (
@@ -86,22 +92,39 @@ export const ServiceCard = ({
       {canFavorite && (
         <button
           onClick={handleFavoriteClick}
-          className="
+          className={`
             absolute top-4 right-4
             w-10 h-10
             bg-white rounded-full
-            border-2 border-neutral-200
-            hover:border-accent-500
-            flex items-center justify-center
+            border-2 flex items-center justify-center
             transition-all duration-200
             z-10
-          "
+            shadow-sm
+            hover:shadow-md
+            ${
+              isFavorite
+                ? 'border-red-200 hover:border-red-300 bg-red-50'
+                : 'border-neutral-200 hover:border-accent-500'
+            }
+          `}
           type="button"
           aria-label={
             isFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'
           }
         >
-          <span className="text-xl">{isFavorite ? '❤️' : '🤍'}</span>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill={isFavorite ? '#EF4444' : 'none'}
+            stroke={isFavorite ? '#EF4444' : '#9CA3AF'}
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="w-5 h-5 transition-all duration-200"
+            aria-hidden="true"
+          >
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+          </svg>
         </button>
       )}
 

@@ -14,10 +14,19 @@ export type AppointmentStatus =
   | 'no_show'; // Cliente no se presentó
 
 /**
+ * Fechas formateadas por el backend
+ */
+export interface FormattedDates {
+  start: string; // Ej: "29/11/2025 10:00"
+  end: string; // Ej: "29/11/2025 10:30"
+}
+
+/**
  * Cita entre cliente y proveedor
  * - Todas las fechas en formato ISO 8601
  * - start/end_date_local: Hora en timezone del usuario
  * - start/end_date_utc: Hora en UTC (solo backend)
+ * - formatted_dates: Fechas ya formateadas por el backend (opcional)
  */
 export interface Appointment {
   id: number;
@@ -32,13 +41,15 @@ export interface Appointment {
   // Fechas en UTC (solo backend)
   start_date_utc: string;
   end_date_utc: string;
+  // Fechas formateadas (opcional, viene del backend)
+  formatted_dates?: FormattedDates;
   // Metadata
   timezone: string;
-  final_price: number;
-  notes?: string;
+  final_price: number | string; // Puede venir como string desde el backend
+  notes?: string | null;
   createdAt: string;
   updatedAt: string;
-  // Relaciones expandidas
+  // Relaciones expandidas (opcional, solo si el backend las incluye)
   service?: Service;
   employee?: User;
 }

@@ -1,9 +1,14 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useState, type ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import type { Service, ServiceCategory } from '@/lib/types/services';
 import { getServices } from '@/lib/api/services';
+import {
+  useFavoriteServiceIds,
+  useFavoriteMutations,
+} from '@/lib/hooks/useFavorites';
 import { ServiceSearch } from './components/ServiceSearch';
 import { ServiceFilters } from './components/ServiceFilters';
 import { ServicesList } from './components/ServicesList';
@@ -13,6 +18,8 @@ import { ServicesList } from './components/ServicesList';
  * Permite buscar, filtrar y explorar servicios disponibles
  */
 export default function ServicesPage(): ReactNode {
+  const router = useRouter();
+
   // Estados
   const [searchText, setSearchText] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<
@@ -81,21 +88,23 @@ export default function ServicesPage(): ReactNode {
   };
 
   const handleSelectService = (serviceId: number): void => {
-    // TODO: Navegar a detalles del servicio o abrir modal
-    console.log('Selected service:', serviceId);
+    router.push(`/client/book/${serviceId}`);
   };
+
+  // Obtener IDs de servicios favoritos
+  const favoriteServiceIds = useFavoriteServiceIds();
+
+  // Hook de mutaciones de favoritos (sin ejecutar queries innecesarias)
+  const { toggleServiceFavorite } = useFavoriteMutations();
 
   const handleToggleFavorite = (serviceId: number): void => {
-    // TODO: Integrar con API de favoritos
-    console.log('Toggle favorite:', serviceId);
+    const isFavorite = favoriteServiceIds.includes(serviceId);
+    toggleServiceFavorite(serviceId, isFavorite);
   };
 
-  // Extraer servicios y metadata
-  const services: Service[] = servicesResponse?.data?.services || [];
-  const pagination = servicesResponse?.data?.pagination;
-
-  // Conteo de resultados
-  const totalResults = pagination?.total || 0;
+  // Extraer servicios y metadata - ESTRUCTURA ACTUALIZADA
+  const services: Service[] = servicesResponse?.data?.data || [];
+  const totalResults = servicesResponse?.data?.total || 0;
   const hasResults = services.length > 0;
 
   return (
@@ -146,7 +155,7 @@ export default function ServicesPage(): ReactNode {
         isLoading={isLoading}
         onSelectService={handleSelectService}
         onToggleFavorite={handleToggleFavorite}
-        favoriteIds={[]} // TODO: Obtener IDs de favoritos
+        favoriteIds={favoriteServiceIds}
       />
 
       {/* Error state */}
@@ -161,18 +170,6 @@ export default function ServicesPage(): ReactNode {
               ? error.message
               : 'Hubo un problema al cargar los servicios. Por favor, intenta nuevamente.'}
           </p>
-        </div>
-      )}
-
-      {/* Paginación (TODO) */}
-      {pagination && pagination.pages > 1 && (
-        <div className="mt-8 flex justify-center">
-          <div className="bg-white rounded-lg p-4 border border-neutral-200">
-            <p className="text-sm text-neutral-600 font-poppins">
-              Página {pagination.page} de {pagination.pages}
-            </p>
-            {/* TODO: Agregar botones de paginación */}
-          </div>
         </div>
       )}
 

@@ -24,14 +24,20 @@ export const ServiceFilters = ({
     icon: string;
   }> = [
     { value: 'all', label: 'Todos', icon: '✨' },
-    { value: 'hair', label: 'Cabello', icon: '💇' },
+    { value: 'corte', label: 'Corte', icon: '✂️' },
+    { value: 'tinte', label: 'Tinte', icon: '🎨' },
+    { value: 'peinado', label: 'Peinado', icon: '💇' },
+    { value: 'tratamiento_capilar', label: 'Tratamiento Capilar', icon: '💆' },
+    { value: 'barba', label: 'Barba', icon: '🧔' },
+    { value: 'afeitado', label: 'Afeitado', icon: '🪒' },
+    { value: 'manicure', label: 'Manicure', icon: '💅' },
+    { value: 'pedicure', label: 'Pedicure', icon: '🦶' },
     { value: 'facial', label: 'Facial', icon: '🧖' },
-    { value: 'nails', label: 'Uñas', icon: '💅' },
-    { value: 'makeup', label: 'Maquillaje', icon: '💄' },
-    { value: 'massage', label: 'Masajes', icon: '💆' },
-    { value: 'spa', label: 'Spa', icon: '🧘' },
-    { value: 'barber', label: 'Barbería', icon: '💈' },
-    { value: 'other', label: 'Otros', icon: '🎨' },
+    { value: 'corporal', label: 'Corporal', icon: '🧘' },
+    { value: 'masaje', label: 'Masaje', icon: '💆‍♀️' },
+    { value: 'aromaterapia', label: 'Aromaterapia', icon: '🌸' },
+    { value: 'limpieza_dental', label: 'Limpieza Dental', icon: '🦷' },
+    { value: 'estetica_dental', label: 'Estética Dental', icon: '🦷✨' },
   ];
 
   const sortOptions = [

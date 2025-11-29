@@ -1,7 +1,18 @@
+'use client';
+
+import { useState } from 'react';
 import { FavoritesList } from './components/FavoritesList';
 import { FavoritesFilters } from './components/FavoritesFilters';
 
+type FilterType = 'all' | 'providers' | 'services';
+
 export default function FavoritesPage() {
+  const [activeFilter, setActiveFilter] = useState<FilterType>('all');
+
+  const handleFilterChange = (filter: FilterType): void => {
+    setActiveFilter(filter);
+  };
+
   return (
     <main className="container-sm mx-auto px-4 py-8">
       <div className="flex flex-col gap-8">
@@ -14,8 +25,11 @@ export default function FavoritesPage() {
           </p>
         </header>
 
-        <FavoritesFilters />
-        <FavoritesList />
+        <FavoritesFilters
+          activeFilter={activeFilter}
+          onFilterChange={handleFilterChange}
+        />
+        <FavoritesList filter={activeFilter} />
       </div>
     </main>
   );
