@@ -9,7 +9,7 @@ import type {
 } from '@/lib/types/appointments';
 
 import { API_BASE_URL } from '@/lib/constants';
-import { getAuthHeaders, hasActiveSession } from '@/lib/api/client';
+import { hasActiveSession } from '@/lib/api/client';
 import { fetchWithAuth } from '@/lib/api/interceptor';
 
 /**
@@ -38,7 +38,7 @@ export async function getAppointments(
 
     // Construir query params
     const queryParams = new URLSearchParams();
-    
+
     if (params?.limit) queryParams.append('limit', params.limit.toString());
     if (params?.offset) queryParams.append('offset', params.offset.toString());
     if (params?.page) queryParams.append('page', params.page.toString());
@@ -66,6 +66,7 @@ export async function getAppointments(
     const data = await response.json();
     return { success: true, data };
   } catch (error) {
+    console.log('error', error);
     return { success: false, error: 'Error de red' };
   }
 }
@@ -86,6 +87,7 @@ export async function getAppointment(
     const data = await response.json();
     return { success: true, data: data.data };
   } catch (error) {
+    console.log('error', error);
     return { success: false, error: 'Error de red' };
   }
 }
@@ -118,6 +120,7 @@ export async function createAppointment(
     const responseData = await response.json();
     return { success: true, data: responseData.data };
   } catch (error) {
+    console.log('error', error);
     return { success: false, error: 'Error de red' };
   }
 }
@@ -150,6 +153,7 @@ export async function updateAppointment(
     const responseData = await response.json();
     return { success: true, data: responseData.data };
   } catch (error) {
+    console.log('error', error);
     return { success: false, error: 'Error de red' };
   }
 }
@@ -176,6 +180,7 @@ export async function cancelAppointment(
     const data = await response.json();
     return { success: true, data };
   } catch (error) {
+    console.log('error', error);
     return { success: false, error: 'Error de red' };
   }
 }

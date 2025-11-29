@@ -68,6 +68,7 @@ export function useSessionValidator() {
           setAuth(currentUser, newToken, newRefreshToken);
         }
       } catch (error) {
+        console.log('error', error);
         // Si hay error, hacer logout
         logout();
         router.push('/login');

@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
 import { getServices, getServiceById } from '@/lib/api/services';
-import type { Service, ServicesPaginatedResponse } from '@/lib/types/services';
 
 /**
  * Hook para obtener lista de servicios

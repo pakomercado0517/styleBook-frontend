@@ -50,6 +50,7 @@ export async function updateProfile(
 
     return { success: true, data: responseData.data };
   } catch (error) {
+    console.log('error', error);
     return { success: false, error: 'Error de red' };
   }
 }
@@ -82,6 +83,7 @@ export async function changePassword(
     const responseData = await response.json();
     return { success: true, data: responseData };
   } catch (error) {
+    console.log('error', error);
     return { success: false, error: 'Error de red' };
   }
 }

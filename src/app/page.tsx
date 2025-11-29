@@ -64,9 +64,7 @@ export default function Home(): React.ReactNode {
         <div className="relative z-10 max-w-4xl mx-auto text-center">
           {/* Logo & Badge */}
           <div className="mb-6 animate-fade-in">
-            <Badge icon="✨" variant="primary">
-              Bienvenido a StyleBook
-            </Badge>
+            <Badge variant="primary">✨ Bienvenido a StyleBook</Badge>
           </div>
 
           {/* Main Title */}
@@ -149,11 +147,17 @@ export default function Home(): React.ReactNode {
                 className="animate-slide-up"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
-                <Card
-                  icon={feature.icon}
-                  title={feature.title}
-                  description={feature.description}
-                />
+                <Card>
+                  <div className="p-6">
+                    <div className="text-4xl mb-4">{feature.icon}</div>
+                    <h3 className="font-playfair text-xl font-bold text-primary-800 mb-2">
+                      {feature.title}
+                    </h3>
+                    <p className="text-neutral-600 font-poppins">
+                      {feature.description}
+                    </p>
+                  </div>
+                </Card>
               </div>
             ))}
           </div>

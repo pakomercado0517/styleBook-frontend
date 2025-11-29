@@ -81,19 +81,6 @@ export function useVerifyEmail() {
       setVerificationStatus('error');
       toast.error(error.message || 'Error al verificar email');
     },
-    onSuccess: (response) => {
-      if (response.success) {
-        toast.success('¡Email verificado exitosamente!');
-        setVerificationStatus('success');
-      } else {
-        setVerificationStatus('error');
-        toast.error(response.error || 'Error al verificar email');
-      }
-    },
-    onError: (error: Error) => {
-      setVerificationStatus('error');
-      toast.error(error.message || 'Error al verificar email');
-    },
   });
 
   // Mutación para reenviar email

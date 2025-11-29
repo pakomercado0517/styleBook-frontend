@@ -19,6 +19,7 @@ import { getUserTimezone } from '@/lib/utils/dateUtils';
 export function ProfileForm(): ReactNode {
   const user = useAuthStore((state) => state.user);
   const token = useAuthStore((state) => state.token);
+  const refreshToken = useAuthStore((state) => state.refreshToken);
   const setAuth = useAuthStore((state) => state.setAuth);
 
   const {
@@ -46,8 +47,8 @@ export function ProfileForm(): ReactNode {
       if (result.success) {
         toast.success('Perfil actualizado correctamente');
         // Actualizar el store con los nuevos datos
-        if (user && token) {
-          setAuth({ ...user, ...result.data }, token);
+        if (user && token && refreshToken) {
+          setAuth({ ...user, ...result.data }, token, refreshToken);
         }
       } else {
         // Mostrar el mensaje de error detallado del backend

@@ -1,7 +1,6 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { Button } from '@/components/Button';
 import type { AppointmentStatus } from '@/lib/types/appointments';
 
 interface AppointmentsFiltersProps {

@@ -29,6 +29,7 @@ export async function getFavorites(
     const data = await response.json();
     return { success: true, data: data.data };
   } catch (error) {
+    console.log('error', error);
     return { success: false, error: 'Error de red' };
   }
 }
@@ -55,6 +56,7 @@ export async function getProviderFavorites(
     const data = await response.json();
     return { success: true, data };
   } catch (error) {
+    console.log('error', error);
     return { success: false, error: 'Error de red' };
   }
 }
@@ -78,6 +80,7 @@ export async function getServiceFavorites(
     const data = await response.json();
     return { success: true, data };
   } catch (error) {
+    console.log('error', error);
     return { success: false, error: 'Error de red' };
   }
 }
@@ -107,6 +110,7 @@ export async function addProviderToFavorites(
     const data = await response.json();
     return { success: true, data: data.data };
   } catch (error) {
+    console.log('error', error);
     return { success: false, error: 'Error de red' };
   }
 }
@@ -136,6 +140,7 @@ export async function addServiceToFavorites(
     const data = await response.json();
     return { success: true, data: data.data };
   } catch (error) {
+    console.log('error', error);
     return { success: false, error: 'Error de red' };
   }
 }
@@ -158,6 +163,7 @@ export async function isProviderFavorite(
     const data = await response.json();
     return { success: true, data: data.data };
   } catch (error) {
+    console.log('error', error);
     return { success: false, error: 'Error de red' };
   }
 }
@@ -180,6 +186,7 @@ export async function isServiceFavorite(
     const data = await response.json();
     return { success: true, data: data.data };
   } catch (error) {
+    console.log('error', error);
     return { success: false, error: 'Error de red' };
   }
 }
@@ -206,6 +213,7 @@ export async function deleteFavorite(
     const data = await response.json();
     return { success: true, data };
   } catch (error) {
+    console.log('error', error);
     return { success: false, error: 'Error de red' };
   }
 }
@@ -235,6 +243,7 @@ export async function deleteProviderFromFavorites(
     const data = await response.json();
     return { success: true, data };
   } catch (error) {
+    console.log('error', error);
     return { success: false, error: 'Error de red' };
   }
 }
@@ -264,6 +273,7 @@ export async function deleteServiceFromFavorites(
     const data = await response.json();
     return { success: true, data };
   } catch (error) {
+    console.log('error', error);
     return { success: false, error: 'Error de red' };
   }
 }

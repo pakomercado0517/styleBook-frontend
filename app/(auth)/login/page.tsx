@@ -54,8 +54,8 @@ export default function LoginPage(): React.ReactNode {
       return;
     }
 
-    // Guardar usuario y token en el store
-    setAuth(result.data.user, result.data.token);
+    // Guardar usuario y tokens en el store
+    setAuth(result.data.user, result.data.token, result.data.refreshToken);
 
     // Mostrar éxito
     toast.success('¡Bienvenido de vuelta!');

@@ -6,7 +6,6 @@ import { useQuery } from '@tanstack/react-query';
 import { getAppointments } from '@/lib/api/appointments';
 import type { Appointment, AppointmentStatus } from '@/lib/types/appointments';
 import { AppointmentCard } from './AppointmentCard';
-import { Button } from '@/components/Button';
 
 interface AppointmentsListProps {
   status?: AppointmentStatus;
