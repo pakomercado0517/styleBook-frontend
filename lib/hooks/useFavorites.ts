@@ -173,12 +173,51 @@ export function useFavorites(options: UseFavoritesOptions = {}) {
     }
   };
 
+  // Extraer datos según el tipo de filtro
+  const data = favoritesQuery.data;
+  let favorites: Favorite[] = [];
+  let total = 0;
+  let providerFavorites = 0;
+  let serviceFavorites = 0;
+
+  if (data) {
+    if (filter === 'all') {
+      // Cuando filter === 'all', data es FavoritesPaginatedResponse
+      const allData = data as {
+        favorites?: Favorite[];
+        total?: number;
+        provider_favorites?: number;
+        service_favorites?: number;
+      };
+      favorites = allData.favorites || [];
+      total = allData.total || 0;
+      providerFavorites = allData.provider_favorites || 0;
+      serviceFavorites = allData.service_favorites || 0;
+    } else if (filter === 'providers') {
+      // Cuando filter === 'providers', data es { providers: Favorite[], total: number }
+      const providersData = data as {
+        providers?: Favorite[];
+        total?: number;
+      };
+      favorites = providersData.providers || [];
+      total = providersData.total || 0;
+    } else if (filter === 'services') {
+      // Cuando filter === 'services', data es { services: Favorite[], total: number }
+      const servicesData = data as {
+        services?: Favorite[];
+        total?: number;
+      };
+      favorites = servicesData.services || [];
+      total = servicesData.total || 0;
+    }
+  }
+
   return {
     // Datos
-    favorites: favoritesQuery.data?.favorites || [],
-    total: favoritesQuery.data?.total || 0,
-    providerFavorites: favoritesQuery.data?.provider_favorites || 0,
-    serviceFavorites: favoritesQuery.data?.service_favorites || 0,
+    favorites,
+    total,
+    providerFavorites,
+    serviceFavorites,
     // Estados
     isLoading: favoritesQuery.isLoading,
     isError: favoritesQuery.isError,
