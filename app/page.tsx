@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { Badge } from '@/components/Badge';
@@ -70,8 +71,15 @@ export default function Home(): React.ReactNode {
         {/* Content */}
         <div className="relative z-10 max-w-5xl mx-auto text-center">
           {/* Logo & Badge */}
-          <div className="mb-8 animate-fade-in">
-            <Badge variant="primary">✨ Bienvenido a StyleBook</Badge>
+          <div className="mb-8 animate-fade-in flex flex-col items-center gap-4">
+            <Image
+              src="/logo.png"
+              alt="StyleBook Logo"
+              width={250}
+              height={250}
+              className="w-24 h-24 md:w-52 md:h-52 object-contain"
+              priority
+            />
           </div>
 
           {/* Main Title */}
