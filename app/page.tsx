@@ -71,9 +71,7 @@ export default function Home(): React.ReactNode {
         <div className="relative z-10 max-w-5xl mx-auto text-center">
           {/* Logo & Badge */}
           <div className="mb-8 animate-fade-in">
-            <Badge variant="primary">
-              ✨ Bienvenido a StyleBook
-            </Badge>
+            <Badge variant="primary">✨ Bienvenido a StyleBook</Badge>
           </div>
 
           {/* Main Title */}
