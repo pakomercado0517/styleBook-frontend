@@ -423,17 +423,17 @@ export function useFavoriteServiceIds() {
           break;
         }
 
-        // El backend devuelve { data: { services: [], total: 0 } }
-        // y la función API lo envuelve en Result, resultando en result.data.data
-        const responseData = result.data as unknown as {
-          data?: { services: Favorite[]; total: number };
+        // Ahora result.data tiene directamente { services: [], total: 0 }
+        const responseData = result.data as {
+          services?: Favorite[];
+          total?: number;
         };
 
-        if (!responseData.data?.services) {
+        if (!responseData.services) {
           break;
         }
 
-        const serviceIds = responseData.data.services
+        const serviceIds = responseData.services
           .map((favorite: Favorite) => favorite.service_id)
           .filter((id): id is number => id !== undefined);
 
@@ -441,6 +441,56 @@ export function useFavoriteServiceIds() {
 
         // Si obtuvimos menos de lo solicitado, no hay más páginas
         hasMore = serviceIds.length === limit;
+        offset += limit;
+      }
+
+      return allFavoriteIds;
+    },
+    staleTime: 0, // Siempre considerar datos frescos para reflejar cambios inmediatos
+  });
+
+  return data || [];
+}
+
+/**
+ * Hook para obtener IDs de proveedores favoritos (útil para verificar múltiples proveedores)
+ * Obtiene todos los favoritos usando paginación si es necesario
+ */
+export function useFavoriteProviderIds() {
+  const { data } = useQuery({
+    queryKey: ['favorites', 'providers', 'ids'],
+    queryFn: async () => {
+      const allFavoriteIds: number[] = [];
+      const limit = 100; // Tamaño de página razonable
+      let offset = 0;
+      let hasMore = true;
+
+      // Obtener todos los favoritos usando paginación
+      while (hasMore) {
+        const result = await getProviderFavorites(limit, offset);
+
+        if (!result.success || !result.data) {
+          break;
+        }
+
+        // result.data tiene directamente { providers: [], total: 0 }
+        const responseData = result.data as {
+          providers?: Favorite[];
+          total?: number;
+        };
+
+        if (!responseData.providers) {
+          break;
+        }
+
+        const providerIds = responseData.providers
+          .map((favorite: Favorite) => favorite.provider_id)
+          .filter((id): id is number => id !== undefined);
+
+        allFavoriteIds.push(...providerIds);
+
+        // Si obtuvimos menos de lo solicitado, no hay más páginas
+        hasMore = providerIds.length === limit;
         offset += limit;
       }
 

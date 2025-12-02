@@ -101,23 +101,55 @@ export const getServiceById = async (
 
 /**
  * Obtiene servicios de un proveedor específico
+ * Usa la ruta específica: /services/provider/:id
  * @param providerId - ID del proveedor
- * @param params - Parámetros adicionales de filtrado
+ * @param params - Parámetros adicionales de filtrado (limit, offset)
  * @returns Promise con resultado de servicios
  */
 export const getServicesByProvider = async (
   providerId: number,
   params?: {
-    category?: string;
-    is_active?: boolean;
-    page?: number;
     limit?: number;
+    offset?: number;
   }
 ): Promise<GetServicesResponse> => {
-  return getServices({
-    provider_id: providerId,
-    ...params,
-  });
+  try {
+    // Construir query params
+    const queryParams = new URLSearchParams();
+    
+    if (params?.limit !== undefined) {
+      queryParams.append('limit', params.limit.toString());
+    }
+    if (params?.offset !== undefined) {
+      queryParams.append('offset', params.offset.toString());
+    }
+
+    const queryString = queryParams.toString();
+    const url = queryString
+      ? `${API_BASE_URL}/services/provider/${providerId}?${queryString}`
+      : `${API_BASE_URL}/services/provider/${providerId}`;
+
+    const response = await fetchWithAuth(url);
+
+    if (!response.ok) {
+      return {
+        success: false,
+        error: 'Error al obtener servicios del proveedor',
+      };
+    }
+
+    const data: ServicesPaginatedResponse = await response.json();
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error fetching services by provider:', error);
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Error al obtener servicios del proveedor',
+    };
+  }
 };
 
 /**

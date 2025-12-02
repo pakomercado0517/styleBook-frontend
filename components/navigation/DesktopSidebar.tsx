@@ -37,6 +37,12 @@ export function DesktopSidebar({ role }: DesktopSidebarProps): ReactNode {
       activePatterns: ['/client/services'],
     },
     {
+      icon: '💼',
+      label: 'Proveedores',
+      href: '/client/providers',
+      activePatterns: ['/client/providers'],
+    },
+    {
       icon: '📅',
       label: 'Mis Citas',
       href: '/client/appointments',

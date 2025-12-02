@@ -1,12 +1,13 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { useState, type ReactNode } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useState, useEffect, type ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import type { Service, ServiceCategory } from '@/lib/types/services';
-import { getServices } from '@/lib/api/services';
+import { getServices, getServicesByProvider } from '@/lib/api/services';
 import {
   useFavoriteServiceIds,
+  useFavoriteProviderIds,
   useFavoriteMutations,
 } from '@/lib/hooks/useFavorites';
 import { ServiceSearch } from './components/ServiceSearch';
@@ -19,6 +20,11 @@ import { ServicesList } from './components/ServicesList';
  */
 export default function ServicesPage(): ReactNode {
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Leer provider_id de la URL
+  const providerIdParam = searchParams.get('provider');
+  const providerId = providerIdParam ? Number.parseInt(providerIdParam, 10) : null;
 
   // Estados
   const [searchText, setSearchText] = useState<string>('');
@@ -27,6 +33,14 @@ export default function ServicesPage(): ReactNode {
   >('all');
   const [selectedSort, setSelectedSort] = useState<string>('newest');
   const [currentPage, setCurrentPage] = useState<number>(1);
+
+  // Resetear página cuando cambia el provider
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [providerId]);
+
+  const limit = 12;
+  const offset = (currentPage - 1) * limit;
 
   // Query para obtener servicios
   const {
@@ -37,12 +51,28 @@ export default function ServicesPage(): ReactNode {
   } = useQuery({
     queryKey: [
       'services',
+      providerId,
       searchText,
       selectedCategory,
       selectedSort,
       currentPage,
     ],
     queryFn: async () => {
+      // Si hay un provider_id en la URL, usar la ruta específica
+      if (providerId && !Number.isNaN(providerId)) {
+        const result = await getServicesByProvider(providerId, {
+          limit,
+          offset,
+        });
+
+        if (!result.success) {
+          throw new Error(result.error);
+        }
+
+        return result.data;
+      }
+
+      // Si no hay provider_id, usar la ruta general con filtros
       const params: {
         search?: string;
         category?: string;
@@ -52,7 +82,7 @@ export default function ServicesPage(): ReactNode {
         is_active?: boolean;
       } = {
         page: currentPage,
-        limit: 12,
+        limit,
         is_active: true,
       };
 
@@ -94,12 +124,21 @@ export default function ServicesPage(): ReactNode {
   // Obtener IDs de servicios favoritos
   const favoriteServiceIds = useFavoriteServiceIds();
 
+  // Obtener IDs de proveedores favoritos
+  const favoriteProviderIds = useFavoriteProviderIds();
+
   // Hook de mutaciones de favoritos (sin ejecutar queries innecesarias)
-  const { toggleServiceFavorite } = useFavoriteMutations();
+  const { toggleServiceFavorite, toggleProviderFavorite } =
+    useFavoriteMutations();
 
   const handleToggleFavorite = (serviceId: number): void => {
     const isFavorite = favoriteServiceIds.includes(serviceId);
     toggleServiceFavorite(serviceId, isFavorite);
+  };
+
+  const handleToggleProviderFavorite = (providerId: number): void => {
+    const isFavorite = favoriteProviderIds.includes(providerId);
+    toggleProviderFavorite(providerId, isFavorite);
   };
 
   // Extraer servicios y metadata - ESTRUCTURA ACTUALIZADA
@@ -156,6 +195,8 @@ export default function ServicesPage(): ReactNode {
         onSelectService={handleSelectService}
         onToggleFavorite={handleToggleFavorite}
         favoriteIds={favoriteServiceIds}
+        onToggleProviderFavorite={handleToggleProviderFavorite}
+        favoriteProviderIds={favoriteProviderIds}
       />
 
       {/* Error state */}

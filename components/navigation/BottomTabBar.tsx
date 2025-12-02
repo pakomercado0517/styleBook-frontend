@@ -24,6 +24,7 @@ export function BottomTabBar({ role }: BottomTabBarProps): ReactNode {
   const pathname = usePathname();
 
   // Tabs específicos por rol
+  // Labels optimizados para 6 items en mobile
   const clientTabs: TabItem[] = [
     {
       icon: '🏠',
@@ -36,6 +37,12 @@ export function BottomTabBar({ role }: BottomTabBarProps): ReactNode {
       label: 'Servicios',
       href: '/client/services',
       activePatterns: ['/client/services'],
+    },
+    {
+      icon: '💼',
+      label: 'Proveedores',
+      href: '/client/providers',
+      activePatterns: ['/client/providers'],
     },
     {
       icon: '📅',
@@ -104,11 +111,16 @@ export function BottomTabBar({ role }: BottomTabBarProps): ReactNode {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-white border-t border-neutral-200 shadow-lg"
+      className="
+        fixed bottom-0 left-0 right-0 z-50 md:hidden
+        bg-white/95 backdrop-blur-sm
+        border-t border-neutral-200/80
+        shadow-[0_-4px_20px_rgba(0,0,0,0.05)]
+      "
       role="navigation"
       aria-label="Navegación principal"
     >
-      <div className="flex items-center justify-around h-16 max-w-xl mx-auto">
+      <div className="flex items-center justify-between h-20 px-2 max-w-xl mx-auto">
         {tabs.map((tab) => {
           const active = isActive(tab.activePatterns);
 
@@ -117,30 +129,68 @@ export function BottomTabBar({ role }: BottomTabBarProps): ReactNode {
               key={tab.href}
               href={tab.href}
               className={`
-                flex flex-col items-center justify-center 
-                min-w-[64px] h-full px-2
-                transition-colors duration-200
+                group
+                flex flex-col items-center justify-center
+                flex-1 h-full
+                px-1 py-2
+                transition-all duration-200
+                relative
                 ${active ? 'text-accent-600' : 'text-neutral-500'}
                 hover:text-accent-500
                 active:scale-95
               `}
               aria-current={active ? 'page' : undefined}
             >
-              {/* Icon con indicador superior si está activo */}
-              <div className="relative">
-                {active && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-accent-600 rounded-full" />
-                )}
-                <span className="text-2xl" role="img" aria-hidden="true">
+              {/* Indicador superior si está activo */}
+              {active && (
+                <div
+                  className="
+                    absolute top-0 left-1/2 -translate-x-1/2
+                    w-10 h-1
+                    bg-accent-600 rounded-b-full
+                    shadow-sm
+                  "
+                />
+              )}
+
+              {/* Icon */}
+              <div
+                className={`
+                  relative mb-1
+                  transition-all duration-200
+                  ${active ? 'scale-110' : 'scale-100 group-hover:scale-105'}
+                `}
+              >
+                <span
+                  className="text-xl md:text-2xl"
+                  role="img"
+                  aria-hidden="true"
+                >
                   {tab.icon}
                 </span>
+                {/* Badge de notificación (opcional, para futuras features) */}
+                {active && (
+                  <div
+                    className="
+                      absolute -top-1 -right-1
+                      w-2 h-2
+                      bg-accent-600 rounded-full
+                      animate-pulse
+                    "
+                  />
+                )}
               </div>
 
-              {/* Label */}
+              {/* Label - Optimizado para 6 items */}
               <span
                 className={`
-                  mt-1 text-xs font-poppins font-medium
+                  text-[10px] md:text-xs
+                  font-poppins font-medium
+                  leading-tight
+                  text-center
+                  transition-colors duration-200
                   ${active ? 'text-accent-600' : 'text-neutral-600'}
+                  ${active ? 'font-semibold' : 'font-medium'}
                 `}
               >
                 {tab.label}

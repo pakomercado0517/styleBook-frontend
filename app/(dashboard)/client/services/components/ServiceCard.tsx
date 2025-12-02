@@ -7,6 +7,8 @@ interface ServiceCardProps {
   onSelect?: (serviceId: number) => void;
   onToggleFavorite?: (serviceId: number) => void;
   isFavorite?: boolean;
+  onToggleProviderFavorite?: (providerId: number) => void;
+  isProviderFavorite?: boolean;
 }
 
 /**
@@ -18,9 +20,13 @@ export const ServiceCard = ({
   onSelect,
   onToggleFavorite,
   isFavorite = false,
+  onToggleProviderFavorite,
+  isProviderFavorite = false,
 }: ServiceCardProps): ReactNode => {
   const canSelect = onSelect !== undefined;
   const canFavorite = onToggleFavorite !== undefined;
+  const canFavoriteProvider =
+    onToggleProviderFavorite !== undefined && service.provider !== undefined;
 
   const handleCardClick = (): void => {
     if (canSelect) {
@@ -32,6 +38,13 @@ export const ServiceCard = ({
     e.stopPropagation();
     if (canFavorite) {
       onToggleFavorite(service.id);
+    }
+  };
+
+  const handleProviderFavoriteClick = (e: React.MouseEvent): void => {
+    e.stopPropagation();
+    if (canFavoriteProvider && service.provider) {
+      onToggleProviderFavorite(service.provider.id);
     }
   };
 
@@ -163,8 +176,8 @@ export const ServiceCard = ({
 
       {/* Proveedor */}
       {service.provider && (
-        <div className="mb-4 pb-4 border-b border-neutral-200">
-          <div className="flex items-center gap-2">
+        <div className="mb-4 pb-4 border-b border-neutral-200 relative">
+          <div className="flex items-center gap-2 pr-12">
             <span className="text-sm text-neutral-500">Por:</span>
             <span className="text-sm font-semibold text-primary-800">
               {service.provider.business_name}
@@ -177,6 +190,47 @@ export const ServiceCard = ({
                 {service.provider.average_rating.toFixed(1)}
               </span>
             </div>
+          )}
+          {/* Botón de favorito del proveedor */}
+          {canFavoriteProvider && (
+            <button
+              onClick={handleProviderFavoriteClick}
+              className={`
+                absolute top-0 right-0
+                w-8 h-8
+                bg-white rounded-full
+                border-2 flex items-center justify-center
+                transition-all duration-200
+                z-10
+                shadow-sm
+                hover:shadow-md
+                ${
+                  isProviderFavorite
+                    ? 'border-red-200 hover:border-red-300 bg-red-50'
+                    : 'border-neutral-200 hover:border-accent-500'
+                }
+              `}
+              type="button"
+              aria-label={
+                isProviderFavorite
+                  ? 'Quitar proveedor de favoritos'
+                  : 'Agregar proveedor a favoritos'
+              }
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill={isProviderFavorite ? '#EF4444' : 'none'}
+                stroke={isProviderFavorite ? '#EF4444' : '#9CA3AF'}
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="w-4 h-4 transition-all duration-200"
+                aria-hidden="true"
+              >
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+              </svg>
+            </button>
           )}
         </div>
       )}

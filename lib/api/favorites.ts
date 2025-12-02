@@ -54,7 +54,7 @@ export async function getProviderFavorites(
     }
 
     const data = await response.json();
-    return { success: true, data };
+    return { success: true, data: data.data };
   } catch (error) {
     console.log('error', error);
     return { success: false, error: 'Error de red' };
@@ -78,7 +78,7 @@ export async function getServiceFavorites(
     }
 
     const data = await response.json();
-    return { success: true, data };
+    return { success: true, data: data.data };
   } catch (error) {
     console.log('error', error);
     return { success: false, error: 'Error de red' };

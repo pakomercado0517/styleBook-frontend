@@ -36,7 +36,7 @@ export default function ClientLayout({
       </div>
 
       {/* Mobile: Main Content con padding bottom para el tab bar */}
-      <main className="md:hidden pb-20 min-h-[calc(100vh-3.5rem)]">
+      <main className="md:hidden pb-20 min-h-[calc(100vh-5rem)]">
         {children}
       </main>
 

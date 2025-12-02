@@ -64,7 +64,23 @@ export interface ProviderProfileUpdateResponse {
   message: string;
 }
 
+/**
+ * Respuesta paginada de proveedores
+ * Estructura real del backend
+ */
+export interface ProvidersPaginatedResponse {
+  success: true;
+  message: string;
+  data: {
+    total: number;
+    count: number;
+    data: ProviderProfile[];
+  };
+  timestamp: string;
+}
+
 // Tipos de respuestas API
 export type GetProviderProfileResponse = Result<ProviderProfile>;
+export type GetProvidersResponse = Result<ProvidersPaginatedResponse>;
 export type UpdateProviderProfileResponse =
   Result<ProviderProfileUpdateResponse>;
