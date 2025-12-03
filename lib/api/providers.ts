@@ -1,5 +1,4 @@
 import type {
-  ProviderProfile,
   ProvidersPaginatedResponse,
   GetProvidersResponse,
   GetProviderProfileResponse,
@@ -93,5 +92,54 @@ export const getProviderById = async (
     };
   }
 };
+
+/**
+ * Actualiza el perfil de un proveedor
+ * @param id - ID del proveedor
+ * @param data - Datos a actualizar
+ * @returns Promise con resultado de la actualización
+ */
+export const updateProviderProfile = async (
+  id: number,
+  data: import('@/lib/types/provider').UpdateProviderProfileData
+): Promise<import('@/lib/types/provider').UpdateProviderProfileResponse> => {
+  try {
+    const response = await fetchWithAuth(`${API_BASE_URL}/providers/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      let errorMessage = 'Error al actualizar el perfil';
+      try {
+        const error = await response.json();
+        errorMessage = error.message || error.error || errorMessage;
+      } catch {
+        errorMessage = response.statusText || errorMessage;
+      }
+      return {
+        success: false,
+        error: errorMessage,
+      };
+    }
+
+    const responseData = await response.json();
+    return { success: true, data: responseData.data };
+  } catch (error) {
+    console.error('Error updating provider profile:', error);
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Error al actualizar el perfil',
+    };
+  }
+};
+
+
 
 

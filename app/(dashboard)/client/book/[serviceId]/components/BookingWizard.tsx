@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useService } from '@/lib/hooks/useServices';
+import { useAppointment } from '@/lib/hooks/useAppointments';
 import { Button } from '@/components/Button';
 import { StepServiceDetails } from './StepServiceDetails';
 import { StepSelectProfessional } from './StepSelectProfessional';
@@ -13,18 +14,60 @@ type BookingStep = 'details' | 'professional' | 'datetime' | 'confirm';
 
 interface BookingWizardProps {
     serviceId: number;
+    rescheduleAppointmentId?: number | null;
 }
 
-export function BookingWizard({ serviceId }: BookingWizardProps) {
+export function BookingWizard({ serviceId, rescheduleAppointmentId }: BookingWizardProps) {
     const router = useRouter();
     const { data: service, isLoading, error } = useService(serviceId);
+    
+    // Cargar cita existente si estamos reagendando
+    const { data: existingAppointment, isLoading: isLoadingAppointment } = useAppointment(
+        rescheduleAppointmentId || 0
+    );
 
     const [step, setStep] = useState<BookingStep>('details');
     const [selectedEmployeeId, setSelectedEmployeeId] = useState<number | null>(null);
     const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
     const [selectedTime, setSelectedTime] = useState<string | null>(null);
+    const [selectedSlot, setSelectedSlot] = useState<{ start_local: string; end_local: string } | null>(null);
 
-    if (isLoading) {
+    // Pre-llenar datos cuando se carga la cita existente para reagendar
+    useEffect(() => {
+        if (existingAppointment && rescheduleAppointmentId) {
+            // Pre-seleccionar empleado
+            if (existingAppointment.employee_id) {
+                setSelectedEmployeeId(existingAppointment.employee_id);
+            }
+
+            // Pre-seleccionar fecha y hora
+            if (existingAppointment.start_date_local) {
+                const appointmentDate = new Date(existingAppointment.start_date_local);
+                setSelectedDate(appointmentDate);
+                
+                // Extraer hora del formato ISO
+                const timeString = appointmentDate.toTimeString().slice(0, 5); // "HH:mm"
+                setSelectedTime(timeString);
+
+                // Pre-llenar slot si tenemos las fechas
+                if (existingAppointment.end_date_local) {
+                    setSelectedSlot({
+                        start_local: existingAppointment.start_date_local,
+                        end_local: existingAppointment.end_date_local,
+                    });
+                }
+            }
+
+            // Saltar al paso de fecha/hora si ya tenemos servicio y empleado
+            if (existingAppointment.service_id && existingAppointment.employee_id) {
+                setStep('datetime');
+            } else if (existingAppointment.service_id) {
+                setStep('professional');
+            }
+        }
+    }, [existingAppointment, rescheduleAppointmentId]);
+
+    if (isLoading || (rescheduleAppointmentId && isLoadingAppointment)) {
         return (
             <div className="flex items-center justify-center min-h-[50vh]">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-accent-500"></div>
@@ -38,6 +81,19 @@ export function BookingWizard({ serviceId }: BookingWizardProps) {
                 <h2 className="text-2xl font-bold text-primary-800 mb-4">Error</h2>
                 <p className="text-neutral-600 mb-6">No se pudo cargar el servicio.</p>
                 <Button onClick={() => router.back()}>Volver</Button>
+            </div>
+        );
+    }
+
+    // Validar que el servicio de la cita coincida con el serviceId si estamos reagendando
+    if (rescheduleAppointmentId && existingAppointment && existingAppointment.service_id !== serviceId) {
+        return (
+            <div className="p-8 text-center">
+                <h2 className="text-2xl font-bold text-primary-800 mb-4">Error</h2>
+                <p className="text-neutral-600 mb-6">
+                    El servicio de la cita no coincide. Por favor, reagenda desde la página de citas.
+                </p>
+                <Button onClick={() => router.push('/client/appointments')}>Volver a Mis Citas</Button>
             </div>
         );
     }
@@ -98,10 +154,13 @@ export function BookingWizard({ serviceId }: BookingWizardProps) {
 
                 {step === 'datetime' && (
                     <StepSelectDateTime
+                        service={service}
+                        employeeId={selectedEmployeeId}
                         selectedDate={selectedDate}
-                        selectedTime={selectedTime}
+                        selectedSlot={selectedSlot}
                         onSelectDate={setSelectedDate}
                         onSelectTime={setSelectedTime}
+                        onSelectSlot={setSelectedSlot}
                         onContinue={() => setStep('confirm')}
                         onBack={handleBack}
                     />
@@ -113,6 +172,8 @@ export function BookingWizard({ serviceId }: BookingWizardProps) {
                         employeeId={selectedEmployeeId}
                         date={selectedDate}
                         time={selectedTime}
+                        slot={selectedSlot}
+                        rescheduleAppointmentId={rescheduleAppointmentId || null}
                         onBack={handleBack}
                     />
                 )}

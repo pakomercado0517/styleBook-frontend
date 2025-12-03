@@ -2,6 +2,7 @@
 
 import type { ReactNode } from 'react';
 import { useAuth } from '@/lib/hooks/useAuth';
+import { useProviderStats } from '@/lib/hooks/useProviderStats';
 import { StatCard } from '@/components/dashboard/StatCard';
 import { QuickActionCard } from '@/components/dashboard/QuickActionCard';
 
@@ -11,6 +12,22 @@ import { QuickActionCard } from '@/components/dashboard/QuickActionCard';
  */
 export default function ProviderDashboardPage(): ReactNode {
   const { user } = useAuth();
+  const { data: stats, isLoading } = useProviderStats();
+
+  // Formatear ingresos del mes
+  const formatCurrency = (amount: number): string => {
+    return new Intl.NumberFormat('es-MX', {
+      style: 'currency',
+      currency: 'MXN',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
+
+  // Formatear rating
+  const formatRating = (rating: number): string => {
+    return rating > 0 ? rating.toFixed(1) : '0.0';
+  };
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -26,20 +43,46 @@ export default function ProviderDashboardPage(): ReactNode {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
-        <StatCard
-          icon="📅"
-          label="Citas Hoy"
-          value="12"
-          trend={{ value: 8, isPositive: true }}
-        />
-        <StatCard
-          icon="💰"
-          label="Ingresos del Mes"
-          value="$2,450"
-          trend={{ value: 15, isPositive: true }}
-        />
-        <StatCard icon="⭐" label="Rating Promedio" value="4.8" />
-        <StatCard icon="👥" label="Clientes Activos" value="156" />
+        {isLoading ? (
+          // Loading skeleton
+          <>
+            {[1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                className="bg-white rounded-3xl p-5 md:p-6 border border-neutral-100 animate-pulse"
+              >
+                <div className="h-12 w-12 bg-neutral-200 rounded-full mb-4"></div>
+                <div className="h-6 bg-neutral-200 rounded mb-2"></div>
+                <div className="h-8 bg-neutral-200 rounded w-1/2"></div>
+              </div>
+            ))}
+          </>
+        ) : (
+          <>
+            <StatCard
+              icon="📅"
+              label="Citas Hoy"
+              value={stats?.appointmentsToday?.toString() || '0'}
+              trend={stats?.appointmentsTodayTrend}
+            />
+            <StatCard
+              icon="💰"
+              label="Ingresos del Mes"
+              value={formatCurrency(stats?.monthlyRevenue || 0)}
+              trend={stats?.monthlyRevenueTrend}
+            />
+            <StatCard
+              icon="⭐"
+              label="Rating Promedio"
+              value={formatRating(stats?.averageRating || 0)}
+            />
+            <StatCard
+              icon="👥"
+              label="Clientes Activos"
+              value={stats?.activeClients?.toString() || '0'}
+            />
+          </>
+        )}
       </div>
 
       {/* Quick Actions */}
@@ -49,22 +92,61 @@ export default function ProviderDashboardPage(): ReactNode {
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           <QuickActionCard
+            icon="⏳"
+            title="Citas Pendientes"
+            description="Revisa citas que necesitan confirmación"
+            href="/provider/appointments?status=pending"
+          />
+          <QuickActionCard
+            icon="➕"
+            title="Nuevo Servicio"
+            description="Agrega un nuevo servicio a tu catálogo"
+            href="/provider/services/new"
+          />
+          <QuickActionCard
+            icon="👤"
+            title="Nuevo Empleado"
+            description="Registra un nuevo miembro del equipo"
+            href="/provider/employees/new"
+          />
+          <QuickActionCard
+            icon="📆"
+            title="Calendario"
+            description="Vista mensual de todas tus citas"
+            href="/provider/appointments/calendar"
+          />
+          <QuickActionCard
+            icon="📈"
+            title="Reportes"
+            description="Reportes financieros y de rendimiento"
+            href="/provider/reports"
+          />
+          <QuickActionCard
+            icon="🎁"
+            title="Promociones"
+            description="Gestiona ofertas y promociones"
+            href="/provider/promotions"
+          />
+          <QuickActionCard
             icon="💼"
             title="Mis Servicios"
             description="Administra tu catálogo de servicios"
             href="/provider/services"
+            variant="secondary"
           />
           <QuickActionCard
             icon="📅"
             title="Citas"
             description="Gestiona reservas y confirmaciones"
             href="/provider/appointments"
+            variant="secondary"
           />
           <QuickActionCard
             icon="👥"
             title="Empleados"
             description="Administra tu equipo de trabajo"
             href="/provider/employees"
+            variant="secondary"
           />
           <QuickActionCard
             icon="⏰"

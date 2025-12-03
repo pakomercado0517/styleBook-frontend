@@ -1,5 +1,6 @@
 'use client';
 
+import { Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, useEffect, type ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -15,10 +16,10 @@ import { ServiceFilters } from './components/ServiceFilters';
 import { ServicesList } from './components/ServicesList';
 
 /**
- * Página de Catálogo de Servicios - Cliente
- * Permite buscar, filtrar y explorar servicios disponibles
+ * Componente interno que usa useSearchParams
+ * Debe estar envuelto en Suspense para Next.js 15
  */
-export default function ServicesPage(): ReactNode {
+function ServicesPageContent(): ReactNode {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -237,5 +238,42 @@ export default function ServicesPage(): ReactNode {
         </div>
       )}
     </div>
+  );
+}
+
+/**
+ * Página de Catálogo de Servicios - Cliente
+ * Permite buscar, filtrar y explorar servicios disponibles
+ * Envuelto en Suspense para cumplir con los requisitos de Next.js 15
+ */
+export default function ServicesPage(): ReactNode {
+  return (
+    <Suspense
+      fallback={
+        <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-8">
+          <div className="mb-6 md:mb-8">
+            <div className="h-10 bg-neutral-200 rounded-xl animate-pulse mb-2"></div>
+            <div className="h-6 bg-neutral-200 rounded-lg animate-pulse w-2/3"></div>
+          </div>
+          <div className="mb-6">
+            <div className="h-12 bg-neutral-200 rounded-xl animate-pulse"></div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="bg-white rounded-2xl p-6 border border-neutral-200"
+              >
+                <div className="h-48 bg-neutral-200 rounded-xl animate-pulse mb-4"></div>
+                <div className="h-6 bg-neutral-200 rounded-lg animate-pulse mb-2"></div>
+                <div className="h-4 bg-neutral-200 rounded-lg animate-pulse w-2/3"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      }
+    >
+      <ServicesPageContent />
+    </Suspense>
   );
 }

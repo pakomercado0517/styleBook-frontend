@@ -18,7 +18,6 @@ export function QuickActionCard({
   title,
   description,
   href,
-  variant = 'primary',
 }: QuickActionCardProps): ReactNode {
   return (
     <Link

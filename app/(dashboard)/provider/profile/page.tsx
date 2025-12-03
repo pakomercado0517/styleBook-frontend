@@ -2,10 +2,12 @@
 
 import type { ReactNode } from 'react';
 import { useAuth } from '@/lib/hooks/useAuth';
+import { useMyProviderProfile } from '@/lib/hooks/useMyProviderProfile';
 import { Badge } from '@/components/Badge';
 import { Button } from '@/components/Button';
 import { ProfileForm } from '../../client/profile/components/ProfileForm';
 import { PasswordForm } from '../../client/profile/components/PasswordForm';
+import { ProviderBusinessForm } from './components/ProviderBusinessForm';
 import { formatLocalDate } from '@/lib/utils/dateUtils';
 import { logout } from '@/lib/api/auth';
 
@@ -15,6 +17,7 @@ import { logout } from '@/lib/api/auth';
  */
 export default function ProviderProfilePage(): ReactNode {
   const { user } = useAuth();
+  const { data: providerProfile } = useMyProviderProfile();
 
   if (!user) {
     return null;
@@ -23,6 +26,17 @@ export default function ProviderProfilePage(): ReactNode {
   const memberSinceDate = user.memberSince
     ? formatLocalDate(user.memberSince)
     : 'Fecha no disponible';
+
+  // Mapeo de tipos de negocio a español
+  const businessTypeLabels: Record<string, string> = {
+    salon: 'Salón de Belleza',
+    barbershop: 'Barbería',
+    spa: 'Spa',
+    nails: 'Uñas',
+    makeup: 'Maquillaje',
+    hair: 'Peluquería',
+    other: 'Otro',
+  };
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -57,6 +71,50 @@ export default function ProviderProfilePage(): ReactNode {
 
             {/* Info adicional */}
             <div className="space-y-3 pt-4 border-t border-neutral-200">
+              {providerProfile && (
+                <>
+                  <div>
+                    <p className="text-xs text-neutral-500 font-poppins mb-1">
+                      Negocio
+                    </p>
+                    <p className="text-sm text-neutral-700 font-poppins font-semibold">
+                      {providerProfile.business_name}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-neutral-500 font-poppins mb-1">
+                      Tipo
+                    </p>
+                    <p className="text-sm text-neutral-700 font-poppins">
+                      {businessTypeLabels[providerProfile.business_type] ||
+                        providerProfile.business_type}
+                    </p>
+                  </div>
+                  {providerProfile.city && (
+                    <div>
+                      <p className="text-xs text-neutral-500 font-poppins mb-1">
+                        Ubicación
+                      </p>
+                      <p className="text-sm text-neutral-700 font-poppins">
+                        {providerProfile.city}
+                        {providerProfile.country && `, ${providerProfile.country}`}
+                      </p>
+                    </div>
+                  )}
+                  {providerProfile.average_rating && (
+                    <div>
+                      <p className="text-xs text-neutral-500 font-poppins mb-1">
+                        Rating
+                      </p>
+                      <p className="text-sm text-neutral-700 font-poppins">
+                        ⭐ {providerProfile.average_rating.toFixed(1)}
+                      </p>
+                    </div>
+                  )}
+                  <div className="pt-2 border-t border-neutral-200"></div>
+                </>
+              )}
+
               <div>
                 <p className="text-xs text-neutral-500 font-poppins mb-1">
                   Email
@@ -106,6 +164,17 @@ export default function ProviderProfilePage(): ReactNode {
 
         {/* Main Content - Formularios */}
         <div className="lg:col-span-2 space-y-6">
+          {/* Información del Negocio */}
+          <div className="bg-white rounded-2xl p-6 md:p-8 border border-neutral-200">
+            <h3 className="font-playfair text-2xl font-bold text-primary-800 mb-1">
+              Información del Negocio
+            </h3>
+            <p className="text-sm text-neutral-600 font-poppins mb-6">
+              Gestiona los datos de tu negocio (horarios, dirección, tipo)
+            </p>
+            <ProviderBusinessForm />
+          </div>
+
           {/* Información Personal */}
           <div className="bg-white rounded-2xl p-6 md:p-8 border border-neutral-200">
             <h3 className="font-playfair text-2xl font-bold text-primary-800 mb-1">

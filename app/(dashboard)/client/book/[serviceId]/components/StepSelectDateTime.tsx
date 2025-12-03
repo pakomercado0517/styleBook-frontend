@@ -1,32 +1,65 @@
+'use client';
+
 import { DayPicker } from 'react-day-picker';
 import { es } from 'date-fns/locale';
 import { Button } from '@/components/Button';
 import { cn } from '@/lib/utils/cn';
+import type { Service } from '@/lib/types/services';
+import { useAvailabilityByEmployee } from '@/lib/hooks/useAvailability';
+import { getUserTimezone, datePickerToISO } from '@/lib/utils/dateUtils';
 import 'react-day-picker/dist/style.css';
 
 interface StepSelectDateTimeProps {
+    service: Service;
+    employeeId: number | null;
     selectedDate: Date | undefined;
-    selectedTime: string | null;
+    selectedSlot: { start_local: string; end_local: string } | null;
     onSelectDate: (date: Date | undefined) => void;
     onSelectTime: (time: string | null) => void;
+    onSelectSlot: (slot: { start_local: string; end_local: string } | null) => void;
     onContinue: () => void;
     onBack: () => void;
 }
 
-const TIME_SLOTS = [
-    '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
-    '13:00', '13:30', '14:00', '14:30', '15:00', '15:30',
-    '16:00', '16:30', '17:00', '17:30'
-];
-
 export function StepSelectDateTime({
+    service,
+    employeeId,
     selectedDate,
-    selectedTime,
+    selectedSlot,
     onSelectDate,
     onSelectTime,
+    onSelectSlot,
     onContinue,
     onBack,
 }: StepSelectDateTimeProps) {
+    const timezone = getUserTimezone();
+    const dateString = selectedDate ? datePickerToISO(selectedDate) : '';
+
+    // Obtener disponibilidad cuando hay fecha y empleado seleccionados
+    const { data: availability, isLoading, error } = useAvailabilityByEmployee(
+        employeeId,
+        {
+            service_id: service.id,
+            date: dateString,
+            timezone,
+        }
+    );
+
+    const handleDateSelect = (date: Date | undefined): void => {
+        onSelectDate(date);
+        // Limpiar selección de tiempo al cambiar fecha
+        onSelectTime(null);
+        onSelectSlot(null);
+    };
+
+    const handleSlotSelect = (slot: { start_local: string; end_local: string; formatted: string }): void => {
+        // Extraer solo la hora del formato "HH:mm - HH:mm"
+        const timeMatch = slot.formatted.match(/^(\d{2}:\d{2})/);
+        const time = timeMatch ? timeMatch[1] : null;
+        
+        onSelectTime(time);
+        onSelectSlot({ start_local: slot.start_local, end_local: slot.end_local });
+    };
     // Estilos personalizados para el calendario para que coincida con Luxe Noir
     const css = `
     .rdp {
@@ -68,7 +101,7 @@ export function StepSelectDateTime({
                     <DayPicker
                         mode="single"
                         selected={selectedDate}
-                        onSelect={onSelectDate}
+                        onSelect={handleDateSelect}
                         locale={es}
                         disabled={{ before: new Date() }}
                         modifiersClassNames={{
@@ -92,22 +125,46 @@ export function StepSelectDateTime({
                         <div className="text-center p-8 bg-neutral-50 rounded-xl border border-dashed border-neutral-300 text-neutral-500">
                             Selecciona una fecha primero
                         </div>
-                    ) : (
+                    ) : !employeeId ? (
+                        <div className="text-center p-8 bg-yellow-50 rounded-xl border border-yellow-200 text-yellow-700">
+                            Por favor selecciona un profesional primero
+                        </div>
+                    ) : isLoading ? (
+                        <div className="text-center p-8 bg-neutral-50 rounded-xl border border-neutral-200 text-neutral-500">
+                            Cargando horarios disponibles...
+                        </div>
+                    ) : error ? (
+                        <div className="text-center p-8 bg-red-50 rounded-xl border border-red-200 text-red-600">
+                            Error al cargar horarios: {error instanceof Error ? error.message : 'Error desconocido'}
+                        </div>
+                    ) : availability && availability.available_slots.length > 0 ? (
                         <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
-                            {TIME_SLOTS.map((time) => (
-                                <button
-                                    key={time}
-                                    onClick={() => onSelectTime(time)}
-                                    className={cn(
-                                        "py-2 px-1 rounded-lg text-sm font-medium transition-all duration-200 border",
-                                        selectedTime === time
-                                            ? "bg-primary-800 text-white border-primary-800 shadow-lg"
-                                            : "bg-white text-primary-800 border-neutral-200 hover:border-accent-500 hover:text-accent-600"
-                                    )}
-                                >
-                                    {time}
-                                </button>
-                            ))}
+                            {availability.available_slots.map((slot, index) => {
+                                // Extraer hora del formato "HH:mm - HH:mm"
+                                const timeMatch = slot.formatted.match(/^(\d{2}:\d{2})/);
+                                const time = timeMatch ? timeMatch[1] : '';
+                                const isSelected = selectedSlot?.start_local === slot.start_local;
+
+                                return (
+                                    <button
+                                        key={`${slot.start_local}-${index}`}
+                                        onClick={() => handleSlotSelect(slot)}
+                                        className={cn(
+                                            "py-2 px-1 rounded-lg text-sm font-medium transition-all duration-200 border",
+                                            isSelected
+                                                ? "bg-primary-800 text-white border-primary-800 shadow-lg"
+                                                : "bg-white text-primary-800 border-neutral-200 hover:border-accent-500 hover:text-accent-600"
+                                        )}
+                                        aria-label={`Seleccionar horario ${slot.formatted}`}
+                                    >
+                                        {time}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    ) : (
+                        <div className="text-center p-8 bg-neutral-50 rounded-xl border border-dashed border-neutral-300 text-neutral-500">
+                            No hay horarios disponibles para esta fecha
                         </div>
                     )}
                 </div>
@@ -120,7 +177,7 @@ export function StepSelectDateTime({
                 <Button
                     onClick={onContinue}
                     className="flex-1"
-                    disabled={!selectedDate || !selectedTime}
+                    disabled={!selectedDate || !selectedSlot}
                 >
                     Continuar
                 </Button>

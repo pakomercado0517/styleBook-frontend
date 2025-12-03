@@ -77,6 +77,17 @@ export interface UpdateAppointmentData {
 }
 
 /**
+ * Datos para reagendar una cita
+ * - Permite cambiar fecha/hora y opcionalmente el empleado
+ * - Si la cita estaba "confirmed", vuelve a "pending"
+ */
+export interface RescheduleAppointmentData {
+  start_date: string; // ISO Local
+  end_date: string; // ISO Local
+  employee_id?: number; // Opcional, debe pertenecer al mismo proveedor
+}
+
+/**
  * Información de paginación
  */
 export interface PaginationInfo {
@@ -103,6 +114,11 @@ export interface AppointmentsPaginatedResponse {
 // Tipos de respuestas API
 export type GetAppointmentsResponse = Result<AppointmentsPaginatedResponse>;
 export type GetAppointmentResponse = Result<Appointment>;
-export type CreateAppointmentResponse = Result<Appointment>;
+export type CreateAppointmentResponse =
+  | { success: true; data: Appointment }
+  | { success: false; error: string; errorCode?: number };
 export type UpdateAppointmentResponse = Result<Appointment>;
+export type RescheduleAppointmentResponse =
+  | { success: true; data: Appointment }
+  | { success: false; error: string; errorCode?: number };
 export type DeleteAppointmentResponse = Result<{ message: string }>;
