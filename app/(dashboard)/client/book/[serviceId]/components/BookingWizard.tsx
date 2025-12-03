@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useService } from '@/lib/hooks/useServices';
 import { useAppointment } from '@/lib/hooks/useAppointments';
 import { Button } from '@/components/Button';
+import { cn } from '@/lib/utils/cn';
 import { StepServiceDetails } from './StepServiceDetails';
 import { StepSelectProfessional } from './StepSelectProfessional';
 import { StepSelectDateTime } from './StepSelectDateTime';
@@ -112,23 +113,100 @@ export function BookingWizard({ serviceId, rescheduleAppointmentId }: BookingWiz
 
     return (
         <div className="max-w-3xl mx-auto p-4 md:p-8">
-            {/* Progress Bar */}
+            {/* Progress Bar Mejorado */}
             <div className="mb-8">
-                <div className="flex justify-between text-sm font-medium text-neutral-500 mb-2">
-                    <span className={step === 'details' ? 'text-accent-500' : ''}>Servicio</span>
-                    <span className={step === 'professional' ? 'text-accent-500' : ''}>Profesional</span>
-                    <span className={step === 'datetime' ? 'text-accent-500' : ''}>Fecha</span>
-                    <span className={step === 'confirm' ? 'text-accent-500' : ''}>Confirmar</span>
-                </div>
-                <div className="h-2 bg-neutral-200 rounded-full overflow-hidden">
-                    <div
-                        className="h-full bg-accent-500 transition-all duration-300 ease-in-out"
-                        style={{
-                            width: step === 'details' ? '25%' :
-                                step === 'professional' ? '50%' :
-                                    step === 'datetime' ? '75%' : '100%'
-                        }}
-                    />
+                <div className="flex justify-between text-sm font-medium mb-3">
+                    <div className="flex flex-col items-center flex-1">
+                        <div className={cn(
+                            "w-8 h-8 rounded-full flex items-center justify-center mb-1 transition-all",
+                            step === 'details' 
+                                ? 'bg-accent-500 text-primary-900 border-2 border-accent-600' 
+                                : step === 'professional' || step === 'datetime' || step === 'confirm'
+                                ? 'bg-accent-200 text-accent-700 border-2 border-accent-300'
+                                : 'bg-neutral-200 text-neutral-500 border-2 border-neutral-300'
+                        )}>
+                            {step === 'details' || step === 'professional' || step === 'datetime' || step === 'confirm' ? '✓' : '1'}
+                        </div>
+                        <span className={cn(
+                            "text-xs",
+                            step === 'details' ? 'text-accent-600 font-semibold' : 'text-neutral-500'
+                        )}>Servicio</span>
+                    </div>
+                    <div className="flex-1 flex items-center justify-center px-2">
+                        <div className={cn(
+                            "h-0.5 w-full transition-all",
+                            step === 'professional' || step === 'datetime' || step === 'confirm'
+                                ? 'bg-accent-500' : 'bg-neutral-200'
+                        )} />
+                    </div>
+                    <div className="flex flex-col items-center flex-1">
+                        <div className={cn(
+                            "w-8 h-8 rounded-full flex items-center justify-center mb-1 transition-all",
+                            step === 'professional'
+                                ? 'bg-accent-500 text-primary-900 border-2 border-accent-600' 
+                                : step === 'datetime' || step === 'confirm'
+                                ? 'bg-accent-200 text-accent-700 border-2 border-accent-300'
+                                : selectedEmployeeId !== null
+                                ? 'bg-accent-100 text-accent-600 border-2 border-accent-200'
+                                : 'bg-neutral-200 text-neutral-500 border-2 border-neutral-300'
+                        )}>
+                            {step === 'professional' || step === 'datetime' || step === 'confirm' ? '✓' : selectedEmployeeId !== null ? '✓' : '2'}
+                        </div>
+                        <span className={cn(
+                            "text-xs",
+                            step === 'professional' ? 'text-accent-600 font-semibold' : 
+                            selectedEmployeeId !== null ? 'text-accent-500' : 'text-neutral-500'
+                        )}>Profesional</span>
+                    </div>
+                    <div className="flex-1 flex items-center justify-center px-2">
+                        <div className={cn(
+                            "h-0.5 w-full transition-all",
+                            step === 'datetime' || step === 'confirm'
+                                ? 'bg-accent-500' : 
+                            selectedEmployeeId !== null && selectedSlot !== null
+                                ? 'bg-accent-300' : 'bg-neutral-200'
+                        )} />
+                    </div>
+                    <div className="flex flex-col items-center flex-1">
+                        <div className={cn(
+                            "w-8 h-8 rounded-full flex items-center justify-center mb-1 transition-all",
+                            step === 'datetime'
+                                ? 'bg-accent-500 text-primary-900 border-2 border-accent-600' 
+                                : step === 'confirm'
+                                ? 'bg-accent-200 text-accent-700 border-2 border-accent-300'
+                                : selectedSlot !== null
+                                ? 'bg-accent-100 text-accent-600 border-2 border-accent-200'
+                                : 'bg-neutral-200 text-neutral-500 border-2 border-neutral-300'
+                        )}>
+                            {step === 'datetime' || step === 'confirm' ? '✓' : selectedSlot !== null ? '✓' : '3'}
+                        </div>
+                        <span className={cn(
+                            "text-xs",
+                            step === 'datetime' ? 'text-accent-600 font-semibold' : 
+                            selectedSlot !== null ? 'text-accent-500' : 'text-neutral-500'
+                        )}>Fecha</span>
+                    </div>
+                    <div className="flex-1 flex items-center justify-center px-2">
+                        <div className={cn(
+                            "h-0.5 w-full transition-all",
+                            step === 'confirm'
+                                ? 'bg-accent-500' : 'bg-neutral-200'
+                        )} />
+                    </div>
+                    <div className="flex flex-col items-center flex-1">
+                        <div className={cn(
+                            "w-8 h-8 rounded-full flex items-center justify-center mb-1 transition-all",
+                            step === 'confirm'
+                                ? 'bg-accent-500 text-primary-900 border-2 border-accent-600' 
+                                : 'bg-neutral-200 text-neutral-500 border-2 border-neutral-300'
+                        )}>
+                            {step === 'confirm' ? '✓' : '4'}
+                        </div>
+                        <span className={cn(
+                            "text-xs",
+                            step === 'confirm' ? 'text-accent-600 font-semibold' : 'text-neutral-500'
+                        )}>Confirmar</span>
+                    </div>
                 </div>
             </div>
 
@@ -146,8 +224,15 @@ export function BookingWizard({ serviceId, rescheduleAppointmentId }: BookingWiz
                     <StepSelectProfessional
                         service={service}
                         selectedEmployeeId={selectedEmployeeId}
-                        onSelect={(id) => setSelectedEmployeeId(id)}
-                        onContinue={() => setStep('datetime')}
+                        onSelect={(id) => {
+                            console.log('BookingWizard: Seleccionando empleado', id);
+                            setSelectedEmployeeId(id);
+                        }}
+                        onContinue={() => {
+                            if (selectedEmployeeId) {
+                                setStep('datetime');
+                            }
+                        }}
                         onBack={handleBack}
                     />
                 )}

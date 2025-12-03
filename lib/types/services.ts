@@ -22,13 +22,16 @@ export type ServiceCategory =
 
 /**
  * Información básica del proveedor en servicio
+ * Según la documentación del backend, incluye estos campos cuando viene en appointments
  */
 export interface ServiceProvider {
   id: number;
   business_name: string;
   business_type: string;
+  description?: string; // Descripción del negocio
   city: string;
   address: string;
+  country?: string; // País del proveedor
   average_rating: number;
 }
 

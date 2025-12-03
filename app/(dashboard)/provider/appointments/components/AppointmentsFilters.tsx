@@ -41,13 +41,13 @@ export function AppointmentsFilters({
     { value: 'no_show', label: 'No asistió' },
   ];
 
-  const employeeOptions = [
-    { value: 'all', label: 'Todos los empleados' },
-    ...(employeesData?.data?.data?.map((employee) => ({
-      value: employee.id.toString(),
-      label: employee.name,
-    })) || []),
-  ];
+      const employeeOptions = [
+        { value: 'all', label: 'Todos los empleados' },
+        ...(employeesData?.map((employee) => ({
+          value: employee.id.toString(),
+          label: employee.name,
+        })) || []),
+      ];
 
   return (
     <div className="bg-white rounded-2xl border-2 border-neutral-200 p-4 md:p-6">

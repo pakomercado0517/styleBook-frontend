@@ -21,7 +21,8 @@ export function useEmployeesByProvider(
       }
       
       // El backend siempre retorna estructura paginada: { data: { total, count, data: Employee[] } }
-      return result.data;
+      // Retornamos el array de empleados directamente para facilitar el uso
+      return result.data.data.data;
     },
     enabled: providerId > 0,
     staleTime: 5 * 60 * 1000, // 5 minutos

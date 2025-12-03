@@ -104,6 +104,7 @@ interface AlertDialogActionProps {
   onClick?: () => void;
   variant?: 'primary' | 'secondary' | 'outline' | 'gold' | 'ghost';
   className?: string;
+  disabled?: boolean;
 }
 
 const AlertDialogAction = ({
@@ -111,10 +112,12 @@ const AlertDialogAction = ({
   onClick,
   variant = 'primary',
   className,
+  disabled = false,
 }: AlertDialogActionProps) => (
   <Button
     variant={variant}
     onClick={onClick}
+    disabled={disabled}
     className={cn('flex-1 sm:flex-initial', className)}
   >
     {children}

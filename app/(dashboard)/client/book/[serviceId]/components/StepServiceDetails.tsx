@@ -63,13 +63,27 @@ export function StepServiceDetails({ service, onContinue, onBack }: StepServiceD
                 </div>
             )}
 
-            <div className="flex gap-4 pt-4">
-                <Button variant="outline" onClick={onBack} className="flex-1">
-                    Cancelar
-                </Button>
-                <Button onClick={onContinue} className="flex-1">
-                    Continuar
-                </Button>
+            <div className="space-y-4 pt-4">
+                <div className="bg-accent-50 border-2 border-accent-200 rounded-xl p-4 flex items-start gap-3">
+                    <span className="text-xl flex-shrink-0">ℹ️</span>
+                    <div>
+                        <p className="text-sm font-semibold text-accent-800 mb-1">
+                            Revisa los detalles del servicio
+                        </p>
+                        <p className="text-sm text-accent-700">
+                            Asegúrate de que este es el servicio que deseas reservar. Podrás elegir el profesional y la fecha en los siguientes pasos.
+                        </p>
+                    </div>
+                </div>
+
+                <div className="flex gap-4">
+                    <Button variant="outline" onClick={onBack} className="flex-1">
+                        Cancelar
+                    </Button>
+                    <Button onClick={onContinue} variant="gold" className="flex-1">
+                        Continuar →
+                    </Button>
+                </div>
             </div>
         </div>
     );

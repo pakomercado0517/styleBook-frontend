@@ -268,10 +268,10 @@ export function StepConfirm({
                 {employee.specialty && (
                   <p className="text-xs text-neutral-500 truncate">{employee.specialty}</p>
                 )}
-                {employee.rating && employee.rating > 0 && (
+                {employee.rating !== null && employee.rating !== undefined && employee.rating > 0 && (
                   <div className="flex items-center gap-1 text-xs text-accent-600 mt-1">
                     <span>⭐</span>
-                    <span>{employee.rating.toFixed(1)}</span>
+                    <span>{typeof employee.rating === 'number' ? employee.rating.toFixed(1) : employee.rating}</span>
                   </div>
                 )}
               </div>

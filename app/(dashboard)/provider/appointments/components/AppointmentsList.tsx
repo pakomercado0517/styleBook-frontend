@@ -87,9 +87,9 @@ export function AppointmentsList({
     );
   }
 
-  const appointments = data.data.appointments || [];
-  const pagination = data.data.pagination;
-  const totalPages = pagination.pages;
+  const appointments = data?.data?.appointments || [];
+  const pagination = data?.data?.pagination;
+  const totalPages = pagination?.pages || 0;
 
   // Empty state
   if (appointments.length === 0) {

@@ -49,7 +49,7 @@ export const AppointmentsList = ({
       if (!result.success) {
         throw new Error(result.error);
       }
-
+      console.log('result', result);
       return result.data;
     },
     staleTime: 5 * 60 * 1000, // 5 minutos
@@ -123,9 +123,7 @@ export const AppointmentsList = ({
       {/* Contador de resultados */}
       <div>
         <p className="text-sm text-neutral-600 font-poppins">
-          {total === 1
-            ? '1 cita encontrada'
-            : `${total} citas encontradas`}
+          {total === 1 ? '1 cita encontrada' : `${total} citas encontradas`}
         </p>
       </div>
 

@@ -6,6 +6,8 @@ import {
   getProviderPendingAppointments,
   updateAppointment,
   cancelAppointment,
+  confirmAppointment,
+  markAppointmentAsNoShow,
 } from '@/lib/api/appointments';
 import type { GetAppointmentsParams } from '@/lib/api/appointments';
 import type { UpdateAppointmentData } from '@/lib/types/appointments';
@@ -40,6 +42,7 @@ export function useAppointments(params?: GetAppointmentsParams) {
       if (!result.success) {
         throw new Error(result.error);
       }
+      console.log('result', result);
       return result.data;
     },
     staleTime: 2 * 60 * 1000, // 2 minutos
@@ -125,6 +128,9 @@ export function useUpdateAppointment() {
       queryClient.invalidateQueries({
         queryKey: ['appointments'],
       });
+      queryClient.invalidateQueries({
+        queryKey: ['appointment'],
+      });
       toast.success('Cita actualizada exitosamente');
     },
     onError: (error: Error) => {
@@ -158,6 +164,9 @@ export function useCancelAppointment() {
       queryClient.invalidateQueries({
         queryKey: ['appointments'],
       });
+      queryClient.invalidateQueries({
+        queryKey: ['appointment'],
+      });
       toast.success('Cita cancelada exitosamente');
     },
     onError: (error: Error) => {
@@ -166,3 +175,66 @@ export function useCancelAppointment() {
   });
 }
 
+/**
+ * Hook para confirmar una cita (solo proveedor)
+ */
+export function useConfirmAppointment() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (appointmentId: number) => {
+      const result = await confirmAppointment(appointmentId);
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+      return result.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['provider-appointments'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['provider-pending-appointments'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['appointment'],
+      });
+      toast.success('Cita confirmada exitosamente');
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Error al confirmar la cita');
+    },
+  });
+}
+
+/**
+ * Hook para marcar una cita como "no asistió" (solo proveedor)
+ */
+export function useMarkAppointmentAsNoShow() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (appointmentId: number) => {
+      const result = await markAppointmentAsNoShow(appointmentId);
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+      return result.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['provider-appointments'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['provider-pending-appointments'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['appointment'],
+      });
+      toast.success('Cita marcada como "no asistió"');
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Error al marcar la cita como no asistió');
+    },
+  });
+}
