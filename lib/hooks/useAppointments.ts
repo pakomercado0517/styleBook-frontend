@@ -1,11 +1,15 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   getAppointment,
   getAppointments,
   getProviderAppointments,
   getProviderPendingAppointments,
+  updateAppointment,
+  cancelAppointment,
 } from '@/lib/api/appointments';
 import type { GetAppointmentsParams } from '@/lib/api/appointments';
+import type { UpdateAppointmentData } from '@/lib/types/appointments';
+import { toast } from 'sonner';
 
 /**
  * Hook para obtener una cita por ID
@@ -50,6 +54,7 @@ export function useProviderAppointments(params?: {
   status?: string;
   start_date?: string;
   end_date?: string;
+  employee_id?: number;
   limit?: number;
   offset?: number;
 }) {
@@ -71,6 +76,7 @@ export function useProviderAppointments(params?: {
  * Endpoint: GET /appointments/provider/pending
  */
 export function useProviderPendingAppointments(params?: {
+  employee_id?: number;
   limit?: number;
   offset?: number;
 }) {
@@ -84,6 +90,79 @@ export function useProviderPendingAppointments(params?: {
       return result.data;
     },
     staleTime: 1 * 60 * 1000, // 1 minuto (más frecuente porque cambian rápido)
+  });
+}
+
+/**
+ * Hook para actualizar el estado de una cita
+ * Permite cambiar status y notas
+ */
+export function useUpdateAppointment() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      appointmentId,
+      data,
+    }: {
+      appointmentId: number;
+      data: UpdateAppointmentData;
+    }) => {
+      const result = await updateAppointment(appointmentId, data);
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+      return result.data;
+    },
+    onSuccess: () => {
+      // Invalidar queries relacionadas
+      queryClient.invalidateQueries({
+        queryKey: ['provider-appointments'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['provider-pending-appointments'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['appointments'],
+      });
+      toast.success('Cita actualizada exitosamente');
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Error al actualizar la cita');
+    },
+  });
+}
+
+/**
+ * Hook para cancelar una cita
+ */
+export function useCancelAppointment() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (appointmentId: number) => {
+      const result = await cancelAppointment(appointmentId);
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+      return result.data;
+    },
+    onSuccess: () => {
+      // Invalidar queries relacionadas
+      queryClient.invalidateQueries({
+        queryKey: ['provider-appointments'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['provider-pending-appointments'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['appointments'],
+      });
+      toast.success('Cita cancelada exitosamente');
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Error al cancelar la cita');
+    },
   });
 }
 

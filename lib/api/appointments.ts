@@ -276,12 +276,13 @@ export async function cancelAppointment(
 /**
  * Obtiene todas las citas del proveedor autenticado
  * Endpoint: GET /appointments/provider/all
- * Permite filtrar por estado, fecha y paginación
+ * Permite filtrar por estado, fecha, empleado y paginación
  */
 export async function getProviderAppointments(params?: {
   status?: string;
   start_date?: string;
   end_date?: string;
+  employee_id?: number;
   limit?: number;
   offset?: number;
 }): Promise<GetAppointmentsResponse> {
@@ -291,10 +292,11 @@ export async function getProviderAppointments(params?: {
     if (params?.status) queryParams.append('status', params.status);
     if (params?.start_date) queryParams.append('start_date', params.start_date);
     if (params?.end_date) queryParams.append('end_date', params.end_date);
+    if (params?.employee_id) queryParams.append('employee_id', params.employee_id.toString());
     // Validar que el límite no exceda 100 (máximo permitido por el backend)
     const limit = params?.limit ? Math.min(params.limit, 100) : undefined;
     if (limit) queryParams.append('limit', limit.toString());
-    if (params?.offset) queryParams.append('offset', params.offset.toString());
+    if (params?.offset !== undefined) queryParams.append('offset', params.offset.toString());
 
     const queryString = queryParams.toString();
     const url = queryString
@@ -308,19 +310,23 @@ export async function getProviderAppointments(params?: {
     }
 
     const responseData = await response.json();
-    // El backend retorna { success: true, data: { total, count, data: [...] } }
+    // El backend retorna { success: true, data: { appointments: [...], total: number } }
     // Necesitamos convertir a AppointmentsPaginatedResponse
     const backendData = responseData.data;
+    const effectiveLimit = params?.limit ? Math.min(params.limit, 100) : 20;
+    const effectiveOffset = params?.offset || 0;
+    const total = backendData.total || 0;
+    
     const appointmentsData: import('@/lib/types/appointments').AppointmentsPaginatedResponse = {
       success: true,
       message: responseData.message || 'Citas obtenidas',
       data: {
-        appointments: backendData.data || [],
+        appointments: backendData.appointments || [],
         pagination: {
-          page: Math.floor((backendData.offset || 0) / (backendData.limit || 20)) + 1,
-          limit: backendData.limit || 20,
-          total: backendData.total || 0,
-          pages: Math.ceil((backendData.total || 0) / (backendData.limit || 20)),
+          page: Math.floor(effectiveOffset / effectiveLimit) + 1,
+          limit: effectiveLimit,
+          total: total,
+          pages: Math.ceil(total / effectiveLimit),
         },
       },
       timestamp: responseData.timestamp || new Date().toISOString(),
@@ -338,19 +344,21 @@ export async function getProviderAppointments(params?: {
 /**
  * Obtiene las citas pendientes del proveedor autenticado
  * Endpoint: GET /appointments/provider/pending
- * Solo acepta limit y offset (no acepta status porque siempre es "pending")
+ * Acepta limit, offset y employee_id (no acepta status porque siempre es "pending")
  */
 export async function getProviderPendingAppointments(params?: {
+  employee_id?: number;
   limit?: number;
   offset?: number;
 }): Promise<GetAppointmentsResponse> {
   try {
     const queryParams = new URLSearchParams();
 
+    if (params?.employee_id) queryParams.append('employee_id', params.employee_id.toString());
     // Validar que el límite no exceda 100 (máximo permitido por el backend)
     const limit = params?.limit ? Math.min(params.limit, 100) : undefined;
     if (limit) queryParams.append('limit', limit.toString());
-    if (params?.offset) queryParams.append('offset', params.offset.toString());
+    if (params?.offset !== undefined) queryParams.append('offset', params.offset.toString());
 
     const queryString = queryParams.toString();
     const url = queryString
@@ -367,19 +375,23 @@ export async function getProviderPendingAppointments(params?: {
     }
 
     const responseData = await response.json();
-    // El backend retorna { success: true, data: { total, count, data: [...] } }
+    // El backend retorna { success: true, data: { appointments: [...], total: number } }
     // Necesitamos convertir a AppointmentsPaginatedResponse
     const backendData = responseData.data;
+    const effectiveLimit = params?.limit ? Math.min(params.limit, 100) : 20;
+    const effectiveOffset = params?.offset || 0;
+    const total = backendData.total || 0;
+    
     const appointmentsData: import('@/lib/types/appointments').AppointmentsPaginatedResponse = {
       success: true,
       message: responseData.message || 'Citas pendientes obtenidas',
       data: {
-        appointments: backendData.data || [],
+        appointments: backendData.appointments || [],
         pagination: {
-          page: Math.floor((backendData.offset || 0) / (backendData.limit || 20)) + 1,
-          limit: backendData.limit || 20,
-          total: backendData.total || 0,
-          pages: Math.ceil((backendData.total || 0) / (backendData.limit || 20)),
+          page: Math.floor(effectiveOffset / effectiveLimit) + 1,
+          limit: effectiveLimit,
+          total: total,
+          pages: Math.ceil(total / effectiveLimit),
         },
       },
       timestamp: responseData.timestamp || new Date().toISOString(),
