@@ -116,7 +116,7 @@ export const getServicesByProvider = async (
   try {
     // Construir query params
     const queryParams = new URLSearchParams();
-    
+
     if (params?.limit !== undefined) {
       queryParams.append('limit', params.limit.toString());
     }
@@ -198,4 +198,157 @@ export const getServicesByCategory = async (
     is_active: true,
     ...params,
   });
+};
+
+/**
+ * Crea un nuevo servicio para un proveedor
+ * @param providerId - ID del proveedor
+ * @param data - Datos del servicio a crear
+ * @returns Promise con resultado del servicio creado
+ */
+export const createService = async (
+  providerId: number,
+  data: {
+    name: string;
+    description: string;
+    category: string;
+    price: number;
+    duration_minutes: number;
+    image_url?: string;
+  }
+): Promise<import('@/lib/types/services').CreateServiceResponse> => {
+  try {
+    const response = await fetchWithAuth(
+      `${API_BASE_URL}/services/provider/${providerId}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      return {
+        success: false,
+        error:
+          errorData.message || errorData.error || 'Error al crear el servicio',
+      };
+    }
+
+    const result: {
+      success: true;
+      data: import('@/lib/types/services').Service;
+    } = await response.json();
+    return { success: true, data: result.data };
+  } catch (error) {
+    console.error('Error creating service:', error);
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : 'Error al crear el servicio',
+    };
+  }
+};
+
+/**
+ * Actualiza un servicio existente
+ * @param serviceId - ID del servicio
+ * @param data - Datos a actualizar (todos opcionales)
+ * @returns Promise con resultado del servicio actualizado
+ */
+export const updateService = async (
+  serviceId: number,
+  data: {
+    name?: string;
+    description?: string;
+    category?: string;
+    price?: number;
+    duration_minutes?: number;
+    is_active?: boolean;
+    image_url?: string;
+  }
+): Promise<import('@/lib/types/services').UpdateServiceResponse> => {
+  try {
+    const response = await fetchWithAuth(
+      `${API_BASE_URL}/services/${serviceId}`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      return {
+        success: false,
+        error:
+          errorData.message ||
+          errorData.error ||
+          'Error al actualizar el servicio',
+      };
+    }
+
+    const result: {
+      success: true;
+      data: import('@/lib/types/services').Service;
+    } = await response.json();
+    return { success: true, data: result.data };
+  } catch (error) {
+    console.error('Error updating service:', error);
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Error al actualizar el servicio',
+    };
+  }
+};
+
+/**
+ * Elimina un servicio
+ * @param serviceId - ID del servicio a eliminar
+ * @returns Promise con resultado de la eliminación
+ */
+export const deleteService = async (
+  serviceId: number
+): Promise<import('@/lib/types/services').DeleteServiceResponse> => {
+  try {
+    const response = await fetchWithAuth(
+      `${API_BASE_URL}/services/${serviceId}`,
+      {
+        method: 'DELETE',
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      return {
+        success: false,
+        error:
+          errorData.message ||
+          errorData.error ||
+          'Error al eliminar el servicio',
+      };
+    }
+
+    const result: { success: true; data: { message: string } } =
+      await response.json();
+    return { success: true, data: result.data };
+  } catch (error) {
+    console.error('Error deleting service:', error);
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Error al eliminar el servicio',
+    };
+  }
 };

@@ -71,7 +71,11 @@ export const createServiceSchema = z.object({
     .min(15, 'La duración mínima es 15 minutos')
     .max(480, 'La duración máxima es 8 horas'),
   is_active: z.boolean().default(true),
-  image_url: z.string().url().optional(),
+  image_url: z
+    .string()
+    .url('URL inválida')
+    .optional()
+    .or(z.literal('')),
 });
 
 /**
