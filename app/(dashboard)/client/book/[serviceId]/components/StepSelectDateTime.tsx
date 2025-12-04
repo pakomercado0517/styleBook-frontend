@@ -170,17 +170,51 @@ export function StepSelectDateTime({
                 </div>
             </div>
 
-            <div className="flex gap-4 pt-4">
-                <Button variant="outline" onClick={onBack} className="flex-1">
-                    Atrás
-                </Button>
-                <Button
-                    onClick={onContinue}
-                    className="flex-1"
-                    disabled={!selectedDate || !selectedSlot}
-                >
-                    Continuar
-                </Button>
+            <div className="space-y-4 pt-4">
+                {/* Mensajes de ayuda según lo que falte */}
+                {(!selectedDate || !selectedSlot) && !isLoading && !error && (
+                    <div className="bg-accent-50 border-2 border-accent-200 rounded-xl p-4 flex items-start gap-3">
+                        <span className="text-xl flex-shrink-0">💡</span>
+                        <div>
+                            <p className="text-sm font-semibold text-accent-800 mb-1">
+                                {!selectedDate ? 'Selecciona una fecha' : 'Selecciona un horario'}
+                            </p>
+                            <p className="text-sm text-accent-700">
+                                {!selectedDate 
+                                    ? 'Elige una fecha en el calendario para ver los horarios disponibles.'
+                                    : 'Elige uno de los horarios disponibles para continuar.'}
+                            </p>
+                        </div>
+                    </div>
+                )}
+
+                {/* Mensaje cuando no hay slots disponibles */}
+                {selectedDate && employeeId && !isLoading && !error && availability && availability.available_slots.length === 0 && (
+                    <div className="bg-yellow-50 border-2 border-yellow-200 rounded-xl p-4 flex items-start gap-3">
+                        <span className="text-xl flex-shrink-0">⚠️</span>
+                        <div>
+                            <p className="text-sm font-semibold text-yellow-800 mb-1">
+                                No hay horarios disponibles
+                            </p>
+                            <p className="text-sm text-yellow-700">
+                                Por favor selecciona otra fecha para ver más opciones.
+                            </p>
+                        </div>
+                    </div>
+                )}
+
+                <div className="flex gap-4">
+                    <Button variant="outline" onClick={onBack} className="flex-1">
+                        Atrás
+                    </Button>
+                    <Button
+                        onClick={onContinue}
+                        className="flex-1"
+                        disabled={!selectedDate || !selectedSlot || isLoading}
+                    >
+                        {isLoading ? 'Cargando...' : 'Continuar'}
+                    </Button>
+                </div>
             </div>
         </div>
     );

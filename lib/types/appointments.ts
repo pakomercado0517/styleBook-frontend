@@ -1,6 +1,6 @@
 import type { Service } from './services';
-import type { User } from './auth';
 import type { Result } from './common';
+import type { Employee } from './employees';
 
 /**
  * Estado de una cita
@@ -50,8 +50,25 @@ export interface Appointment {
   createdAt: string;
   updatedAt: string;
   // Relaciones expandidas (opcional, solo si el backend las incluye)
+  // Según la documentación actualizada, el backend ahora incluye estos modelos completos
   service?: Service;
-  employee?: User;
+  employee?: Employee; // Cambiado de User a Employee según documentación actualizada
+  provider?: {
+    id: number;
+    business_name: string;
+    description?: string;
+    business_type: string;
+    address: string;
+    city: string;
+    country?: string;
+    average_rating: number;
+  };
+  client?: {
+    id: number;
+    name: string;
+    email: string;
+    phone?: string | null;
+  };
 }
 
 /**
