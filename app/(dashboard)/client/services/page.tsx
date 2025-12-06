@@ -148,28 +148,28 @@ function ServicesPageContent(): ReactNode {
   const hasResults = services.length > 0;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-8">
-      {/* Header */}
-      <div className="mb-6 md:mb-8">
-        <h1 className="font-playfair text-3xl md:text-4xl lg:text-5xl font-bold text-primary-800 mb-2">
-          Catálogo de Servicios
-        </h1>
-        <p className="text-neutral-600 font-poppins text-base md:text-lg">
-          Descubre y reserva los mejores servicios de belleza
-        </p>
-      </div>
+    <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-[#201d12]">
+      {/* Top App Bar */}
+      <header className="sticky top-0 z-10 bg-[#201d12]/80 backdrop-blur-sm border-b border-white/10">
+        <div className="flex items-center p-4 pb-2">
+          <h1 className="text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center font-playfair">
+            Búsqueda de Servicios
+          </h1>
+        </div>
+      </header>
 
-      {/* Búsqueda */}
-      <div className="mb-6">
-        <ServiceSearch
-          onSearch={handleSearch}
-          placeholder="Buscar por nombre o descripción..."
-          initialValue={searchText}
-        />
-      </div>
+      {/* Search and Filters */}
+      <div className="px-4 py-3">
+        {/* Search Bar */}
+        <div className="mb-4">
+          <ServiceSearch
+            onSearch={handleSearch}
+            placeholder="Buscar servicios o salones..."
+            initialValue={searchText}
+          />
+        </div>
 
-      {/* Filtros */}
-      <div className="mb-6 md:mb-8">
+        {/* Chips Filters */}
         <ServiceFilters
           selectedCategory={selectedCategory}
           onCategoryChange={handleCategoryChange}
@@ -178,27 +178,27 @@ function ServicesPageContent(): ReactNode {
         />
       </div>
 
-      {/* Contador de resultados */}
+      {/* Results Count */}
       {!isLoading && hasResults && (
-        <div className="mb-4">
-          <p className="text-sm text-neutral-600 font-poppins">
-            {totalResults === 1
-              ? '1 servicio encontrado'
-              : `${totalResults} servicios encontrados`}
-          </p>
-        </div>
+        <p className="text-neutral-300 text-sm font-normal leading-normal pb-3 pt-1 px-4 font-poppins">
+          {totalResults === 1
+            ? '1 resultado'
+            : `${totalResults} resultados`}
+        </p>
       )}
 
-      {/* Lista de servicios */}
-      <ServicesList
-        services={services}
-        isLoading={isLoading}
-        onSelectService={handleSelectService}
-        onToggleFavorite={handleToggleFavorite}
-        favoriteIds={favoriteServiceIds}
-        onToggleProviderFavorite={handleToggleProviderFavorite}
-        favoriteProviderIds={favoriteProviderIds}
-      />
+      {/* Cards Section */}
+      <main className="flex flex-col gap-4 px-4 pb-6">
+        <ServicesList
+          services={services}
+          isLoading={isLoading}
+          onSelectService={handleSelectService}
+          onToggleFavorite={handleToggleFavorite}
+          favoriteIds={favoriteServiceIds}
+          onToggleProviderFavorite={handleToggleProviderFavorite}
+          favoriteProviderIds={favoriteProviderIds}
+        />
+      </main>
 
       {/* Error state */}
       {isError && !isLoading && (
@@ -250,23 +250,33 @@ export default function ServicesPage(): ReactNode {
   return (
     <Suspense
       fallback={
-        <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-8">
-          <div className="mb-6 md:mb-8">
-            <div className="h-10 bg-neutral-200 rounded-xl animate-pulse mb-2"></div>
-            <div className="h-6 bg-neutral-200 rounded-lg animate-pulse w-2/3"></div>
+        <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-[#201d12]">
+          <div className="px-4 py-3">
+            <div className="h-14 bg-white/5 rounded-xl animate-pulse mb-4"></div>
+            <div className="flex gap-3 overflow-x-auto pb-1">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div
+                  key={i}
+                  className="h-10 w-24 bg-white/5 rounded-full animate-pulse shrink-0"
+                ></div>
+              ))}
+            </div>
           </div>
-          <div className="mb-6">
-            <div className="h-12 bg-neutral-200 rounded-xl animate-pulse"></div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="flex flex-col gap-4 px-4 pb-6">
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="bg-white rounded-2xl p-6 border border-neutral-200"
+                className="flex flex-col rounded-xl bg-white/5 overflow-hidden animate-pulse"
               >
-                <div className="h-48 bg-neutral-200 rounded-xl animate-pulse mb-4"></div>
-                <div className="h-6 bg-neutral-200 rounded-lg animate-pulse mb-2"></div>
-                <div className="h-4 bg-neutral-200 rounded-lg animate-pulse w-2/3"></div>
+                <div className="w-full aspect-video bg-white/10"></div>
+                <div className="p-4">
+                  <div className="h-4 bg-white/10 rounded w-20 mb-2"></div>
+                  <div className="h-6 bg-white/10 rounded w-3/4 mb-2"></div>
+                  <div className="flex items-end justify-between">
+                    <div className="h-4 bg-white/10 rounded w-24"></div>
+                    <div className="h-4 bg-white/10 rounded w-20"></div>
+                  </div>
+                </div>
               </div>
             ))}
           </div>

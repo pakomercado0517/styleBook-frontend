@@ -1,50 +1,38 @@
 'use client';
 
-import { useState } from 'react';
+import type { ReactNode } from 'react';
+import { Heart } from 'lucide-react';
 import { useFavorites } from '@/lib/hooks/useFavorites';
 import { FavoriteCard } from './FavoriteCard';
-import { Card } from '@/components/Card';
-import { Button } from '@/components/Button';
 
-type FilterType = 'all' | 'providers' | 'services';
+type FilterType = 'services' | 'providers';
 
 interface FavoritesListProps {
   filter: FilterType;
 }
 
-const ITEMS_PER_PAGE = 12;
-
-export function FavoritesList({ filter }: FavoritesListProps) {
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
-
+/**
+ * FavoritesList - Lista de favoritos
+ * Muestra servicios o proveedores favoritos según el filtro
+ */
+export const FavoritesList = ({ filter }: FavoritesListProps): ReactNode => {
   const {
     favorites,
-    total,
     isLoading,
     isError,
     error,
   } = useFavorites({
     filter,
-    limit: ITEMS_PER_PAGE,
-    offset,
+    limit: 50,
+    offset: 0,
   });
-
-  const totalPages = Math.ceil(total / ITEMS_PER_PAGE);
-  const hasResults = favorites.length > 0;
-
-  const handlePageChange = (page: number): void => {
-    setCurrentPage(page);
-    // Scroll to top
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
 
   // Loading state
   if (isLoading) {
     return (
-      <Card className="p-8 text-center">
-        <p className="text-neutral-600">Cargando favoritos...</p>
-      </Card>
+      <div className="flex items-center justify-center py-12">
+        <div className="w-8 h-8 border-4 border-accent-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
     );
   }
 
@@ -56,102 +44,62 @@ export function FavoritesList({ filter }: FavoritesListProps) {
         : 'Error al cargar los favoritos';
 
     return (
-      <Card className="p-8 text-center">
-        <p className="text-red-600">{errorMessage}</p>
-      </Card>
+      <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-6 text-center">
+        <p className="text-red-400 font-poppins">{errorMessage}</p>
+      </div>
     );
   }
 
   // Empty state
-  if (!hasResults) {
+  if (!favorites || favorites.length === 0) {
     const emptyMessages = {
-      all: 'No tienes favoritos guardados',
       providers: 'No tienes proveedores favoritos',
       services: 'No tienes servicios favoritos',
     };
 
     return (
-      <Card className="p-8 text-center">
+      <div className="bg-white/5 border border-white/10 rounded-xl p-12 text-center">
         <div className="flex flex-col items-center gap-4">
-          <span className="text-6xl">⭐</span>
-          <p className="text-neutral-600 text-lg">{emptyMessages[filter]}</p>
+          <Heart className="w-16 h-16 text-neutral-400" strokeWidth={1.5} />
+          <p className="text-neutral-300 text-lg font-poppins">{emptyMessages[filter]}</p>
         </div>
-      </Card>
+      </div>
     );
   }
 
-  // Favorites grid
-  return (
-    <div className="flex flex-col gap-6">
-      {/* Contador de resultados */}
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-neutral-600 font-poppins">
-          {total === 1
-            ? '1 favorito encontrado'
-            : `${total} favoritos encontrados`}
-        </p>
-      </div>
+  // Filtro de favoritos según el tipo
+  const filteredFavorites = favorites.filter((favorite) => {
+    if (filter === 'services') {
+      return favorite.service_id !== undefined && favorite.service !== undefined;
+    }
+    if (filter === 'providers') {
+      return favorite.provider_id !== undefined && favorite.provider !== undefined;
+    }
+    return true;
+  });
 
-      {/* Grid de favoritos */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {favorites.map((favorite) => (
-          <FavoriteCard key={favorite.id} favorite={favorite} />
-        ))}
-      </div>
+  if (filteredFavorites.length === 0) {
+    const emptyMessages = {
+      providers: 'No tienes proveedores favoritos',
+      services: 'No tienes servicios favoritos',
+    };
 
-      {/* Paginación */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2 mt-4">
-          <Button
-            variant="outline"
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-            aria-label="Página anterior"
-          >
-            ← Anterior
-          </Button>
-
-          <div className="flex items-center gap-2">
-            {Array.from({ length: totalPages }, (_, i) => i + 1)
-              .filter((page) => {
-                // Mostrar primera, última, actual y adyacentes
-                return (
-                  page === 1 ||
-                  page === totalPages ||
-                  (page >= currentPage - 1 && page <= currentPage + 1)
-                );
-              })
-              .map((page, index, array) => {
-                // Agregar elipsis si hay gap
-                const showEllipsisBefore = index > 0 && array[index - 1] !== page - 1;
-                return (
-                  <div key={page} className="flex items-center gap-2">
-                    {showEllipsisBefore && (
-                      <span className="text-neutral-400">...</span>
-                    )}
-                    <Button
-                      variant={currentPage === page ? 'primary' : 'outline'}
-                      onClick={() => handlePageChange(page)}
-                      aria-label={`Ir a página ${page}`}
-                      aria-current={currentPage === page ? 'page' : undefined}
-                    >
-                      {page}
-                    </Button>
-                  </div>
-                );
-              })}
-          </div>
-
-          <Button
-            variant="outline"
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            aria-label="Página siguiente"
-          >
-            Siguiente →
-          </Button>
+    return (
+      <div className="bg-white/5 border border-white/10 rounded-xl p-12 text-center">
+        <div className="flex flex-col items-center gap-4">
+          <Heart className="w-16 h-16 text-neutral-400" strokeWidth={1.5} />
+          <p className="text-neutral-300 text-lg font-poppins">{emptyMessages[filter]}</p>
         </div>
-      )}
+      </div>
+    );
+  }
+
+  // Lista de favoritos
+  return (
+    <div className="space-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:space-y-0">
+      {filteredFavorites.map((favorite) => (
+        <FavoriteCard key={favorite.id} favorite={favorite} />
+      ))}
     </div>
   );
-}
+};

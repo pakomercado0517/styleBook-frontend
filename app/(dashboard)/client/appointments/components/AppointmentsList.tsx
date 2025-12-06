@@ -11,6 +11,10 @@ interface AppointmentsListProps {
   status?: AppointmentStatus;
   startDate?: string;
   endDate?: string;
+  isUpcoming?: boolean; // Para filtrar citas futuras (pending y confirmed)
+  searchQuery?: string;
+  onSelectAppointment?: (id: number) => void;
+  selectedAppointmentId?: number | null;
 }
 
 /**
@@ -20,12 +24,16 @@ export const AppointmentsList = ({
   status,
   startDate,
   endDate,
+  isUpcoming = false,
+  searchQuery = '',
+  onSelectAppointment,
+  selectedAppointmentId,
 }: AppointmentsListProps): ReactNode => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const limit = 12;
 
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['appointments', status, startDate, endDate, currentPage],
+    queryKey: ['appointments', status, startDate, endDate, currentPage, isUpcoming, searchQuery],
     queryFn: async () => {
       const params: {
         limit: number;
@@ -40,7 +48,16 @@ export const AppointmentsList = ({
         include: 'service,employee,provider',
       };
 
-      if (status) params.status = status;
+      // Para "Próximas", filtrar por fechas futuras
+      if (isUpcoming) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        params.start_date = today.toISOString().split('T')[0] || '';
+        // No filtrar por status, mostrar pending y confirmed
+      } else if (status) {
+        params.status = status;
+      }
+
       if (startDate) params.start_date = startDate;
       if (endDate) params.end_date = endDate;
 
@@ -49,8 +66,32 @@ export const AppointmentsList = ({
       if (!result.success) {
         throw new Error(result.error);
       }
-      console.log('result', result);
-      return result.data;
+
+      // Filtrar en el frontend para "Próximas" (solo pending y confirmed)
+      let appointments = result.data.data.appointments;
+      if (isUpcoming) {
+        appointments = appointments.filter(
+          (apt) => apt.status === 'pending' || apt.status === 'confirmed'
+        );
+      }
+
+      // Filtrar por búsqueda si hay query
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        appointments = appointments.filter((apt) => {
+          const serviceName = apt.service?.name?.toLowerCase() || '';
+          const providerName = apt.provider?.business_name?.toLowerCase() || '';
+          return serviceName.includes(query) || providerName.includes(query);
+        });
+      }
+
+      return {
+        ...result.data,
+        data: {
+          ...result.data.data,
+          appointments,
+        },
+      };
     },
     staleTime: 5 * 60 * 1000, // 5 minutos
   });
@@ -58,9 +99,9 @@ export const AppointmentsList = ({
   // Loading state
   if (isLoading) {
     return (
-      <div className="bg-white rounded-2xl p-8 md:p-12 text-center border border-neutral-200">
+      <div className="text-center py-12">
         <div className="mx-auto w-12 h-12 border-4 border-accent-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-        <p className="text-neutral-600 font-poppins">Cargando citas...</p>
+        <p className="text-neutral-300 font-poppins">Cargando citas...</p>
       </div>
     );
   }
@@ -72,8 +113,8 @@ export const AppointmentsList = ({
 
     if (errorMessage === 'No hay sesión activa') {
       return (
-        <div className="bg-white rounded-2xl p-8 md:p-12 text-center border border-neutral-200">
-          <p className="text-neutral-600 font-poppins">
+        <div className="text-center py-12">
+          <p className="text-neutral-300 font-poppins">
             Inicia sesión para ver tus citas
           </p>
         </div>
@@ -81,12 +122,12 @@ export const AppointmentsList = ({
     }
 
     return (
-      <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-6 text-center">
+      <div className="bg-red-50/10 border-2 border-red-500/30 rounded-xl p-6 text-center">
         <span className="text-4xl mb-4 block">⚠️</span>
-        <h3 className="font-playfair text-xl font-bold text-red-800 mb-2">
+        <h3 className="font-playfair text-xl font-bold text-red-400 mb-2">
           Error al cargar citas
         </h3>
-        <p className="text-red-600 font-poppins">{errorMessage}</p>
+        <p className="text-red-300 font-poppins">{errorMessage}</p>
       </div>
     );
   }
@@ -99,12 +140,12 @@ export const AppointmentsList = ({
   // Empty state
   if (!hasResults) {
     return (
-      <div className="bg-white rounded-2xl p-8 md:p-12 text-center border border-neutral-200">
+      <div className="text-center py-12">
         <span className="text-6xl mb-4 block">📅</span>
-        <h3 className="font-playfair text-xl font-bold text-primary-800 mb-2">
+        <h3 className="font-playfair text-xl font-bold text-white mb-2">
           No hay citas
         </h3>
-        <p className="text-neutral-600 font-poppins">
+        <p className="text-neutral-300 font-poppins">
           {status
             ? 'No tienes citas con este filtro'
             : 'No tienes citas programadas'}
@@ -119,18 +160,16 @@ export const AppointmentsList = ({
   };
 
   return (
-    <div className="space-y-6">
-      {/* Contador de resultados */}
-      <div>
-        <p className="text-sm text-neutral-600 font-poppins">
-          {total === 1 ? '1 cita encontrada' : `${total} citas encontradas`}
-        </p>
-      </div>
-
-      {/* Grid de citas */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+    <div className="space-y-4">
+      {/* Lista de citas */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {appointments.map((appointment: Appointment) => (
-          <AppointmentCard key={appointment.id} appointment={appointment} />
+          <AppointmentCard
+            key={appointment.id}
+            appointment={appointment}
+            onSelect={onSelectAppointment}
+            isSelected={selectedAppointmentId === appointment.id}
+          />
         ))}
       </div>
 

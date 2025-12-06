@@ -29,18 +29,21 @@ export const ServicesList = ({
   // Loading state
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {[1, 2, 3, 4, 5, 6].map((i) => (
           <div
             key={i}
-            className="bg-white rounded-2xl p-6 border border-neutral-200 animate-pulse"
+            className="flex flex-col items-stretch justify-start rounded-xl bg-white/5 overflow-hidden animate-pulse"
           >
-            <div className="w-full h-48 bg-neutral-200 rounded-xl mb-4" />
-            <div className="h-4 bg-neutral-200 rounded w-1/4 mb-3" />
-            <div className="h-6 bg-neutral-200 rounded w-3/4 mb-2" />
-            <div className="h-4 bg-neutral-200 rounded w-full mb-2" />
-            <div className="h-4 bg-neutral-200 rounded w-2/3 mb-4" />
-            <div className="h-8 bg-neutral-200 rounded w-1/2" />
+            <div className="w-full aspect-video bg-white/10" />
+            <div className="flex w-full grow flex-col items-stretch justify-center gap-1 p-4">
+              <div className="h-4 bg-white/10 rounded w-20 mb-2" />
+              <div className="h-6 bg-white/10 rounded w-3/4 mb-2" />
+              <div className="flex items-end justify-between mt-1">
+                <div className="h-4 bg-white/10 rounded w-24" />
+                <div className="h-4 bg-white/10 rounded w-20" />
+              </div>
+            </div>
           </div>
         ))}
       </div>
@@ -58,9 +61,9 @@ export const ServicesList = ({
     );
   }
 
-  // Services grid
+  // Services grid: 1 columna en móvil, 3 columnas en desktop
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-slide-up">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
       {services.map((service) => (
         <ServiceCard
           key={service.id}

@@ -1,6 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
+import { User, Building2 } from 'lucide-react';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { Badge } from '@/components/Badge';
 import { Button } from '@/components/Button';
@@ -15,7 +16,8 @@ export function DesktopTopBar(): ReactNode {
 
   if (!user) return null;
 
-  const roleLabel = user.role === 'client' ? '👤 Cliente' : '🏢 Proveedor';
+  const RoleIcon = user.role === 'client' ? User : Building2;
+  const roleLabel = user.role === 'client' ? 'Cliente' : 'Proveedor';
   const roleBadge = user.role === 'client' ? 'primary' : 'primary';
 
   return (
@@ -23,7 +25,10 @@ export function DesktopTopBar(): ReactNode {
       <div className="flex items-center justify-between px-6 py-4">
         {/* User Info */}
         <div className="flex items-center gap-4">
-          <Badge variant={roleBadge}>{roleLabel}</Badge>
+          <Badge variant={roleBadge} className="flex items-center gap-1.5">
+            <RoleIcon className="w-3.5 h-3.5" strokeWidth={2.5} />
+            {roleLabel}
+          </Badge>
           <div>
             <h2 className="font-poppins text-sm font-semibold text-primary-800">
               {user.name}

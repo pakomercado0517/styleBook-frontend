@@ -43,79 +43,43 @@ export const ServiceSearch = ({
 
   return (
     <form onSubmit={handleSearchSubmit} className="w-full">
-      <div className="relative">
-        {/* Search Icon */}
-        <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
-          <svg
-            className="w-5 h-5 text-neutral-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            />
-          </svg>
-        </div>
-
-        {/* Input */}
-        <input
-          type="text"
-          value={searchText}
-          onChange={handleSearchChange}
-          onKeyDown={handleKeyDown}
-          placeholder={placeholder}
-          className="
-            w-full pl-12 pr-12 py-3 md:py-4
-            bg-white border-2 border-neutral-200
-            rounded-lg
-            font-poppins text-sm md:text-base
-            text-primary-800
-            placeholder:text-neutral-400
-            hover:border-accent-500/50
-            focus:border-accent-500
-            focus:outline-none
-            focus:ring-2 focus:ring-accent-500/20
-            transition-all duration-200
-          "
-          aria-label="Buscar servicios"
-        />
-
-        {/* Clear Button */}
-        {searchText.length > 0 && (
-          <button
-            type="button"
-            onClick={handleClearSearch}
-            className="
-              absolute right-4 top-1/2 -translate-y-1/2
-              w-6 h-6
-              flex items-center justify-center
-              text-neutral-400
-              hover:text-neutral-600
-              transition-colors duration-200
-            "
-            aria-label="Limpiar búsqueda"
-          >
+      <label className="flex flex-col min-w-40 h-14 w-full">
+        <div className="flex w-full flex-1 items-stretch rounded-xl h-full">
+          {/* Search Icon Container */}
+          <div className="text-neutral-400 flex border-white/10 bg-white/5 items-center justify-center pl-4 rounded-l-xl border-r-0">
             <svg
-              className="w-5 h-5"
+              className="w-6 h-6"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
+              aria-hidden="true"
             >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
               />
             </svg>
-          </button>
-        )}
-      </div>
+          </div>
+
+          {/* Input */}
+          <input
+            type="text"
+            value={searchText}
+            onChange={handleSearchChange}
+            onKeyDown={handleKeyDown}
+            placeholder={placeholder}
+            className="
+              form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden 
+              rounded-r-xl text-white focus:outline-0 focus:ring-0 border-none 
+              bg-white/5 h-full placeholder:text-neutral-400 px-4 pl-2 
+              text-base font-normal leading-normal font-poppins
+            "
+            aria-label="Buscar servicios"
+          />
+        </div>
+      </label>
     </form>
   );
 };

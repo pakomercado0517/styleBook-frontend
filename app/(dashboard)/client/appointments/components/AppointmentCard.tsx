@@ -4,138 +4,79 @@ import type { ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { formatLocalDate, formatTime } from '@/lib/utils/dateUtils';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 import { cancelAppointment } from '@/lib/api/appointments';
 import type { Appointment } from '@/lib/types/appointments';
-import { Badge } from '@/components/Badge';
-import { Button } from '@/components/Button';
 
 interface AppointmentCardProps {
   appointment: Appointment;
+  onSelect?: (id: number) => void;
+  isSelected?: boolean;
 }
 
-const statusMap = {
-  pending: { text: 'Pendiente', variant: 'warning' as const, icon: '⏳' },
-  confirmed: { text: 'Confirmada', variant: 'success' as const, icon: '✅' },
-  completed: { text: 'Completada', variant: 'info' as const, icon: '✔️' },
-  cancelled: { text: 'Cancelada', variant: 'error' as const, icon: '❌' },
-  no_show: { text: 'No asistió', variant: 'error' as const, icon: '🚫' },
-} as const;
+const statusLabels: Record<string, string> = {
+  pending: 'Próxima',
+  confirmed: 'Confirmada',
+  completed: 'Completada',
+  cancelled: 'Cancelada',
+  no_show: 'No asistió',
+};
 
 /**
- * AppointmentCard - Tarjeta de cita con información y acciones
- * Muestra detalles de la cita, estado y permite cancelar o ver detalles
+ * AppointmentCard - Tarjeta de cita rediseñada
+ * Estilo mobile-first con imagen, información y botones de acción
  */
 export const AppointmentCard = ({
   appointment,
+  onSelect,
+  isSelected = false,
 }: AppointmentCardProps): ReactNode => {
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  const { mutate: handleCancelMutation, isPending: isCancelling } = useMutation(
-    {
-      mutationFn: () => cancelAppointment(appointment.id),
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['appointments'] });
-        toast.success('Cita cancelada exitosamente');
-      },
-      onError: (error: Error) => {
-        toast.error(error.message || 'Error al cancelar la cita');
-      },
-    }
-  );
-
-  // Usar fechas formateadas del backend si están disponibles, sino formatear
-  const displayDate =
-    appointment.formatted_dates?.start ||
-    formatLocalDate(appointment.start_date_local);
-  const displayTime = appointment.formatted_dates?.start
-    ? appointment.formatted_dates.start.split(' ')[1] || ''
-    : formatTime(appointment.start_date_local);
-
-  // Calcular duración desde las fechas
-  const startDate = new Date(appointment.start_date_local);
-  const endDate = new Date(appointment.end_date_local);
-  const durationMinutes = Math.round(
-    (endDate.getTime() - startDate.getTime()) / (1000 * 60)
-  );
-
-  const status = statusMap[appointment.status];
-  const canCancel = ['pending', 'confirmed'].includes(appointment.status);
-  const canReschedule = ['pending', 'confirmed'].includes(appointment.status);
-
-  // Convertir final_price a number si viene como string
-  const rawPrice = appointment.final_price;
-  const priceNumber =
-    typeof rawPrice === 'string'
-      ? parseFloat(rawPrice)
-      : typeof rawPrice === 'number'
-        ? rawPrice
-        : 0;
-
-  // Validar que el precio sea un número válido
-  const isValidPrice =
-    !isNaN(priceNumber) && isFinite(priceNumber) && priceNumber >= 0;
-
-  const formattedPrice =
-    isValidPrice && priceNumber > 0
-      ? new Intl.NumberFormat('es-MX', {
-          style: 'currency',
-          currency: 'MXN',
-        }).format(priceNumber)
-      : isValidPrice && priceNumber === 0
-        ? '$0.00'
-        : 'Precio no disponible';
+  const { mutate: handleCancelMutation, isPending: isCancelling } = useMutation({
+    mutationFn: () => cancelAppointment(appointment.id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['appointments'] });
+      toast.success('Cita cancelada exitosamente');
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Error al cancelar la cita');
+    },
+  });
 
   // Información del servicio
-  const serviceName =
-    appointment.service?.name || `Servicio #${appointment.service_id}`;
-  const serviceCategory = appointment.service?.category;
-  const serviceDescription = appointment.service?.description;
+  const serviceName = appointment.service?.name || `Servicio #${appointment.service_id}`;
   const serviceImage = appointment.service?.image_url;
-  const hasServiceDetails = appointment.service !== undefined;
-
-  // Información del profesional/empleado
-  // Según la documentación actualizada, employee viene como Employee completo
-  const employeeName =
-    appointment.employee?.name || `Empleado #${appointment.employee_id}`;
-  const employeeSpecialty = appointment.employee?.specialty;
-  const employeePhoto = appointment.employee?.photo_url;
-  const employeeRating = appointment.employee?.rating;
 
   // Información del proveedor
-  // Según la documentación, provider viene directamente en appointment, no anidado en service
-  const providerName =
-    appointment.provider?.business_name ||
-    appointment.service?.provider?.business_name;
-  const providerDescription = appointment.provider?.description;
-  const providerAddress =
-    appointment.provider?.address || appointment.service?.provider?.address;
-  const providerCity =
-    appointment.provider?.city || appointment.service?.provider?.city;
-  const providerCountry = appointment.provider?.country;
-  const providerRating = appointment.provider?.average_rating;
+  const providerName = appointment.provider?.business_name || 'Salón';
+  const providerBusinessType = appointment.provider?.business_type || '';
 
-  // Categorías en español
-  const categoryLabels: Record<string, string> = {
-    corte: 'Corte',
-    tinte: 'Tinte',
-    peinado: 'Peinado',
-    manicure: 'Manicure',
-    pedicure: 'Pedicure',
-    tratamiento_capilar: 'Tratamiento Capilar',
-    barba: 'Barba',
-    afeitado: 'Afeitado',
-    masaje: 'Masaje',
-    facial: 'Facial',
-    corporal: 'Corporal',
-    aromaterapia: 'Aromaterapia',
-    limpieza_dental: 'Limpieza Dental',
-    estetica_dental: 'Estética Dental',
-  };
+  // Formatear fecha y hora
+  const appointmentDate = new Date(appointment.start_date_local);
+  const formattedDate = format(appointmentDate, "EEEE, d 'de' MMMM", { locale: es });
+  const formattedTime = format(appointmentDate, "HH:mm", { locale: es });
+
+  // Estado
+  const statusLabel = statusLabels[appointment.status] || appointment.status;
+  const canCancel = ['pending', 'confirmed'].includes(appointment.status);
+  const isCompleted = appointment.status === 'completed';
+  const canRebook = isCompleted && appointment.service_id;
 
   const handleViewDetails = (): void => {
-    router.push(`/client/appointments/${appointment.id}`);
+    if (onSelect) {
+      onSelect(appointment.id);
+    } else {
+      router.push(`/client/appointments/${appointment.id}`);
+    }
+  };
+
+  const handleCardClick = (): void => {
+    if (onSelect) {
+      onSelect(appointment.id);
+    }
   };
 
   const handleCancel = (): void => {
@@ -144,261 +85,115 @@ export const AppointmentCard = ({
     }
   };
 
-  const handleReschedule = (): void => {
+  const handleRebook = (e: React.MouseEvent): void => {
+    e.stopPropagation();
     if (appointment.service_id) {
-      router.push(
-        `/client/book/${appointment.service_id}?reschedule=${appointment.id}`
-      );
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent): void => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      handleViewDetails();
+      // Navegar al flujo de reserva con el servicio y empleado pre-seleccionados
+      const params = new URLSearchParams();
+      if (appointment.employee_id) {
+        params.append('employee', appointment.employee_id.toString());
+      }
+      router.push(`/client/book/${appointment.service_id}?${params.toString()}`);
     }
   };
 
   return (
     <div
-      className="
-        bg-white rounded-2xl p-6
-        border border-neutral-200
-        hover:border-accent-500/30
-        hover:shadow-2xl hover:shadow-accent-500/10
-        transition-all duration-300
-        cursor-pointer
-        relative
-      "
-      onClick={handleViewDetails}
-      onKeyDown={handleKeyDown}
-      tabIndex={0}
-      role="button"
-      aria-label={`Cita: ${serviceName}`}
+      className={`
+        bg-white/5 rounded-xl overflow-hidden border mb-4 transition-all cursor-pointer
+        ${isSelected ? 'border-accent-500' : 'border-white/10'}
+      `}
+      onClick={onSelect ? handleCardClick : undefined}
     >
-      <div className="flex flex-col gap-4">
-        {/* Header: Servicio y Estado */}
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1">
-              <h3 className="font-playfair text-xl md:text-2xl font-bold text-primary-800 hover:text-accent-500 transition-colors truncate">
-                {serviceName}
-              </h3>
-            </div>
-            {serviceCategory && (
-              <Badge variant="secondary" className="text-xs">
-                {categoryLabels[serviceCategory] || serviceCategory}
-              </Badge>
-            )}
+      {/* Estado - Mobile */}
+      <div className="px-4 pt-4 md:hidden">
+        <span className="text-sm font-semibold text-white font-poppins">{statusLabel}</span>
+      </div>
+
+      {/* Imagen del servicio */}
+      <div className="w-full h-48 rounded-xl overflow-hidden mt-3 mx-4">
+        {serviceImage ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={serviceImage}
+            alt={serviceName}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-primary-800 to-primary-900 flex items-center justify-center">
+            <span className="text-4xl">💇</span>
           </div>
-          <Badge variant={status.variant} className="shrink-0">
-            <span className="mr-1">{status.icon}</span>
-            <span className="hidden sm:inline">{status.text}</span>
-          </Badge>
+        )}
+      </div>
+
+      {/* Información */}
+      <div className="px-4 pt-4 pb-4">
+        {/* Título del servicio con badge de estado - Desktop */}
+        <div className="hidden md:flex items-start justify-between gap-3 mb-2">
+          <h3 className="text-xl font-bold text-white font-playfair flex-1">{serviceName}</h3>
+          <span className="text-xs font-semibold text-white font-poppins bg-white/10 px-3 py-1 rounded-full">
+            {statusLabel}
+          </span>
         </div>
+        {/* Título del servicio - Mobile */}
+        <h3 className="text-xl font-bold text-white font-playfair mb-2 md:hidden">
+          {serviceName}
+        </h3>
 
-        {/* Imagen del servicio si está disponible */}
-        {serviceImage && (
-          <div className="w-full h-32 rounded-xl overflow-hidden bg-neutral-100">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={serviceImage}
-              alt={serviceName}
-              className="w-full h-full object-cover"
-            />
-          </div>
-        )}
+        {/* Proveedor/Localización */}
+        <p className="text-sm text-neutral-300 font-poppins mb-3">
+          por {providerName}
+          {providerBusinessType && ` en ${providerBusinessType}`}
+        </p>
 
-        {/* Descripción breve del servicio */}
-        {serviceDescription && (
-          <p className="text-sm text-neutral-600 font-poppins line-clamp-2">
-            {serviceDescription}
-          </p>
-        )}
+        {/* Fecha y hora */}
+        <p className="text-sm text-neutral-300 font-poppins mb-4">
+          {formattedDate} a las {formattedTime}
+        </p>
 
-        {/* Advertencia si no hay detalles del servicio */}
-        {!hasServiceDetails && (
-          <div className="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-3">
-            <p className="text-xs text-yellow-700 font-poppins">
-              ⚠️ Información del servicio no disponible
-            </p>
-          </div>
-        )}
-
-        {/* Información del Proveedor */}
-        {providerName && (
-          <div className="bg-neutral-50 rounded-lg p-3 border border-neutral-200">
-            <div className="flex items-start gap-2">
-              <span className="text-lg">🏢</span>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs text-neutral-500 font-poppins mb-1">
-                  Establecimiento
-                </p>
-                <p className="text-sm font-semibold text-primary-800 font-poppins truncate">
-                  {providerName}
-                </p>
-                {providerDescription && (
-                  <p className="text-xs text-neutral-500 font-poppins mt-1 line-clamp-2">
-                    {providerDescription}
-                  </p>
-                )}
-                {(providerCity || providerAddress || providerCountry) && (
-                  <p className="text-xs text-neutral-500 font-poppins mt-1 truncate">
-                    {[providerCity, providerAddress, providerCountry]
-                      .filter(Boolean)
-                      .join(', ')}
-                  </p>
-                )}
-                {providerRating !== undefined && providerRating > 0 && (
-                  <div className="flex items-center gap-1 mt-1">
-                    <span className="text-accent-500 text-xs">⭐</span>
-                    <span className="text-xs font-semibold text-primary-800">
-                      {providerRating.toFixed(1)}
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Fecha y Hora - Destacado */}
-        <div className="bg-gradient-to-br from-accent-50 to-accent-100 rounded-lg p-4 border-2 border-accent-200">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-full bg-accent-500 flex items-center justify-center flex-shrink-0">
-              <span className="text-primary-900 text-lg">📅</span>
-            </div>
-            <div className="flex-1">
-              <p className="text-xs text-neutral-600 font-poppins mb-1">
-                Fecha y Hora
-              </p>
-              <p className="text-base font-bold text-primary-800 font-poppins">
-                {displayDate}
-              </p>
-              {displayTime && (
-                <p className="text-sm font-semibold text-accent-700 font-poppins">
-                  {displayTime}
-                </p>
-              )}
-            </div>
-          </div>
-          {durationMinutes > 0 && (
-            <div className="flex items-center gap-2 pt-2 border-t border-accent-200">
-              <span className="text-sm">⏱️</span>
-              <p className="text-xs text-neutral-600 font-poppins">
-                Duración aproximada: {durationMinutes} minutos
-              </p>
-            </div>
-          )}
-        </div>
-
-        {/* Información del Profesional */}
-        <div className="bg-neutral-50 rounded-lg p-3 border border-neutral-200">
-          <div className="flex items-center gap-3">
-            {employeePhoto ? (
-              <div className="w-12 h-12 rounded-full overflow-hidden bg-neutral-200 flex-shrink-0">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={employeePhoto}
-                  alt={employeeName}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            ) : (
-              <div className="w-12 h-12 rounded-full bg-accent-100 flex items-center justify-center flex-shrink-0">
-                <span className="text-accent-700 font-bold text-lg">
-                  {employeeName.charAt(0).toUpperCase()}
-                </span>
-              </div>
-            )}
-            <div className="flex-1 min-w-0">
-              <p className="text-xs text-neutral-500 font-poppins mb-1">
-                Profesional
-              </p>
-              <p className="text-sm font-semibold text-primary-800 font-poppins truncate">
-                {employeeName}
-              </p>
-              {employeeSpecialty && (
-                <p className="text-xs text-neutral-500 font-poppins truncate">
-                  {employeeSpecialty}
-                </p>
-              )}
-              {employeeRating !== null &&
-                employeeRating !== undefined &&
-                typeof employeeRating === 'number' &&
-                employeeRating > 0 && (
-                  <div className="flex items-center gap-1 mt-1">
-                    <span className="text-accent-500 text-xs">⭐</span>
-                    <span className="text-xs font-semibold text-primary-800">
-                      {employeeRating.toFixed(1)}
-                    </span>
-                  </div>
-                )}
-            </div>
-          </div>
-        </div>
-
-        {/* Precio - Destacado */}
-        <div className="bg-gradient-to-br from-primary-800 to-primary-900 rounded-lg p-4 text-white">
-          <p className="text-xs text-neutral-300 font-poppins mb-1">
-            Precio Total
-          </p>
-          <p
-            className="font-playfair text-3xl font-bold whitespace-nowrap"
-            style={{ color: '#FFD700' }}
-          >
-            {formattedPrice}
-          </p>
-        </div>
-
-        {/* Notas si existen */}
-        {appointment.notes && (
-          <div className="bg-neutral-50 rounded-lg p-3 border border-neutral-200">
-            <p className="text-xs text-neutral-500 font-poppins mb-1">Notas</p>
-            <p className="text-sm text-neutral-700 font-poppins">
-              {appointment.notes}
-            </p>
-          </div>
-        )}
-
-        {/* Acciones */}
-        <div
-          className="flex flex-col sm:flex-row gap-2 pt-2"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleViewDetails}
-            className="flex-1"
-            aria={{ label: 'Ver detalles de la cita' }}
-          >
-            Ver Detalles
-          </Button>
-
-          {canReschedule && (
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={handleReschedule}
-              className="flex-1"
-              aria={{ label: 'Reagendar cita' }}
-            >
-              Reagendar
-            </Button>
-          )}
-
+        {/* Botones de acción - Solo en móvil */}
+        <div className="flex gap-3 md:hidden">
           {canCancel && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleCancel}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleCancel();
+              }}
               disabled={isCancelling}
-              className="flex-1 border-red-200 text-red-600 hover:border-red-300 hover:bg-red-50"
-              aria={{ label: 'Cancelar cita' }}
+              className="flex-1 h-11 rounded-lg bg-white/5 border border-white/10 text-white font-semibold font-poppins hover:bg-white/10 transition-colors disabled:opacity-50"
+              type="button"
             >
               {isCancelling ? 'Cancelando...' : 'Cancelar'}
-            </Button>
+            </button>
+          )}
+          {canRebook && (
+            <button
+              onClick={handleRebook}
+              className="flex-1 h-11 rounded-lg font-semibold font-poppins transition-colors"
+              style={{
+                backgroundColor: '#D4AF37',
+                color: '#1A1A1A',
+              }}
+              type="button"
+            >
+              Re-reservar
+            </button>
+          )}
+          {!canRebook && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleViewDetails();
+              }}
+              className="flex-1 h-11 rounded-lg font-semibold font-poppins transition-colors"
+              style={{
+                backgroundColor: '#D4AF37',
+                color: '#1A1A1A',
+              }}
+              type="button"
+            >
+              Ver Detalles
+            </button>
           )}
         </div>
       </div>

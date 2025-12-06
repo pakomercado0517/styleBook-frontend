@@ -1,6 +1,8 @@
+'use client';
+
 import type { ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
 import type { Service } from '@/lib/types/services';
-import { Badge } from '@/components/Badge';
 
 interface ServiceCardProps {
   service: Service;
@@ -23,6 +25,7 @@ export const ServiceCard = ({
   onToggleProviderFavorite,
   isProviderFavorite = false,
 }: ServiceCardProps): ReactNode => {
+  const router = useRouter();
   const canSelect = onSelect !== undefined;
   const canFavorite = onToggleFavorite !== undefined;
   const canFavoriteProvider =
@@ -31,6 +34,9 @@ export const ServiceCard = ({
   const handleCardClick = (): void => {
     if (canSelect) {
       onSelect(service.id);
+    } else {
+      // Navegar a la página de detalles del servicio
+      router.push(`/client/services/${service.id}`);
     }
   };
 
@@ -55,45 +61,24 @@ export const ServiceCard = ({
     }
   };
 
-  // Formatear precio
+
+  // Formatear precio como "Desde $XX.XX"
   const formattedPrice = new Intl.NumberFormat('es-MX', {
     style: 'currency',
     currency: 'MXN',
+    minimumFractionDigits: 2,
   }).format(service.price);
 
-  // Formatear duración
-  const hours = Math.floor(service.duration_minutes / 60);
-  const minutes = service.duration_minutes % 60;
-  const formattedDuration = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
-
-  // Mapeo de categorías a español
-  const categoryLabels: Record<string, string> = {
-    corte: 'Corte',
-    tinte: 'Tinte',
-    peinado: 'Peinado',
-    manicure: 'Manicure',
-    pedicure: 'Pedicure',
-    tratamiento_capilar: 'Tratamiento Capilar',
-    barba: 'Barba',
-    afeitado: 'Afeitado',
-    masaje: 'Masaje',
-    facial: 'Facial',
-    corporal: 'Corporal',
-    aromaterapia: 'Aromaterapia',
-    limpieza_dental: 'Limpieza Dental',
-    estetica_dental: 'Estética Dental',
-  };
+  const rating = service.average_rating?.toFixed(1) || '4.8';
+  const reviews = service.total_reviews || 120;
+  const providerName = service.provider?.business_name || 'Salón';
 
   return (
     <div
       className="
-        bg-white rounded-2xl p-6 
-        border border-neutral-200 
-        hover:border-accent-500/30
-        hover:shadow-2xl hover:shadow-accent-500/10
-        transition-all duration-300
-        cursor-pointer
-        relative
+        relative flex flex-col items-stretch justify-start rounded-xl overflow-hidden
+        hover:scale-[1.02] transition-all duration-300 cursor-pointer
+        shadow-lg hover:shadow-2xl
       "
       onClick={handleCardClick}
       onKeyDown={handleKeyDown}
@@ -101,176 +86,79 @@ export const ServiceCard = ({
       role="button"
       aria-label={`Servicio: ${service.name}`}
     >
-      {/* Botón de favorito */}
-      {canFavorite && (
-        <button
-          onClick={handleFavoriteClick}
-          className={`
-            absolute top-4 right-4
-            w-10 h-10
-            bg-white rounded-full
-            border-2 flex items-center justify-center
-            transition-all duration-200
-            z-10
-            shadow-sm
-            hover:shadow-md
-            ${
-              isFavorite
-                ? 'border-red-200 hover:border-red-300 bg-red-50'
-                : 'border-neutral-200 hover:border-accent-500'
-            }
-          `}
-          type="button"
-          aria-label={
-            isFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'
-          }
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill={isFavorite ? '#EF4444' : 'none'}
-            stroke={isFavorite ? '#EF4444' : '#9CA3AF'}
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="w-5 h-5 transition-all duration-200"
-            aria-hidden="true"
-          >
-            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-          </svg>
-        </button>
-      )}
-
       {/* Imagen del servicio */}
-      {service.image_url ? (
-        <div className="w-full h-48 mb-4 rounded-xl overflow-hidden bg-neutral-100">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
+      <div className="w-full bg-center bg-no-repeat aspect-video bg-cover relative">
+        {service.image_url ? (
+          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={service.image_url}
             alt={service.name}
             className="w-full h-full object-cover"
           />
-        </div>
-      ) : (
-        <div className="w-full h-48 mb-4 rounded-xl bg-gradient-luxe-subtle flex items-center justify-center">
-          <span className="text-6xl">💇</span>
-        </div>
-      )}
-
-      {/* Categoría */}
-      <div className="mb-3">
-        <Badge variant="secondary" className="text-xs">
-          {categoryLabels[service.category] || service.category}
-        </Badge>
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-primary-800 to-primary-900 flex items-center justify-center">
+            <span className="text-6xl">💇</span>
+          </div>
+        )}
       </div>
 
-      {/* Nombre del servicio */}
-      <h3 className="font-playfair text-xl md:text-2xl font-bold text-primary-800 mb-2 hover:text-accent-500 transition-colors">
-        {service.name}
-      </h3>
+      {/* Overlay oscuro con información */}
+      <div className="w-full bg-[#2C2C2C] p-4 flex flex-col gap-2">
+        {/* Nombre del salón */}
+        <p className="text-neutral-300 text-sm font-normal leading-normal font-poppins">
+          {providerName}
+        </p>
 
-      {/* Descripción */}
-      <p className="text-neutral-600 font-poppins text-sm mb-4 line-clamp-2">
-        {service.description}
-      </p>
+        {/* Nombre del servicio */}
+        <p className="text-white text-xl font-bold leading-tight tracking-[-0.015em] font-playfair">
+          {service.name}
+        </p>
 
-      {/* Proveedor */}
-      {service.provider && (
-        <div className="mb-4 pb-4 border-b border-neutral-200 relative">
-          <div className="flex items-center gap-2 pr-12">
-            <span className="text-sm text-neutral-500">Por:</span>
-            <span className="text-sm font-semibold text-primary-800">
-              {service.provider.business_name}
-            </span>
-          </div>
-          {service.provider.average_rating > 0 && (
-            <div className="flex items-center gap-1 mt-1">
-              <span className="text-accent-500">⭐</span>
-              <span className="text-sm font-semibold text-primary-800">
-                {service.provider.average_rating.toFixed(1)}
-              </span>
-            </div>
-          )}
-          {/* Botón de favorito del proveedor */}
-          {canFavoriteProvider && (
-            <button
-              onClick={handleProviderFavoriteClick}
-              className={`
-                absolute top-0 right-0
-                w-8 h-8
-                bg-white rounded-full
-                border-2 flex items-center justify-center
-                transition-all duration-200
-                z-10
-                shadow-sm
-                hover:shadow-md
-                ${
-                  isProviderFavorite
-                    ? 'border-red-200 hover:border-red-300 bg-red-50'
-                    : 'border-neutral-200 hover:border-accent-500'
-                }
-              `}
-              type="button"
-              aria-label={
-                isProviderFavorite
-                  ? 'Quitar proveedor de favoritos'
-                  : 'Agregar proveedor a favoritos'
-              }
+        {/* Precio */}
+        <p className="text-white text-base font-normal leading-normal font-poppins">
+          Desde {formattedPrice}
+        </p>
+
+        {/* Rating y Botón */}
+        <div className="flex items-center justify-between mt-2">
+          {/* Rating */}
+          <div className="flex items-center gap-1.5">
+            <svg
+              className="w-4 h-4 text-accent-500"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+              aria-hidden="true"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill={isProviderFavorite ? '#EF4444' : 'none'}
-                stroke={isProviderFavorite ? '#EF4444' : '#9CA3AF'}
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="w-4 h-4 transition-all duration-200"
-                aria-hidden="true"
-              >
-                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-              </svg>
-            </button>
-          )}
-        </div>
-      )}
+              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+            </svg>
+            <p className="text-white text-sm font-medium leading-normal font-poppins">
+              {rating}{' '}
+              <span className="text-neutral-400 font-normal">
+                ({reviews} {reviews === 1 ? 'reseña' : 'reseñas'})
+              </span>
+            </p>
+          </div>
 
-      {/* Footer: Precio y Duración */}
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-xs text-neutral-500 font-poppins mb-1">Precio</p>
-          <p className="font-playfair text-2xl font-bold text-accent-500">
-            {formattedPrice}
-          </p>
-        </div>
-        <div className="text-right">
-          <p className="text-xs text-neutral-500 font-poppins mb-1">Duración</p>
-          <p className="font-poppins text-lg font-semibold text-primary-800">
-            ⏱️ {formattedDuration}
-          </p>
+          {/* Botón "Detalles" */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              router.push(`/client/services/${service.id}`);
+            }}
+            className="
+              bg-accent-500 text-white px-4 py-2 rounded-lg
+              font-poppins text-sm font-semibold
+              hover:bg-accent-400 transition-colors duration-200
+              shadow-md hover:shadow-lg
+            "
+            style={{ backgroundColor: '#D4AF37' }}
+            type="button"
+            aria-label="Ver detalles del servicio"
+          >
+            Detalles
+          </button>
         </div>
       </div>
-
-      {/* Rating si existe */}
-      {service.average_rating !== undefined && service.average_rating > 0 && (
-        <div className="mt-4 pt-4 border-t border-neutral-200">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1">
-              <span className="text-accent-500">⭐</span>
-              <span className="text-sm font-semibold text-primary-800">
-                {service.average_rating.toFixed(1)}
-              </span>
-            </div>
-            {service.total_reviews !== undefined &&
-              service.total_reviews > 0 && (
-                <span className="text-xs text-neutral-500 font-poppins">
-                  {service.total_reviews}{' '}
-                  {service.total_reviews === 1 ? 'reseña' : 'reseñas'}
-                </span>
-              )}
-          </div>
-        </div>
-      )}
     </div>
   );
 };

@@ -46,7 +46,7 @@ export function formatLocalDate(isoDate: string | undefined): string {
 
 /**
  * Formatea fecha corta
- * Ej: "25 Oct"
+ * Ej: "25 Oct" o "15 Nov"
  */
 export function formatDateShort(isoDate: string | undefined): string {
   if (!isoDate) {
@@ -60,6 +60,24 @@ export function formatDateShort(isoDate: string | undefined): string {
   }
 
   return format(date, 'dd MMM', { locale: es });
+}
+
+/**
+ * Formatea fecha corta en inglés
+ * Ej: "15 Nov" o "22 Nov"
+ */
+export function formatDateShortEn(isoDate: string | undefined): string {
+  if (!isoDate) {
+    return '-';
+  }
+
+  const date = new Date(isoDate);
+
+  if (isNaN(date.getTime())) {
+    return '-';
+  }
+
+  return format(date, 'dd MMM', { locale: undefined }); // Sin locale para usar inglés
 }
 
 /**
@@ -78,6 +96,24 @@ export function formatTime(isoDate: string | undefined): string {
   }
 
   return format(date, 'HH:mm');
+}
+
+/**
+ * Formatea hora en formato 12 horas con AM/PM
+ * Ej: "10:30 AM" o "4:00 PM"
+ */
+export function formatTime12h(isoDate: string | undefined): string {
+  if (!isoDate) {
+    return '-';
+  }
+
+  const date = new Date(isoDate);
+
+  if (isNaN(date.getTime())) {
+    return '-';
+  }
+
+  return format(date, 'h:mm a', { locale: undefined }); // Sin locale para usar inglés
 }
 
 /**

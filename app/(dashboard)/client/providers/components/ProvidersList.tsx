@@ -3,44 +3,57 @@
 import type { ReactNode } from 'react';
 import type { ProviderProfile } from '@/lib/types/provider';
 import { ProviderCard } from './ProviderCard';
-import { EmptyState } from '../../services/components/EmptyState';
 
 interface ProvidersListProps {
   providers: ProviderProfile[];
   isLoading?: boolean;
-  onSelectProvider?: (providerId: number) => void;
-  onToggleFavorite?: (providerId: number) => void;
-  favoriteIds?: number[];
+  isError?: boolean;
+  error?: Error | null;
 }
 
 /**
- * ProvidersList - Lista de proveedores en grid responsive
- * Muestra proveedores en tarjetas con loading y empty states
+ * ProvidersList - Lista de proveedores
+ * Muestra proveedores en cards verticales
  */
 export const ProvidersList = ({
   providers,
   isLoading = false,
-  onSelectProvider,
-  onToggleFavorite,
-  favoriteIds = [],
+  isError = false,
+  error,
 }: ProvidersListProps): ReactNode => {
   // Loading state
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {[1, 2, 3, 4, 5, 6].map((i) => (
           <div
             key={i}
-            className="bg-white rounded-2xl p-6 border border-neutral-200 animate-pulse"
+            className="bg-white/5 rounded-xl overflow-hidden animate-pulse border border-white/10"
           >
-            <div className="w-full h-48 bg-neutral-200 rounded-xl mb-4" />
-            <div className="h-4 bg-neutral-200 rounded w-1/4 mb-3" />
-            <div className="h-6 bg-neutral-200 rounded w-3/4 mb-2" />
-            <div className="h-4 bg-neutral-200 rounded w-full mb-2" />
-            <div className="h-4 bg-neutral-200 rounded w-2/3 mb-4" />
-            <div className="h-8 bg-neutral-200 rounded w-1/2" />
+            <div className="px-4 py-6 space-y-4">
+              <div className="flex justify-center">
+                <div className="w-16 h-16 bg-white/10 rounded-lg" />
+              </div>
+              <div className="h-6 bg-white/10 rounded w-3/4 mx-auto" />
+              <div className="h-4 bg-white/10 rounded w-1/2 mx-auto" />
+              <div className="h-4 bg-white/10 rounded w-1/3 mx-auto" />
+            </div>
           </div>
         ))}
+      </div>
+    );
+  }
+
+  // Error state
+  if (isError) {
+    const errorMessage =
+      error instanceof Error
+        ? error.message
+        : 'Error al cargar los proveedores';
+
+    return (
+      <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-6 text-center">
+        <p className="text-red-400 font-poppins">{errorMessage}</p>
       </div>
     );
   }
@@ -48,27 +61,23 @@ export const ProvidersList = ({
   // Empty state
   if (providers.length === 0) {
     return (
-      <EmptyState
-        icon="🔍"
-        title="No hay proveedores disponibles"
-        description="Por el momento no tenemos proveedores para mostrar. Intenta ajustar tus filtros o vuelve más tarde."
-      />
+      <div className="bg-white/5 border border-white/10 rounded-xl p-12 text-center">
+        <div className="flex flex-col items-center gap-4">
+          <span className="text-6xl">🔍</span>
+          <p className="text-neutral-300 text-lg font-poppins">
+            No se encontraron proveedores
+          </p>
+        </div>
+      </div>
     );
   }
 
-  // Providers grid
+  // Lista de proveedores
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-slide-up">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {providers.map((provider) => (
-        <ProviderCard
-          key={provider.id}
-          provider={provider}
-          onSelect={onSelectProvider}
-          onToggleFavorite={onToggleFavorite}
-          isFavorite={favoriteIds.includes(provider.id)}
-        />
+        <ProviderCard key={provider.id} provider={provider} />
       ))}
     </div>
   );
 };
-

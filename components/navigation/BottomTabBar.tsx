@@ -3,9 +3,19 @@
 import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import {
+  Home,
+  ShoppingBag,
+  Briefcase,
+  Calendar,
+  Heart,
+  User,
+  Users,
+} from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
 interface TabItem {
-  icon: string;
+  icon: LucideIcon;
   label: string;
   href: string;
   activePatterns: string[]; // Patrones para detectar si está activo
@@ -27,37 +37,37 @@ export function BottomTabBar({ role }: BottomTabBarProps): ReactNode {
   // Labels optimizados para 6 items en mobile
   const clientTabs: TabItem[] = [
     {
-      icon: '🏠',
+      icon: Home,
       label: 'Inicio',
       href: '/client',
       activePatterns: ['/client$'],
     },
     {
-      icon: '🛍️',
+      icon: ShoppingBag,
       label: 'Servicios',
       href: '/client/services',
       activePatterns: ['/client/services'],
     },
     {
-      icon: '💼',
+      icon: Briefcase,
       label: 'Proveedores',
       href: '/client/providers',
       activePatterns: ['/client/providers'],
     },
     {
-      icon: '📅',
+      icon: Calendar,
       label: 'Citas',
       href: '/client/appointments',
       activePatterns: ['/client/appointments'],
     },
     {
-      icon: '❤️',
+      icon: Heart,
       label: 'Favoritos',
       href: '/client/favorites',
       activePatterns: ['/client/favorites'],
     },
     {
-      icon: '👤',
+      icon: User,
       label: 'Perfil',
       href: '/client/profile',
       activePatterns: ['/client/profile'],
@@ -66,31 +76,31 @@ export function BottomTabBar({ role }: BottomTabBarProps): ReactNode {
 
   const providerTabs: TabItem[] = [
     {
-      icon: '🏠',
+      icon: Home,
       label: 'Inicio',
       href: '/provider',
       activePatterns: ['/provider$'],
     },
     {
-      icon: '💼',
+      icon: Briefcase,
       label: 'Servicios',
       href: '/provider/services',
       activePatterns: ['/provider/services'],
     },
     {
-      icon: '📅',
+      icon: Calendar,
       label: 'Citas',
       href: '/provider/appointments',
       activePatterns: ['/provider/appointments'],
     },
     {
-      icon: '👥',
+      icon: Users,
       label: 'Equipo',
       href: '/provider/employees',
       activePatterns: ['/provider/employees'],
     },
     {
-      icon: '👤',
+      icon: User,
       label: 'Perfil',
       href: '/provider/profile',
       activePatterns: ['/provider/profile'],
@@ -113,9 +123,9 @@ export function BottomTabBar({ role }: BottomTabBarProps): ReactNode {
     <nav
       className="
         fixed bottom-0 left-0 right-0 z-50 md:hidden
-        bg-white/95 backdrop-blur-sm
-        border-t border-neutral-200/80
-        shadow-[0_-4px_20px_rgba(0,0,0,0.05)]
+        bg-[#201d12]/95 backdrop-blur-sm
+        border-t border-white/10
+        shadow-[0_-4px_20px_rgba(0,0,0,0.3)]
       "
       role="navigation"
       aria-label="Navegación principal"
@@ -135,8 +145,6 @@ export function BottomTabBar({ role }: BottomTabBarProps): ReactNode {
                 px-1 py-2
                 transition-all duration-200
                 relative
-                ${active ? 'text-accent-600' : 'text-neutral-500'}
-                hover:text-accent-500
                 active:scale-95
               `}
               aria-current={active ? 'page' : undefined}
@@ -144,12 +152,11 @@ export function BottomTabBar({ role }: BottomTabBarProps): ReactNode {
               {/* Indicador superior si está activo */}
               {active && (
                 <div
-                  className="
-                    absolute top-0 left-1/2 -translate-x-1/2
-                    w-10 h-1
-                    bg-accent-600 rounded-b-full
-                    shadow-sm
-                  "
+                  className="absolute top-0 left-1/2 -translate-x-1/2 w-10 h-1 rounded-b-full shadow-sm"
+                  style={{
+                    backgroundColor: '#D4AF37',
+                    boxShadow: '0 1px 3px rgba(212, 175, 55, 0.5)',
+                  }}
                 />
               )}
 
@@ -161,22 +168,25 @@ export function BottomTabBar({ role }: BottomTabBarProps): ReactNode {
                   ${active ? 'scale-110' : 'scale-100 group-hover:scale-105'}
                 `}
               >
-                <span
-                  className="text-xl md:text-2xl"
-                  role="img"
+                <tab.icon
+                  className="w-5 h-5 md:w-6 md:h-6"
+                  style={
+                    active
+                      ? {
+                          color: '#D4AF37',
+                        }
+                      : {
+                          color: '#FFFFFF',
+                        }
+                  }
+                  strokeWidth={active ? 2.5 : 2}
                   aria-hidden="true"
-                >
-                  {tab.icon}
-                </span>
+                />
                 {/* Badge de notificación (opcional, para futuras features) */}
                 {active && (
                   <div
-                    className="
-                      absolute -top-1 -right-1
-                      w-2 h-2
-                      bg-accent-600 rounded-full
-                      animate-pulse
-                    "
+                    className="absolute -top-1 -right-1 w-2 h-2 rounded-full animate-pulse"
+                    style={{ backgroundColor: '#D4AF37' }}
                   />
                 )}
               </div>
@@ -185,13 +195,21 @@ export function BottomTabBar({ role }: BottomTabBarProps): ReactNode {
               <span
                 className={`
                   text-[10px] md:text-xs
-                  font-poppins font-medium
+                  font-poppins
                   leading-tight
                   text-center
                   transition-colors duration-200
-                  ${active ? 'text-accent-600' : 'text-neutral-600'}
-                  ${active ? 'font-semibold' : 'font-medium'}
+                  ${active ? 'font-bold' : 'font-medium'}
                 `}
+                style={
+                  active
+                    ? {
+                        color: '#D4AF37',
+                      }
+                    : {
+                        color: '#FFFFFF',
+                      }
+                }
               >
                 {tab.label}
               </span>

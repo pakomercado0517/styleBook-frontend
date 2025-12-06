@@ -4,29 +4,27 @@ import type { ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { ArrowLeft, MoreVertical, MapPin, Star } from 'lucide-react';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 import { getAppointment, cancelAppointment } from '@/lib/api/appointments';
-import { getServiceById } from '@/lib/api/services';
 import type { Appointment } from '@/lib/types/appointments';
-import type { Service } from '@/lib/types/services';
-import { Badge } from '@/components/Badge';
-import { Button } from '@/components/Button';
-import { Card } from '@/components/Card';
 
 interface AppointmentDetailsProps {
   appointmentId: number;
 }
 
-const statusMap = {
-  pending: { text: 'Pendiente', variant: 'warning' as const, icon: '⏳' },
-  confirmed: { text: 'Confirmada', variant: 'success' as const, icon: '✅' },
-  completed: { text: 'Completada', variant: 'info' as const, icon: '✔️' },
-  cancelled: { text: 'Cancelada', variant: 'error' as const, icon: '❌' },
-  no_show: { text: 'No asistió', variant: 'error' as const, icon: '🚫' },
-} as const;
+const statusLabels: Record<string, string> = {
+  pending: 'Pendiente',
+  confirmed: 'Confirmada',
+  completed: 'Completada',
+  cancelled: 'Cancelada',
+  no_show: 'No asistió',
+};
 
 /**
  * AppointmentDetails - Vista detallada de una cita
- * Muestra toda la información de la cita con acciones disponibles
+ * Rediseño mobile-first con estilo Luxe Noir
  */
 export const AppointmentDetails = ({
   appointmentId,
@@ -34,7 +32,7 @@ export const AppointmentDetails = ({
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  const { data, isLoading, isError, error } = useQuery({
+  const { data: appointment, isLoading, isError, error } = useQuery({
     queryKey: ['appointment', appointmentId],
     queryFn: async () => {
       const result = await getAppointment(appointmentId);
@@ -48,160 +46,38 @@ export const AppointmentDetails = ({
     staleTime: 5 * 60 * 1000, // 5 minutos
   });
 
-  // Obtener información del servicio
-  const {
-    data: serviceData,
-    isLoading: isLoadingService,
-    isError: isErrorService,
-  } = useQuery({
-    queryKey: ['service', data?.service_id],
-    queryFn: async () => {
-      if (!data?.service_id) {
-        return null;
-      }
-
-      const result = await getServiceById(data.service_id);
-
-      if (!result.success) {
-        return null;
-      }
-
-      return result.data;
+  const { mutate: handleCancelMutation, isPending: isCancelling } = useMutation({
+    mutationFn: () => cancelAppointment(appointmentId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['appointments'] });
+      queryClient.invalidateQueries({ queryKey: ['appointment', appointmentId] });
+      toast.success('Cita cancelada exitosamente');
+      router.push('/client/appointments');
     },
-    enabled: !!data?.service_id, // Solo ejecutar si hay service_id
-    staleTime: 10 * 60 * 1000, // 10 minutos
+    onError: (error: Error) => {
+      toast.error(error.message || 'Error al cancelar la cita');
+    },
   });
 
-  const { mutate: handleCancelMutation, isPending: isCancelling } = useMutation(
-    {
-      mutationFn: () => cancelAppointment(appointmentId),
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['appointments'] });
-        queryClient.invalidateQueries({
-          queryKey: ['appointment', appointmentId],
-        });
-        toast.success('Cita cancelada exitosamente');
-        router.push('/client/appointments');
-      },
-      onError: (error: Error) => {
-        toast.error(error.message || 'Error al cancelar la cita');
-      },
-    }
-  );
-
-  // Loading state
-  if (isLoading) {
-    return (
-      <div className="max-w-4xl mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-8">
-        <div className="bg-white rounded-2xl p-8 md:p-12 text-center border border-neutral-200">
-          <div className="mx-auto w-12 h-12 border-4 border-accent-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-          <p className="text-neutral-600 font-poppins">
-            Cargando detalles de la cita...
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // Error state
-  if (isError || !data) {
-    const errorMessage =
-      error instanceof Error ? error.message : 'Error al cargar la cita';
-
-    return (
-      <div className="max-w-4xl mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-8">
-        <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-6 text-center">
-          <span className="text-4xl mb-4 block">⚠️</span>
-          <h3 className="font-playfair text-xl font-bold text-red-800 mb-2">
-            Error al cargar la cita
-          </h3>
-          <p className="text-red-600 font-poppins mb-6">{errorMessage}</p>
-          <Button
-            variant="outline"
-            onClick={() => router.push('/client/appointments')}
-          >
-            Volver a Mis Citas
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  const appointment: Appointment = data;
-  const service: Service | null = serviceData || appointment.service || null;
-  const status = statusMap[appointment.status];
-  const canCancel = ['pending', 'confirmed'].includes(appointment.status);
-  const canReschedule = ['pending', 'confirmed'].includes(appointment.status);
-
-  // Usar fechas formateadas del backend si están disponibles
-  const displayStartDate =
-    appointment.formatted_dates?.start ||
-    new Date(appointment.start_date_local).toLocaleString('es-MX', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-
-  const displayEndDate =
-    appointment.formatted_dates?.end ||
-    new Date(appointment.end_date_local).toLocaleString('es-MX', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-
-  // Calcular duración (usar duración del servicio si está disponible, sino calcular)
-  const serviceDuration = service?.duration_minutes || 0;
-  const startDate = new Date(appointment.start_date_local);
-  const endDate = new Date(appointment.end_date_local);
-  const calculatedDuration = Math.round(
-    (endDate.getTime() - startDate.getTime()) / (1000 * 60)
-  );
-  const durationMinutes =
-    serviceDuration > 0 ? serviceDuration : calculatedDuration;
-
-  // Convertir final_price a number si viene como string
-  const priceNumber =
-    typeof appointment.final_price === 'string'
-      ? parseFloat(appointment.final_price)
-      : appointment.final_price;
-
-  const formattedPrice = new Intl.NumberFormat('es-MX', {
-    style: 'currency',
-    currency: 'MXN',
-  }).format(priceNumber);
-
-  // Información del servicio
-  const serviceName = service?.name || `Servicio #${appointment.service_id}`;
-  const serviceDescription = service?.description;
-  const serviceCategory = service?.category;
-  const servicePrice = service?.price;
-  const serviceProvider = service?.provider;
-
-  // Mapeo de categorías a español
-  const categoryLabels: Record<string, string> = {
-    corte: 'Corte',
-    tinte: 'Tinte',
-    peinado: 'Peinado',
-    manicure: 'Manicure',
-    pedicure: 'Pedicure',
-    tratamiento_capilar: 'Tratamiento Capilar',
-    barba: 'Barba',
-    afeitado: 'Afeitado',
-    masaje: 'Masaje',
-    facial: 'Facial',
-    corporal: 'Corporal',
-    aromaterapia: 'Aromaterapia',
-    limpieza_dental: 'Limpieza Dental',
-    estetica_dental: 'Estética Dental',
+  const handleBack = (): void => {
+    router.back();
   };
 
-  const handleBack = (): void => {
-    router.push('/client/appointments');
+  const handleReschedule = (): void => {
+    if (appointment?.service_id) {
+      router.push(`/client/book/${appointment.service_id}?reschedule=${appointmentId}`);
+    }
+  };
+
+  const handleRebook = (): void => {
+    if (appointment?.service_id) {
+      // Navegar al flujo de reserva con el servicio y empleado pre-seleccionados
+      const params = new URLSearchParams();
+      if (appointment.employee_id) {
+        params.append('employee', appointment.employee_id.toString());
+      }
+      router.push(`/client/book/${appointment.service_id}?${params.toString()}`);
+    }
   };
 
   const handleCancel = (): void => {
@@ -210,358 +86,421 @@ export const AppointmentDetails = ({
     }
   };
 
-  const handleReschedule = (): void => {
-    if (appointment.service_id) {
-      router.push(
-        `/client/book/${appointment.service_id}?reschedule=${appointment.id}`
-      );
-    }
-  };
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#201d12] flex flex-col">
+        <div className="flex items-center justify-between px-4 py-4 border-b border-white/10">
+          <button
+            onClick={handleBack}
+            className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-white/10 transition-colors"
+            aria-label="Volver"
+            type="button"
+          >
+            <ArrowLeft className="w-5 h-5 text-white" strokeWidth={2} />
+          </button>
+          <h1 className="text-xl font-bold text-white font-playfair">Detalles de la Cita</h1>
+          <div className="w-10"></div>
+        </div>
+        <div className="flex-1 flex items-center justify-center">
+          <div className="w-8 h-8 border-4 border-accent-500 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (isError || !appointment) {
+    const errorMessage =
+      error instanceof Error ? error.message : 'Error al cargar la cita';
+
+    return (
+      <div className="min-h-screen bg-[#201d12] flex flex-col">
+        <div className="flex items-center justify-between px-4 py-4 border-b border-white/10">
+          <button
+            onClick={handleBack}
+            className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-white/10 transition-colors"
+            aria-label="Volver"
+            type="button"
+          >
+            <ArrowLeft className="w-5 h-5 text-white" strokeWidth={2} />
+          </button>
+          <h1 className="text-xl font-bold text-white font-playfair">Detalles de la Cita</h1>
+          <div className="w-10"></div>
+        </div>
+        <div className="flex-1 flex items-center justify-center px-4">
+          <div className="text-center">
+            <p className="text-red-400 font-poppins mb-4">{errorMessage}</p>
+            <button
+              onClick={handleBack}
+              className="px-6 py-3 rounded-lg bg-accent-500 text-primary-900 font-semibold font-poppins"
+              type="button"
+            >
+              Volver
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Información del servicio
+  const serviceName = appointment.service?.name || `Servicio #${appointment.service_id}`;
+
+  // Información del proveedor
+  const providerName = appointment.provider?.business_name || 'Salón';
+  const providerAddress = appointment.provider?.address || '';
+  const providerCity = appointment.provider?.city || '';
+  const providerCountry = appointment.provider?.country || '';
+  const fullAddress = [providerAddress, providerCity, providerCountry]
+    .filter(Boolean)
+    .join(', ');
+
+  // Formatear fecha y hora
+  const appointmentDate = new Date(appointment.start_date_local);
+  const formattedDate = format(appointmentDate, "EEEE, d MMM, HH:mm", { locale: es });
+
+  // Calcular duración
+  const startDate = new Date(appointment.start_date_local);
+  const endDate = new Date(appointment.end_date_local);
+  const durationMinutes = Math.round(
+    (endDate.getTime() - startDate.getTime()) / (1000 * 60)
+  );
+  const hours = Math.floor(durationMinutes / 60);
+  const minutes = durationMinutes % 60;
+  const formattedDuration =
+    hours > 0 ? `${hours}h ${minutes}min` : `${minutes}min`;
+
+  // Formatear precio
+  const priceNumber =
+    typeof appointment.final_price === 'string'
+      ? parseFloat(appointment.final_price)
+      : appointment.final_price || 0;
+  const formattedPrice = new Intl.NumberFormat('es-MX', {
+    style: 'currency',
+    currency: 'MXN',
+    minimumFractionDigits: 2,
+  }).format(priceNumber);
+
+  // Estado
+  const statusLabel = statusLabels[appointment.status] || appointment.status;
+  const canReschedule = ['pending', 'confirmed'].includes(appointment.status);
+  const canCancel = ['pending', 'confirmed'].includes(appointment.status);
+  const isCompleted = appointment.status === 'completed';
+  const canRebook = isCompleted && appointment.service_id;
+
+  // Información del empleado
+  const employeeName = appointment.employee?.name || 'No asignado';
+
+  // Información del proveedor para rating
+  const providerRating = appointment.provider?.average_rating || 0;
+  const reviewsCount = 254; // Valor por defecto, se podría obtener del backend si está disponible
 
   return (
-    <div className="max-w-4xl mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-8">
-      {/* Header con botón volver */}
-      <div className="mb-6 md:mb-8">
+    <div className="min-h-screen bg-[#201d12] flex flex-col">
+      {/* Header - Mobile */}
+      <div className="flex items-center justify-between px-4 py-4 border-b border-white/10 md:hidden">
         <button
           onClick={handleBack}
-          className="
-            flex items-center gap-2
-            text-neutral-600 hover:text-primary-800
-            font-poppins text-sm font-medium
-            mb-4
-            transition-colors duration-200
-          "
+          className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-white/10 transition-colors"
+          aria-label="Volver"
           type="button"
-          aria-label="Volver a mis citas"
         >
-          <span>←</span>
-          <span>Volver a Mis Citas</span>
+          <ArrowLeft className="w-5 h-5 text-white" strokeWidth={2} />
         </button>
-
-        <div className="flex items-start justify-between gap-4 flex-wrap">
-          <div>
-            <h1 className="font-playfair text-3xl md:text-4xl lg:text-5xl font-bold text-primary-800 mb-2">
-              Detalles de la Cita
-            </h1>
-            <p className="text-neutral-600 font-poppins text-base md:text-lg">
-              {serviceName}
-            </p>
-          </div>
-          <Badge variant={status.variant} className="shrink-0">
-            <span className="mr-1">{status.icon}</span>
-            <span>{status.text}</span>
-          </Badge>
-        </div>
+        <h1 className="text-xl font-bold text-white font-playfair">Detalles de la Cita</h1>
+        <button
+          className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-white/10 transition-colors"
+          aria-label="Más opciones"
+          type="button"
+        >
+          <MoreVertical className="w-5 h-5 text-white" strokeWidth={2} />
+        </button>
       </div>
 
-      {/* Información Principal */}
-      <Card className="p-6 md:p-8 mb-6">
-        <div className="space-y-6">
-          {/* Fecha y Hora */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-xl">📅</span>
-                <h3 className="font-poppins font-semibold text-primary-800 text-xl">
-                  Fecha y Hora de Inicio
-                </h3>
+      {/* Contenido scrollable */}
+      <div className="flex-1 overflow-y-auto">
+        {/* Desktop Layout - Dos columnas */}
+        <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+            {/* Columna Izquierda - Detalles de la Cita */}
+            <div className="space-y-6">
+              {/* Header con título y subtítulo - Desktop */}
+              <div className="hidden md:block">
+                <h1 className="text-3xl lg:text-4xl font-bold text-white font-playfair mb-2">
+                  Detalles de la Cita
+                </h1>
+                <p className="text-base text-neutral-300 font-poppins">
+                  Revisa los detalles de tu próxima cita.
+                </p>
               </div>
-              <p className="text-neutral-700 font-poppins text-base">
-                {displayStartDate}
-              </p>
+
+              {/* Card de Resumen de la Cita */}
+              <div className="bg-white/5 rounded-xl border border-white/10 p-6 relative">
+                {/* Badge de estado en esquina superior izquierda */}
+                <div className="absolute top-4 left-4 z-10">
+                  <span className="inline-block px-3 py-1 rounded-lg bg-white/5 border border-white/10 text-xs font-semibold text-white font-poppins">
+                    {statusLabel}
+                  </span>
+                </div>
+
+                {/* Título del servicio */}
+                <h2 className="text-2xl md:text-3xl font-bold text-white font-playfair mb-6 pt-8 pr-20">
+                  {serviceName}
+                </h2>
+
+                {/* Información de la cita */}
+                <div className="space-y-4">
+                  {/* Fecha y Hora */}
+                  <div className="flex items-center justify-between py-3 border-b border-white/10">
+                    <span className="text-sm font-medium text-white font-poppins">Fecha y Hora</span>
+                    <span className="text-sm text-white font-poppins">{formattedDate}</span>
+                  </div>
+
+                  {/* Profesional */}
+                  <div className="flex items-center justify-between py-3 border-b border-white/10">
+                    <span className="text-sm font-medium text-white font-poppins">Profesional</span>
+                    <span className="text-sm text-white font-poppins">{employeeName}</span>
+                  </div>
+
+                  {/* Duración */}
+                  <div className="flex items-center justify-between py-3 border-b border-white/10">
+                    <span className="text-sm font-medium text-white font-poppins">Duración</span>
+                    <span className="text-sm text-white font-poppins">{formattedDuration}</span>
+                  </div>
+
+                  {/* Precio */}
+                  <div className="flex items-center justify-between py-3">
+                    <span className="text-sm font-medium text-white font-poppins">Precio</span>
+                    <span className="text-lg font-bold font-poppins" style={{ color: '#D4AF37' }}>
+                      {formattedPrice}
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-xl">🕐</span>
-                <h3 className="font-poppins font-semibold text-primary-800 text-xl">
-                  Fecha y Hora de Fin
+            {/* Columna Derecha - Información del Proveedor y Acciones */}
+            <div className="space-y-6">
+              {/* Card de Información del Proveedor */}
+              <div className="bg-white/5 rounded-xl border border-white/10 p-6">
+                <h3 className="text-xl font-bold text-white font-playfair mb-4">
+                  Información del Proveedor
                 </h3>
-              </div>
-              <p className="text-neutral-700 font-poppins text-base">
-                {displayEndDate}
-              </p>
-            </div>
-          </div>
 
-          {/* Duración y Precio */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-neutral-200">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-xl">⏱️</span>
-                <h3 className="font-poppins font-semibold text-primary-800 text-xl">
-                  Duración
-                </h3>
-              </div>
-              <p className="text-neutral-700 font-poppins text-base">
-                {durationMinutes} minutos
-              </p>
-            </div>
+                <div className="flex flex-col md:flex-row gap-4">
+                  {/* Información del proveedor */}
+                  <div className="flex-1 space-y-3">
+                    <h4 className="text-lg font-bold text-white font-playfair">{providerName}</h4>
+                    {fullAddress && (
+                      <p className="text-sm text-neutral-300 font-poppins">{fullAddress}</p>
+                    )}
+                    <div className="flex items-center gap-2">
+                      <Star
+                        className="w-5 h-5"
+                        style={{ color: '#D4AF37' }}
+                        fill="#D4AF37"
+                        strokeWidth={2}
+                      />
+                      <span className="text-sm text-white font-poppins">
+                        {providerRating.toFixed(1)} ({reviewsCount} {reviewsCount === 1 ? 'reseña' : 'reseñas'})
+                      </span>
+                    </div>
+                  </div>
 
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-xl">💰</span>
-                <h3 className="font-poppins font-semibold text-primary-800 text-xl">
-                  Precio Total
-                </h3>
+                  {/* Mapa placeholder */}
+                  <div className="w-full md:w-48 h-48 rounded-lg overflow-hidden bg-gradient-to-br from-teal-100 to-teal-200 relative flex items-center justify-center flex-shrink-0">
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="text-center">
+                        <MapPin
+                          className="w-8 h-8 mx-auto mb-1"
+                          style={{ color: '#0F766E' }}
+                          strokeWidth={2}
+                        />
+                        <p className="text-xs text-teal-800 font-semibold font-poppins">BOBO</p>
+                      </div>
+                    </div>
+                    {/* Líneas de mapa decorativas */}
+                    <div className="absolute inset-0 opacity-20">
+                      <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                        <line x1="0" y1="20" x2="100" y2="20" stroke="#0F766E" strokeWidth="0.5" />
+                        <line x1="0" y1="40" x2="100" y2="40" stroke="#0F766E" strokeWidth="0.5" />
+                        <line x1="0" y1="60" x2="100" y2="60" stroke="#0F766E" strokeWidth="0.5" />
+                        <line x1="0" y1="80" x2="100" y2="80" stroke="#0F766E" strokeWidth="0.5" />
+                        <line x1="20" y1="0" x2="20" y2="100" stroke="#0F766E" strokeWidth="0.5" />
+                        <line x1="40" y1="0" x2="40" y2="100" stroke="#0F766E" strokeWidth="0.5" />
+                        <line x1="60" y1="0" x2="60" y2="100" stroke="#0F766E" strokeWidth="0.5" />
+                        <line x1="80" y1="0" x2="80" y2="100" stroke="#0F766E" strokeWidth="0.5" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <p className="font-playfair text-xl font-bold text-accent-500">
-                {formattedPrice}
-              </p>
+
+              {/* Botones de acción - Desktop */}
+              <div className="hidden md:flex gap-3">
+                {canCancel && (
+                  <button
+                    onClick={handleCancel}
+                    disabled={isCancelling}
+                    className="flex-1 h-12 rounded-lg bg-white/5 border border-white/10 text-white font-semibold font-poppins hover:bg-white/10 transition-colors disabled:opacity-50"
+                    type="button"
+                  >
+                    {isCancelling ? 'Cancelando...' : 'Cancelar Cita'}
+                  </button>
+                )}
+                {canRebook && (
+                  <button
+                    onClick={handleRebook}
+                    className="flex-1 h-12 rounded-lg font-semibold font-poppins transition-colors"
+                    style={{
+                      backgroundColor: '#D4AF37',
+                      color: '#FFFFFF',
+                    }}
+                    type="button"
+                  >
+                    Re-reservar
+                  </button>
+                )}
+                {canReschedule && (
+                  <button
+                    onClick={handleReschedule}
+                    className="flex-1 h-12 rounded-lg font-semibold font-poppins transition-colors"
+                    style={{
+                      backgroundColor: '#D4AF37',
+                      color: '#FFFFFF',
+                    }}
+                    type="button"
+                  >
+                    Reprogramar Cita
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>
-      </Card>
 
-      {/* Información Adicional */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        {/* Información del Servicio */}
-        <Card className="p-6">
-          <h3 className="font-playfair text-xl font-bold text-primary-800 mb-4">
-            Información del Servicio
-          </h3>
-          {isLoadingService ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="w-8 h-8 border-4 border-accent-500 border-t-transparent rounded-full animate-spin"></div>
-            </div>
-          ) : service ? (
-            <div className="space-y-4">
-              <div>
-                <p className="text-sm text-neutral-500 font-poppins mb-1">
-                  Nombre del Servicio
-                </p>
-                <p className="text-primary-800 font-poppins font-semibold text-lg">
-                  {service.name}
-                </p>
+        {/* Mobile Content */}
+        <div className="md:hidden px-4 py-6">
+          {/* Badge de estado */}
+          <div className="mb-4">
+            <span className="inline-block px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-sm font-semibold text-white font-poppins">
+              {statusLabel}
+            </span>
+          </div>
+
+          {/* Título del servicio */}
+          <h2 className="text-2xl font-bold text-white font-playfair mb-6">
+            {serviceName}
+          </h2>
+
+          {/* Mapa */}
+          <div className="bg-white/5 rounded-xl overflow-hidden mb-6 border border-white/10">
+            <div className="w-full h-64 bg-gradient-to-br from-teal-100 to-teal-200 relative flex items-center justify-center">
+              {/* Placeholder del mapa */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center">
+                  <MapPin
+                    className="w-12 h-12 mx-auto mb-2"
+                    style={{ color: '#0F766E' }}
+                    strokeWidth={2}
+                  />
+                  <p className="text-teal-800 font-semibold font-poppins">BOBO</p>
+                </div>
               </div>
-
-              {serviceCategory && (
-                <div>
-                  <p className="text-sm text-neutral-500 font-poppins mb-1">
-                    Categoría
-                  </p>
-                  <Badge variant="secondary" className="mt-1">
-                    {categoryLabels[serviceCategory] || serviceCategory}
-                  </Badge>
-                </div>
-              )}
-
-              {serviceDescription && (
-                <div>
-                  <p className="text-sm text-neutral-500 font-poppins mb-1">
-                    Descripción
-                  </p>
-                  <p className="text-primary-800 font-poppins text-sm leading-relaxed">
-                    {serviceDescription}
-                  </p>
-                </div>
-              )}
-
-              <div className="grid grid-cols-2 gap-4 pt-3 border-t border-neutral-200">
-                {servicePrice !== undefined && (
-                  <div>
-                    <p className="text-sm text-neutral-500 font-poppins mb-1">
-                      Precio Base
-                    </p>
-                    <p className="text-primary-800 font-poppins font-semibold">
-                      {new Intl.NumberFormat('es-MX', {
-                        style: 'currency',
-                        currency: 'MXN',
-                      }).format(servicePrice)}
-                    </p>
-                  </div>
-                )}
-                {durationMinutes > 0 && (
-                  <div>
-                    <p className="text-sm text-neutral-500 font-poppins mb-1">
-                      Duración
-                    </p>
-                    <p className="text-primary-800 font-poppins font-semibold">
-                      {durationMinutes} min
-                    </p>
-                  </div>
-                )}
+              {/* Líneas de mapa decorativas */}
+              <div className="absolute inset-0 opacity-20">
+                <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                  <line x1="0" y1="20" x2="100" y2="20" stroke="#0F766E" strokeWidth="0.5" />
+                  <line x1="0" y1="40" x2="100" y2="40" stroke="#0F766E" strokeWidth="0.5" />
+                  <line x1="0" y1="60" x2="100" y2="60" stroke="#0F766E" strokeWidth="0.5" />
+                  <line x1="0" y1="80" x2="100" y2="80" stroke="#0F766E" strokeWidth="0.5" />
+                  <line x1="20" y1="0" x2="20" y2="100" stroke="#0F766E" strokeWidth="0.5" />
+                  <line x1="40" y1="0" x2="40" y2="100" stroke="#0F766E" strokeWidth="0.5" />
+                  <line x1="60" y1="0" x2="60" y2="100" stroke="#0F766E" strokeWidth="0.5" />
+                  <line x1="80" y1="0" x2="80" y2="100" stroke="#0F766E" strokeWidth="0.5" />
+                </svg>
               </div>
-
-              {serviceProvider && (
-                <div className="pt-3 border-t border-neutral-200">
-                  <p className="text-sm text-neutral-500 font-poppins mb-2">
-                    Proveedor
-                  </p>
-                  <div className="space-y-2">
-                    <p className="text-primary-800 font-poppins font-semibold">
-                      {serviceProvider.business_name}
-                    </p>
-                    {serviceProvider.city && (
-                      <p className="text-sm text-neutral-600 font-poppins">
-                        📍 {serviceProvider.city}
-                      </p>
-                    )}
-                    {serviceProvider.address && (
-                      <p className="text-sm text-neutral-600 font-poppins">
-                        {serviceProvider.address}
-                      </p>
-                    )}
-                    {serviceProvider.average_rating > 0 && (
-                      <div className="flex items-center gap-1 mt-2">
-                        <span className="text-accent-500">⭐</span>
-                        <span className="text-sm font-semibold text-primary-800">
-                          {serviceProvider.average_rating.toFixed(1)}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
             </div>
-          ) : (
-            <div className="text-center py-4">
-              <p className="text-neutral-500 font-poppins text-sm">
-                {isErrorService
-                  ? 'No se pudo cargar la información del servicio'
-                  : 'Información del servicio no disponible'}
-              </p>
-            </div>
-          )}
-        </Card>
+          </div>
 
-        {/* Información del Profesional */}
-        <Card className="p-6">
-          <h3 className="font-playfair text-xl font-bold text-primary-800 mb-4">
-            Información del Profesional
-          </h3>
-          <div className="space-y-3">
-            {appointment.employee ? (
-              <>
-                <div>
-                  <p className="text-sm text-neutral-500 font-poppins mb-1">
-                    Nombre
-                  </p>
-                  <p className="text-primary-800 font-poppins font-semibold text-lg">
-                    {appointment.employee.name}
-                  </p>
-                </div>
-                {appointment.employee.email && (
-                  <div>
-                    <p className="text-sm text-neutral-500 font-poppins mb-1">
-                      Email
-                    </p>
-                    <p className="text-primary-800 font-poppins">
-                      {appointment.employee.email}
-                    </p>
-                  </div>
-                )}
-              </>
-            ) : (
-              <div className="text-center py-4">
-                <p className="text-neutral-500 font-poppins text-sm">
-                  Información del profesional no disponible
-                </p>
-              </div>
+          {/* Detalles del salón */}
+          <div className="mb-6">
+            <h3 className="text-lg font-bold text-white font-playfair mb-2">{providerName}</h3>
+            {fullAddress && (
+              <p className="text-sm text-neutral-300 font-poppins">{fullAddress}</p>
             )}
           </div>
-        </Card>
-      </div>
 
-      {/* Notas */}
-      {appointment.notes && (
-        <Card className="p-6 mb-6">
-          <h3 className="font-playfair text-xl font-bold text-primary-800 mb-4">
-            Notas
-          </h3>
-          <p className="text-neutral-700 font-poppins whitespace-pre-wrap">
-            {appointment.notes}
-          </p>
-        </Card>
-      )}
+          {/* Tabla de información */}
+          <div className="bg-white/5 rounded-xl border border-white/10 overflow-hidden mb-6">
+            {/* Fecha y Hora */}
+            <div className="flex items-center justify-between px-4 py-4 border-b border-white/10">
+              <span className="text-sm font-medium text-white font-poppins">Fecha y Hora</span>
+              <span className="text-sm text-white font-poppins">{formattedDate}</span>
+            </div>
 
-      {/* Información Adicional (Opcional - Colapsable) */}
-      <details className="mb-6">
-        <summary
-          className="
-          cursor-pointer
-          bg-neutral-50 rounded-2xl p-4
-          font-poppins font-medium text-primary-800
-          hover:bg-neutral-100
-          transition-colors duration-200
-          list-none
-        "
-        >
-          <span className="flex items-center gap-2">
-            <span>ℹ️</span>
-            <span>Información Técnica</span>
-          </span>
-        </summary>
-        <Card className="p-6 mt-2 bg-neutral-50">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-            <div>
-              <p className="text-neutral-500 font-poppins mb-1">
-                ID de la Cita
-              </p>
-              <p className="text-primary-800 font-poppins font-medium">
-                #{appointment.id}
-              </p>
+            {/* Profesional */}
+            <div className="flex items-center justify-between px-4 py-4 border-b border-white/10">
+              <span className="text-sm font-medium text-white font-poppins">Profesional</span>
+              <span className="text-sm text-white font-poppins">{employeeName}</span>
             </div>
-            <div>
-              <p className="text-neutral-500 font-poppins mb-1">Timezone</p>
-              <p className="text-primary-800 font-poppins font-medium">
-                {appointment.timezone}
-              </p>
+
+            {/* Duración */}
+            <div className="flex items-center justify-between px-4 py-4 border-b border-white/10">
+              <span className="text-sm font-medium text-white font-poppins">Duración</span>
+              <span className="text-sm text-white font-poppins">{formattedDuration}</span>
             </div>
-            <div>
-              <p className="text-neutral-500 font-poppins mb-1">Creada</p>
-              <p className="text-primary-800 font-poppins font-medium">
-                {new Date(appointment.createdAt).toLocaleString('es-MX')}
-              </p>
-            </div>
-            <div>
-              <p className="text-neutral-500 font-poppins mb-1">
-                Última Actualización
-              </p>
-              <p className="text-primary-800 font-poppins font-medium">
-                {new Date(appointment.updatedAt).toLocaleString('es-MX')}
-              </p>
+
+            {/* Precio */}
+            <div className="flex items-center justify-between px-4 py-4">
+              <span className="text-sm font-medium text-white font-poppins">Precio</span>
+              <span className="text-lg font-bold font-poppins" style={{ color: '#D4AF37' }}>
+                {formattedPrice}
+              </span>
             </div>
           </div>
-        </Card>
-      </details>
 
-      {/* Acciones */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        {canReschedule && (
-          <Button
-            variant="secondary"
-            size="md"
-            onClick={handleReschedule}
-            className="flex-1"
-            aria={{ label: 'Reagendar cita' }}
-          >
-            Reagendar Cita
-          </Button>
-        )}
-
-        {canCancel && (
-          <Button
-            variant="outline"
-            size="md"
-            onClick={handleCancel}
-            disabled={isCancelling}
-            className="flex-1 border-red-200 text-red-600 hover:border-red-300 hover:bg-red-50"
-            aria={{ label: 'Cancelar cita' }}
-          >
-            {isCancelling ? 'Cancelando...' : 'Cancelar Cita'}
-          </Button>
-        )}
-
-        <Button
-          variant="outline"
-          size="md"
-          onClick={handleBack}
-          className="flex-1"
-          aria={{ label: 'Volver a mis citas' }}
-        >
-          Volver
-        </Button>
+          {/* Botones de acción - Mobile */}
+          <div className="space-y-3">
+            {canRebook && (
+              <button
+                onClick={handleRebook}
+                className="w-full h-12 rounded-xl font-semibold font-poppins transition-colors"
+                style={{
+                  backgroundColor: '#D4AF37',
+                  color: '#1A1A1A',
+                }}
+                type="button"
+              >
+                Re-reservar
+              </button>
+            )}
+            {canReschedule && (
+              <button
+                onClick={handleReschedule}
+                className="w-full h-12 rounded-xl font-semibold font-poppins transition-colors"
+                style={{
+                  backgroundColor: '#D4AF37',
+                  color: '#1A1A1A',
+                }}
+                type="button"
+              >
+                Reprogramar Cita
+              </button>
+            )}
+            {canCancel && (
+              <button
+                onClick={handleCancel}
+                disabled={isCancelling}
+                className="w-full h-12 rounded-xl bg-white/5 border border-white/10 text-white font-semibold font-poppins hover:bg-white/10 transition-colors disabled:opacity-50"
+                type="button"
+              >
+                {isCancelling ? 'Cancelando...' : 'Cancelar Cita'}
+              </button>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
