@@ -2,72 +2,89 @@
 
 import type { ReactNode } from 'react';
 import { useState } from 'react';
-import { AppointmentsList } from './AppointmentsList';
-import { AppointmentsFilters } from './AppointmentsFilters';
-import type { AppointmentStatus } from '@/lib/types/appointments';
+import { format, startOfDay, endOfDay } from 'date-fns';
+import { AppointmentsHeader } from './AppointmentsHeader';
+import { AppointmentsTabs } from './AppointmentsTabs';
+import { ProviderAppointmentsList } from './ProviderAppointmentsList';
+import { InteractiveCalendar } from './InteractiveCalendar';
+import { TodayAppointmentsPanel } from './TodayAppointmentsPanel';
+
+type TabType = 'today' | 'upcoming' | 'pending';
 
 /**
  * Contenido principal de la página de citas del proveedor
+ * Diseño mobile-first con layout de 3 columnas en desktop
  */
 export function AppointmentsPageContent(): ReactNode {
-  const [selectedStatus, setSelectedStatus] = useState<
-    AppointmentStatus | 'all'
-  >('all');
-  const [selectedDateRange, setSelectedDateRange] = useState<{
-    start?: string;
-    end?: string;
-  }>({});
-  const [selectedEmployee, setSelectedEmployee] = useState<number | 'all'>(
-    'all'
-  );
+  const [activeTab, setActiveTab] = useState<TabType>('today');
 
-  const handleStatusChange = (status: AppointmentStatus | 'all'): void => {
-    setSelectedStatus(status);
+  // Calcular fechas según el tab activo
+  const getDateRange = () => {
+    const today = new Date();
+    switch (activeTab) {
+      case 'today':
+        return {
+          start: format(startOfDay(today), "yyyy-MM-dd'T'00:00:00"),
+          end: format(endOfDay(today), "yyyy-MM-dd'T'23:59:59"),
+        };
+      case 'upcoming':
+        return {
+          start: format(startOfDay(today), "yyyy-MM-dd'T'00:00:00"),
+          end: undefined, // Sin límite de fin
+        };
+      case 'pending':
+        return {
+          start: undefined,
+          end: undefined,
+        };
+      default:
+        return {
+          start: undefined,
+          end: undefined,
+        };
+    }
   };
 
-  const handleDateRangeChange = (range: {
-    start?: string;
-    end?: string;
-  }): void => {
-    setSelectedDateRange(range);
-  };
-
-  const handleEmployeeChange = (employeeId: number | 'all'): void => {
-    setSelectedEmployee(employeeId);
-  };
+  const dateRange = getDateRange();
+  const statusFilter = activeTab === 'pending' ? 'pending' : undefined;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-8">
+    <div className="min-h-screen bg-[#201d12] flex flex-col">
       {/* Header */}
-      <div className="mb-6 md:mb-8">
-        <h1 className="font-playfair text-3xl md:text-4xl lg:text-5xl font-bold text-primary-800 mb-2">
-          Mis Citas
-        </h1>
-        <p className="text-neutral-600 font-poppins text-base md:text-lg">
-          Gestiona las citas de tu negocio
-        </p>
+      <AppointmentsHeader />
+
+      {/* Mobile: Tabs y Lista */}
+      <div className="md:hidden flex-1 flex flex-col">
+        {/* Tabs de filtro */}
+        <AppointmentsTabs activeTab={activeTab} onTabChange={setActiveTab} />
+
+        {/* Lista de citas */}
+        <div className="flex-1 px-4 py-6 pb-20 space-y-4 overflow-y-auto">
+          <ProviderAppointmentsList
+            status={statusFilter}
+            startDate={dateRange.start}
+            endDate={dateRange.end}
+            filterByTab={activeTab}
+          />
+        </div>
       </div>
 
-      {/* Filtros */}
-      <div className="mb-6 md:mb-8">
-        <AppointmentsFilters
-          selectedStatus={selectedStatus}
-          onStatusChange={handleStatusChange}
-          selectedDateRange={selectedDateRange}
-          onDateRangeChange={handleDateRangeChange}
-          selectedEmployee={selectedEmployee}
-          onEmployeeChange={handleEmployeeChange}
-        />
-      </div>
+      {/* Desktop: Layout de 2 columnas (Calendario + Panel de Hoy) */}
+      <div className="hidden md:flex flex-1 overflow-hidden">
+        {/* Columna izquierda: Calendario Interactivo */}
+        <div className="flex-1 p-6">
+          <div className="h-full">
+            <InteractiveCalendar />
+          </div>
+        </div>
 
-      {/* Lista de citas */}
-      <AppointmentsList
-        status={selectedStatus === 'all' ? undefined : selectedStatus}
-        startDate={selectedDateRange.start}
-        endDate={selectedDateRange.end}
-        employeeId={selectedEmployee === 'all' ? undefined : selectedEmployee}
-      />
+        {/* Columna derecha: Citas para Hoy */}
+        <div className="w-96 p-6 border-l border-white/10">
+          <div className="h-full">
+            <TodayAppointmentsPanel />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
-

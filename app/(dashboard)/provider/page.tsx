@@ -1,20 +1,40 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { useAuth } from '@/lib/hooks/useAuth';
 import { useProviderStats } from '@/lib/hooks/useProviderStats';
-import { StatCard } from '@/components/dashboard/StatCard';
-import { QuickActionCard } from '@/components/dashboard/QuickActionCard';
+import { useProviderAppointments } from '@/lib/hooks/useAppointments';
+import { format, startOfDay, addDays, startOfWeek } from 'date-fns';
+import { DashboardHeader } from './components/DashboardHeader';
+import { MetricCard } from './components/MetricCard';
+import { AppointmentCalendar } from './components/AppointmentCalendar';
+import { IncomeTrends } from './components/IncomeTrends';
+import { RecentActivity } from './components/RecentActivity';
 
 /**
  * Dashboard Home - Proveedor
- * Muestra estadísticas de negocio y accesos rápidos a gestión
+ * Vista mobile-first con métricas, calendario, tendencias y actividad reciente
  */
 export default function ProviderDashboardPage(): ReactNode {
-  const { user } = useAuth();
-  const { data: stats, isLoading } = useProviderStats();
+  const { data: stats } = useProviderStats();
 
-  // Formatear ingresos del mes
+  // Obtener próximas citas (hoy y próximos días)
+  const today = new Date();
+  const todayStart = format(startOfDay(today), "yyyy-MM-dd'T'00:00:00");
+  const nextWeekEnd = format(
+    addDays(today, 7),
+    "yyyy-MM-dd'T'23:59:59"
+  );
+
+  const { data: upcomingAppointmentsResponse } = useProviderAppointments({
+    start_date: todayStart,
+    end_date: nextWeekEnd,
+    limit: 100,
+  });
+
+  const upcomingAppointments =
+    upcomingAppointmentsResponse?.data?.appointments || [];
+
+  // Formatear ingresos
   const formatCurrency = (amount: number): string => {
     return new Intl.NumberFormat('es-MX', {
       style: 'currency',
@@ -24,169 +44,70 @@ export default function ProviderDashboardPage(): ReactNode {
     }).format(amount);
   };
 
-  // Formatear rating
-  const formatRating = (rating: number): string => {
-    return rating > 0 ? rating.toFixed(1) : '0.0';
-  };
+  // Calcular ingresos del mes
+  const monthlyRevenue = stats?.monthlyRevenue || 0;
+
+  // Calcular nuevas reservas de la semana
+  const weekStart = startOfWeek(today, { weekStartsOn: 1 });
+  const weekBookings = upcomingAppointments.filter(
+    (apt) => new Date(apt.createdAt) >= weekStart
+  ).length;
+
+  // Citas próximas de hoy
+  const todayAppointments = upcomingAppointments.filter(
+    (apt) =>
+      format(new Date(apt.start_date_local), 'yyyy-MM-dd') ===
+      format(today, 'yyyy-MM-dd')
+  ).length;
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-[#201d12] flex flex-col">
       {/* Header */}
-      <div className="mb-6 md:mb-8">
-        <h1 className="font-playfair text-3xl md:text-4xl lg:text-5xl font-bold text-primary-800 mb-2">
-          ¡Hola, {user?.name}!
-        </h1>
-        <p className="text-neutral-600 font-poppins">
-          Gestiona tu negocio desde aquí
-        </p>
-      </div>
+      <DashboardHeader />
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
-        {isLoading ? (
-          // Loading skeleton
-          <>
-            {[1, 2, 3, 4].map((i) => (
-              <div
-                key={i}
-                className="bg-white rounded-3xl p-5 md:p-6 border border-neutral-100 animate-pulse"
-              >
-                <div className="h-12 w-12 bg-neutral-200 rounded-full mb-4"></div>
-                <div className="h-6 bg-neutral-200 rounded mb-2"></div>
-                <div className="h-8 bg-neutral-200 rounded w-1/2"></div>
-              </div>
-            ))}
-          </>
-        ) : (
-          <>
-            <StatCard
-              icon="📅"
-              label="Citas Hoy"
-              value={stats?.appointmentsToday?.toString() || '0'}
-              trend={stats?.appointmentsTodayTrend}
-            />
-            <StatCard
-              icon="💰"
-              label="Ingresos del Mes"
-              value={formatCurrency(stats?.monthlyRevenue || 0)}
-              trend={stats?.monthlyRevenueTrend}
-            />
-            <StatCard
-              icon="⭐"
-              label="Rating Promedio"
-              value={formatRating(stats?.averageRating || 0)}
-            />
-            <StatCard
-              icon="👥"
-              label="Clientes Activos"
-              value={stats?.activeClients?.toString() || '0'}
-            />
-          </>
-        )}
-      </div>
-
-      {/* Quick Actions */}
-      <div className="mb-6 md:mb-8">
-        <h2 className="font-playfair text-2xl md:text-3xl font-bold text-primary-800 mb-4 md:mb-6">
-          Gestión Rápida
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-          <QuickActionCard
-            icon="⏳"
-            title="Citas Pendientes"
-            description="Revisa citas que necesitan confirmación"
-            href="/provider/appointments?status=pending"
+      {/* Contenido principal */}
+      <div className="flex-1 px-4 py-6 pb-20 md:pb-6 md:px-8 space-y-6">
+        {/* Cards de Métricas - Grid 2x2 en mobile, 4 columnas en desktop */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+          <MetricCard
+            title="Citas Próximas Hoy"
+            value={todayAppointments || stats?.appointmentsToday || 0}
           />
-          <QuickActionCard
-            icon="➕"
-            title="Nuevo Servicio"
-            description="Agrega un nuevo servicio a tu catálogo"
-            href="/provider/services/new"
+          <MetricCard
+            title="Ingresos del Mes"
+            value={formatCurrency(monthlyRevenue)}
           />
-          <QuickActionCard
-            icon="👤"
-            title="Nuevo Empleado"
-            description="Registra un nuevo miembro del equipo"
-            href="/provider/employees/new"
+          <MetricCard
+            title="Calificación Promedio"
+            value={
+              stats?.averageRating
+                ? `${stats.averageRating.toFixed(1)} / 5`
+                : '0.0 / 5'
+            }
           />
-          <QuickActionCard
-            icon="📆"
-            title="Calendario"
-            description="Vista mensual de todas tus citas"
-            href="/provider/appointments/calendar"
-          />
-          <QuickActionCard
-            icon="📈"
-            title="Reportes"
-            description="Reportes financieros y de rendimiento"
-            href="/provider/reports"
-          />
-          <QuickActionCard
-            icon="🎁"
-            title="Promociones"
-            description="Gestiona ofertas y promociones"
-            href="/provider/promotions"
-          />
-          <QuickActionCard
-            icon="💼"
-            title="Mis Servicios"
-            description="Administra tu catálogo de servicios"
-            href="/provider/services"
-            variant="secondary"
-          />
-          <QuickActionCard
-            icon="📅"
-            title="Citas"
-            description="Gestiona reservas y confirmaciones"
-            href="/provider/appointments"
-            variant="secondary"
-          />
-          <QuickActionCard
-            icon="👥"
-            title="Empleados"
-            description="Administra tu equipo de trabajo"
-            href="/provider/employees"
-            variant="secondary"
-          />
-          <QuickActionCard
-            icon="⏰"
-            title="Horarios"
-            description="Configura disponibilidad y bloqueos"
-            href="/provider/schedule"
-            variant="secondary"
-          />
-          <QuickActionCard
-            icon="📊"
-            title="Analíticas"
-            description="Ve estadísticas de tu negocio"
-            href="/provider/analytics"
-            variant="secondary"
-          />
-          <QuickActionCard
-            icon="⭐"
-            title="Reseñas"
-            description="Lee comentarios de tus clientes"
-            href="/provider/reviews"
-            variant="secondary"
+          <MetricCard
+            title="Nuevas Reservas (Semana)"
+            value={weekBookings}
           />
         </div>
-      </div>
 
-      {/* Coming Soon Section */}
-      <div className="bg-white rounded-2xl p-6 md:p-8 border border-neutral-200">
-        <div className="flex items-start gap-4">
-          <div className="text-4xl">🚀</div>
-          <div>
-            <h3 className="font-playfair text-xl font-bold text-primary-800 mb-2">
-              Dashboard en Desarrollo
-            </h3>
-            <p className="text-neutral-600 font-poppins mb-4">
-              Próximamente tendrás acceso a reportes avanzados, gráficos de
-              rendimiento, comparativas mensuales y herramientas de marketing
-              para impulsar tu negocio.
-            </p>
+        {/* Layout de dos columnas en desktop */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Columna izquierda */}
+          <div className="space-y-6">
+            {/* Calendario de Citas */}
+            <AppointmentCalendar />
+          </div>
+
+          {/* Columna derecha */}
+          <div className="space-y-6">
+            {/* Tendencias de Ingresos */}
+            <IncomeTrends />
           </div>
         </div>
+
+        {/* Actividad Reciente - Ancho completo */}
+        <RecentActivity />
       </div>
     </div>
   );

@@ -10,7 +10,7 @@ import {
   Calendar,
   Heart,
   User,
-  Users,
+  Bell,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -77,15 +77,9 @@ export function BottomTabBar({ role }: BottomTabBarProps): ReactNode {
   const providerTabs: TabItem[] = [
     {
       icon: Home,
-      label: 'Inicio',
+      label: 'Dashboard',
       href: '/provider',
       activePatterns: ['/provider$'],
-    },
-    {
-      icon: Briefcase,
-      label: 'Servicios',
-      href: '/provider/services',
-      activePatterns: ['/provider/services'],
     },
     {
       icon: Calendar,
@@ -94,14 +88,20 @@ export function BottomTabBar({ role }: BottomTabBarProps): ReactNode {
       activePatterns: ['/provider/appointments'],
     },
     {
-      icon: Users,
-      label: 'Equipo',
-      href: '/provider/employees',
-      activePatterns: ['/provider/employees'],
+      icon: Bell,
+      label: 'Notificaciones',
+      href: '/provider/notifications',
+      activePatterns: ['/provider/notifications'],
+    },
+    {
+      icon: ShoppingBag,
+      label: 'Mi Negocio',
+      href: '/provider/business',
+      activePatterns: ['/provider/business'],
     },
     {
       icon: User,
-      label: 'Perfil',
+      label: 'Ajustes',
       href: '/provider/profile',
       activePatterns: ['/provider/profile'],
     },

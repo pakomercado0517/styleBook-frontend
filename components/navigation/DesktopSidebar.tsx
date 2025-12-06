@@ -17,6 +17,7 @@ import {
   BarChart3,
   Star,
   LogOut,
+  Bell,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -98,6 +99,12 @@ export function DesktopSidebar({ role }: DesktopSidebarProps): ReactNode {
       activePatterns: ['/provider/appointments'],
     },
     {
+      icon: ShoppingBag,
+      label: 'Mi Negocio',
+      href: '/provider/business',
+      activePatterns: ['/provider/business'],
+    },
+    {
       icon: Users,
       label: 'Empleados',
       href: '/provider/employees',
@@ -120,6 +127,12 @@ export function DesktopSidebar({ role }: DesktopSidebarProps): ReactNode {
       label: 'Reseñas',
       href: '/provider/reviews',
       activePatterns: ['/provider/reviews'],
+    },
+    {
+      icon: Bell,
+      label: 'Notificaciones',
+      href: '/provider/notifications',
+      activePatterns: ['/provider/notifications'],
     },
     {
       icon: User,

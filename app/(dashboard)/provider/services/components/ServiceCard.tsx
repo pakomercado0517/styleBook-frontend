@@ -1,8 +1,9 @@
+'use client';
+
 import type { ReactNode } from 'react';
 import Image from 'next/image';
-import { Button } from '@/components/Button';
-import { Badge } from '@/components/Badge';
-import { useUpdateService, useDeleteService } from '@/lib/hooks/useServices';
+import { Clock, Pencil, Trash2 } from 'lucide-react';
+import { useDeleteService } from '@/lib/hooks/useServices';
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -22,22 +23,16 @@ interface ServiceCardProps {
 }
 
 /**
- * Card de servicio con acciones
+ * Card de servicio - Diseño responsive
+ * Mobile: diseño compacto sin imagen
+ * Desktop: diseño con imagen, título grande, descripción completa
  */
 export function ServiceCard({
   service,
   onEdit,
 }: ServiceCardProps): ReactNode {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const updateService = useUpdateService();
   const deleteService = useDeleteService();
-
-  const handleToggleActive = (): void => {
-    updateService.mutate({
-      serviceId: service.id,
-      data: { is_active: !service.is_active },
-    });
-  };
 
   const handleDelete = (): void => {
     deleteService.mutate(service.id, {
@@ -64,119 +59,175 @@ export function ServiceCard({
     return mins > 0 ? `${hours}h ${mins}min` : `${hours}h`;
   };
 
-  const getCategoryLabel = (category: string): string => {
-    const labels: Record<string, string> = {
-      corte: 'Corte',
-      tinte: 'Tinte',
-      peinado: 'Peinado',
-      manicure: 'Manicure',
-      pedicure: 'Pedicure',
-      tratamiento_capilar: 'Tratamiento Capilar',
-      barba: 'Barba',
-      afeitado: 'Afeitado',
-      masaje: 'Masaje',
-      facial: 'Facial',
-      corporal: 'Corporal',
-      aromaterapia: 'Aromaterapia',
-      limpieza_dental: 'Limpieza Dental',
-      estetica_dental: 'Estética Dental',
-    };
-    return labels[category] || category;
-  };
-
   return (
-    <div className="bg-white rounded-2xl border-2 border-neutral-200 p-6 hover:border-accent-500/30 hover:shadow-2xl hover:shadow-accent-500/10 transition-all duration-300">
-      {/* Image */}
-      {service.image_url ? (
-        <div className="relative w-full h-48 rounded-xl overflow-hidden mb-4">
-          <Image
-            src={service.image_url}
-            alt={service.name}
-            fill
-            className="object-cover"
-          />
-        </div>
-      ) : (
-        <div className="w-full h-48 bg-gradient-to-br from-primary-800 to-primary-900 rounded-xl mb-4 flex items-center justify-center">
-          <span className="text-white text-4xl font-playfair">
-            {service.name.charAt(0).toUpperCase()}
-          </span>
-        </div>
-      )}
-
-      {/* Content */}
-      <div className="mb-4">
-        <div className="flex items-start justify-between mb-2">
-          <h3 className="font-playfair text-xl font-bold text-primary-800 flex-1">
+    <div className="bg-white/5 rounded-xl overflow-hidden border border-white/10">
+      {/* Mobile: Diseño compacto */}
+      <div className="md:hidden p-4">
+        {/* Header con título */}
+        <div className="mb-3">
+          <h3 className="text-base font-bold text-white font-poppins mb-2">
             {service.name}
           </h3>
-          <Badge
-            variant={service.is_active ? 'primary' : 'secondary'}
-            className="ml-2"
-          >
-            {service.is_active ? 'Activo' : 'Inactivo'}
-          </Badge>
+          <p className="text-sm text-white font-poppins leading-relaxed">
+            {service.description}
+          </p>
         </div>
-        <p className="text-sm text-neutral-600 mb-3 line-clamp-2">
-          {service.description}
-        </p>
-        <div className="flex items-center gap-4 text-sm text-neutral-500">
-          <span>{getCategoryLabel(service.category)}</span>
-          <span>•</span>
-          <span>{formatDuration(service.duration_minutes)}</span>
-          <span>•</span>
-          <span className="font-bold text-accent-600">
+
+        {/* Duración y Precio */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Clock className="w-4 h-4" style={{ color: '#D4AF37' }} strokeWidth={2} />
+            <span className="text-sm text-white font-poppins">
+              {formatDuration(service.duration_minutes)}
+            </span>
+          </div>
+          <span
+            className="text-base font-semibold font-poppins"
+            style={{ color: '#D4AF37' }}
+          >
             {formatPrice(service.price)}
           </span>
         </div>
+
+        {/* Acciones */}
+        <div className="flex items-center gap-4 pt-3 border-t border-white/10">
+          <button
+            onClick={() => onEdit(service.id)}
+            className="flex items-center gap-2 text-sm font-medium text-white font-poppins hover:text-neutral-300 transition-colors"
+            type="button"
+          >
+            <Pencil className="w-4 h-4" strokeWidth={2} />
+            <span>Editar</span>
+          </button>
+          <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+            <AlertDialogTrigger asChild>
+              <button
+                className="flex items-center gap-2 text-sm font-medium text-red-400 font-poppins hover:text-red-300 transition-colors"
+                type="button"
+              >
+                <Trash2 className="w-4 h-4" strokeWidth={2} />
+                <span>Eliminar</span>
+              </button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>¿Eliminar servicio?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Esta acción no se puede deshacer. El servicio "{service.name}" será
+                  eliminado permanentemente.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel onClick={() => setIsDeleteDialogOpen(false)}>
+                  Cancelar
+                </AlertDialogCancel>
+                <button
+                  onClick={handleDelete}
+                  disabled={deleteService.isPending}
+                  className="px-4 py-2 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-700 transition-colors disabled:opacity-50"
+                  type="button"
+                >
+                  {deleteService.isPending ? 'Eliminando...' : 'Eliminar'}
+                </button>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
       </div>
 
-      {/* Actions */}
-      <div className="flex gap-2">
-        <Button
-          variant="outline"
-          size="md"
-          onClick={() => onEdit(service.id)}
-          className="flex-1"
-        >
-          ✏️ Editar
-        </Button>
-        <Button
-          variant={service.is_active ? 'secondary' : 'primary'}
-          size="md"
-          onClick={handleToggleActive}
-          disabled={updateService.isPending}
-        >
-          {service.is_active ? '⏸️' : '▶️'}
-        </Button>
-        <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-          <AlertDialogTrigger asChild>
-            <Button variant="outline" size="md">
-              🗑️
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>¿Eliminar servicio?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Esta acción no se puede deshacer. El servicio "{service.name}" será
-                eliminado permanentemente.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel onClick={() => setIsDeleteDialogOpen(false)}>
-                Cancelar
-              </AlertDialogCancel>
-              <Button
-                variant="primary"
-                onClick={handleDelete}
-                disabled={deleteService.isPending}
-              >
-                {deleteService.isPending ? 'Eliminando...' : 'Eliminar'}
-              </Button>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+      {/* Desktop: Diseño con imagen */}
+      <div className="hidden md:block">
+        {/* Imagen */}
+        {service.image_url ? (
+          <div className="relative w-full h-64">
+            <Image
+              src={service.image_url}
+              alt={service.name}
+              fill
+              className="object-cover"
+            />
+          </div>
+        ) : (
+          <div className="w-full h-64 bg-gradient-to-br from-primary-800 to-primary-900 flex items-center justify-center">
+            <span className="text-white text-6xl font-playfair">
+              {service.name.charAt(0).toUpperCase()}
+            </span>
+          </div>
+        )}
+
+        {/* Contenido */}
+        <div className="p-6">
+          {/* Título */}
+          <h3 className="text-2xl font-bold text-white font-poppins mb-3">
+            {service.name}
+          </h3>
+
+          {/* Descripción */}
+          <p className="text-base text-white font-poppins mb-4 leading-relaxed">
+            {service.description}
+          </p>
+
+          {/* Duración y Precio */}
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Clock className="w-5 h-5" style={{ color: '#D4AF37' }} strokeWidth={2} />
+              <span className="text-base text-white font-poppins">
+                {formatDuration(service.duration_minutes)}
+              </span>
+            </div>
+            <span
+              className="text-xl font-semibold font-poppins"
+              style={{ color: '#D4AF37' }}
+            >
+              {formatPrice(service.price)}
+            </span>
+          </div>
+
+          {/* Acciones: Editar y Eliminar */}
+          <div className="flex items-center justify-end gap-4 pt-4 border-t border-white/10">
+            <button
+              onClick={() => onEdit(service.id)}
+              className="flex items-center gap-2 text-sm font-medium text-white font-poppins hover:text-neutral-300 transition-colors"
+              type="button"
+            >
+              <Pencil className="w-4 h-4" strokeWidth={2} />
+              <span>Editar</span>
+            </button>
+            <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+              <AlertDialogTrigger asChild>
+                <button
+                  className="flex items-center gap-2 text-sm font-medium text-red-400 font-poppins hover:text-red-300 transition-colors"
+                  type="button"
+                >
+                  <Trash2 className="w-4 h-4" strokeWidth={2} />
+                  <span>Eliminar</span>
+                </button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>¿Eliminar servicio?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Esta acción no se puede deshacer. El servicio "{service.name}" será
+                    eliminado permanentemente.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel onClick={() => setIsDeleteDialogOpen(false)}>
+                    Cancelar
+                  </AlertDialogCancel>
+                  <button
+                    onClick={handleDelete}
+                    disabled={deleteService.isPending}
+                    className="px-4 py-2 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-700 transition-colors disabled:opacity-50"
+                    type="button"
+                  >
+                    {deleteService.isPending ? 'Eliminando...' : 'Eliminar'}
+                  </button>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        </div>
       </div>
     </div>
   );

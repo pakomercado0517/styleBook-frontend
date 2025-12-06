@@ -1,8 +1,8 @@
+'use client';
+
 import type { ReactNode } from 'react';
 import { BottomTabBar } from '@/components/navigation/BottomTabBar';
-import { MobileHeader } from '@/components/navigation/MobileHeader';
 import { DesktopSidebar } from '@/components/navigation/DesktopSidebar';
-import { DesktopTopBar } from '@/components/navigation/DesktopTopBar';
 
 interface ProviderLayoutProps {
   children: ReactNode;
@@ -10,33 +10,29 @@ interface ProviderLayoutProps {
 
 /**
  * Layout principal para dashboard de proveedor
- * - Móvil: Header sticky + contenido + Bottom Tab Bar
- * - Desktop: Sidebar + Top Bar + contenido
+ * - Móvil: Contenido + Bottom Tab Bar (sin MobileHeader)
+ * - Desktop: Sidebar + contenido
  */
 export default function ProviderLayout({
   children,
 }: ProviderLayoutProps): ReactNode {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-neutral-50 to-neutral-100">
-      {/* Mobile: Header */}
-      <MobileHeader />
+    <div className="min-h-screen bg-[#201d12]">
 
       {/* Desktop: Sidebar + Content Area */}
       <div className="hidden md:flex h-screen">
         <DesktopSidebar role="provider" />
 
         <div className="flex-1 flex flex-col overflow-hidden">
-          <DesktopTopBar />
-
           {/* Main Content - Scrollable */}
-          <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
+          <main className="flex-1 overflow-y-auto bg-[#201d12]">
             {children}
           </main>
         </div>
       </div>
 
       {/* Mobile: Main Content con padding bottom para el tab bar */}
-      <main className="md:hidden pb-20 min-h-[calc(100vh-3.5rem)]">
+      <main className="md:hidden pb-20 min-h-[calc(100vh-3.5rem)] bg-[#201d12]">
         {children}
       </main>
 
