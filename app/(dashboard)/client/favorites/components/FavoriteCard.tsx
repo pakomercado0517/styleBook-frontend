@@ -28,7 +28,7 @@ export const FavoriteCard = ({ favorite }: FavoriteCardProps): ReactNode => {
     const service = favorite.service;
     const serviceImage = service.image_url;
     const rating = service.provider?.average_rating || 0;
-    const reviewsCount = 124; // Valor por defecto, se podría obtener del backend
+    const reviewsCount: number = 124; // Valor por defecto, se podría obtener del backend
 
     const handleToggleFavorite = (e: React.MouseEvent): void => {
       e.stopPropagation();
@@ -201,7 +201,7 @@ export const FavoriteCard = ({ favorite }: FavoriteCardProps): ReactNode => {
     const providerImage = (provider as { cover_url?: string; avatar_url?: string })?.cover_url || 
                           (provider as { cover_url?: string; avatar_url?: string })?.avatar_url;
     const rating = provider.average_rating || 0;
-    const reviewsCount = 88; // Valor por defecto, se podría obtener del backend
+    const reviewsCount: number = 88; // Valor por defecto, se podría obtener del backend
 
     const handleToggleFavorite = (e: React.MouseEvent): void => {
       e.stopPropagation();

@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react';
 import Link from 'next/link';
-import { Bell, User } from 'lucide-react';
+import { Bell } from 'lucide-react';
 import { useAuth } from '@/lib/hooks/useAuth';
 
 interface DesktopContentHeaderProps {
@@ -17,7 +17,6 @@ export function DesktopContentHeader({
   title,
 }: DesktopContentHeaderProps): ReactNode {
   const { user } = useAuth();
-  const userName = user?.name?.split(' ')[0] || 'Usuario';
 
   return (
     <header className="hidden md:flex items-center justify-between pb-6 mb-6 border-b border-white/10">
@@ -47,18 +46,9 @@ export function DesktopContentHeader({
             className="flex items-center hover:opacity-80 transition-opacity"
           >
             <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center border-2 border-white/30">
-              {user.photo_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={user.photo_url}
-                  alt={`${userName}'s profile picture`}
-                  className="w-full h-full rounded-full object-cover"
-                />
-              ) : (
-                <span className="text-white font-semibold text-sm">
-                  {user.name.charAt(0).toUpperCase()}
-                </span>
-              )}
+              <span className="text-white font-semibold text-sm">
+                {user.name.charAt(0).toUpperCase()}
+              </span>
             </div>
           </Link>
         )}

@@ -18,48 +18,8 @@ export const ServiceFilters = ({
   selectedSort,
   onSortChange,
 }: ServiceFiltersProps): ReactNode => {
-  const categories: Array<{
-    value: ServiceCategory | 'all';
-    label: string;
-    icon: string;
-  }> = [
-    { value: 'all', label: 'Todos', icon: '✨' },
-    { value: 'corte', label: 'Corte', icon: '✂️' },
-    { value: 'tinte', label: 'Tinte', icon: '🎨' },
-    { value: 'peinado', label: 'Peinado', icon: '💇' },
-    { value: 'tratamiento_capilar', label: 'Tratamiento Capilar', icon: '💆' },
-    { value: 'barba', label: 'Barba', icon: '🧔' },
-    { value: 'afeitado', label: 'Afeitado', icon: '🪒' },
-    { value: 'manicure', label: 'Manicure', icon: '💅' },
-    { value: 'pedicure', label: 'Pedicure', icon: '🦶' },
-    { value: 'facial', label: 'Facial', icon: '🧖' },
-    { value: 'corporal', label: 'Corporal', icon: '🧘' },
-    { value: 'masaje', label: 'Masaje', icon: '💆‍♀️' },
-    { value: 'aromaterapia', label: 'Aromaterapia', icon: '🌸' },
-    { value: 'limpieza_dental', label: 'Limpieza Dental', icon: '🦷' },
-    { value: 'estetica_dental', label: 'Estética Dental', icon: '🦷✨' },
-  ];
-
-  const sortOptions = [
-    { value: 'newest', label: 'Más recientes' },
-    { value: 'price_asc', label: 'Menor precio' },
-    { value: 'price_desc', label: 'Mayor precio' },
-    { value: 'rating', label: 'Mejor valorados' },
-    { value: 'name', label: 'Nombre A-Z' },
-  ];
-
   const handleCategoryClick = (category: ServiceCategory | 'all'): void => {
     onCategoryChange(category);
-  };
-
-  const handleCategoryKeyDown = (
-    e: React.KeyboardEvent,
-    category: ServiceCategory | 'all'
-  ): void => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      handleCategoryClick(category);
-    }
   };
 
   // Crear chips de filtros (Todos, Categoría, Ubicación, Precio, Calificación)

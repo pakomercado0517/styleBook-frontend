@@ -7,10 +7,6 @@ interface ServicesListProps {
   services: Service[];
   isLoading?: boolean;
   onSelectService?: (serviceId: number) => void;
-  onToggleFavorite?: (serviceId: number) => void;
-  favoriteIds?: number[];
-  onToggleProviderFavorite?: (providerId: number) => void;
-  favoriteProviderIds?: number[];
 }
 
 /**
@@ -21,10 +17,6 @@ export const ServicesList = ({
   services,
   isLoading = false,
   onSelectService,
-  onToggleFavorite,
-  favoriteIds = [],
-  onToggleProviderFavorite,
-  favoriteProviderIds = [],
 }: ServicesListProps): ReactNode => {
   // Loading state
   if (isLoading) {
@@ -69,14 +61,6 @@ export const ServicesList = ({
           key={service.id}
           service={service}
           onSelect={onSelectService}
-          onToggleFavorite={onToggleFavorite}
-          isFavorite={favoriteIds.includes(service.id)}
-          onToggleProviderFavorite={onToggleProviderFavorite}
-          isProviderFavorite={
-            service.provider
-              ? favoriteProviderIds.includes(service.provider.id)
-              : false
-          }
         />
       ))}
     </div>

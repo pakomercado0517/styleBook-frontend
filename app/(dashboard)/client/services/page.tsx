@@ -7,9 +7,6 @@ import { useQuery } from '@tanstack/react-query';
 import type { Service, ServiceCategory } from '@/lib/types/services';
 import { getServices, getServicesByProvider } from '@/lib/api/services';
 import {
-  useFavoriteServiceIds,
-  useFavoriteProviderIds,
-  useFavoriteMutations,
 } from '@/lib/hooks/useFavorites';
 import { ServiceSearch } from './components/ServiceSearch';
 import { ServiceFilters } from './components/ServiceFilters';
@@ -122,25 +119,7 @@ function ServicesPageContent(): ReactNode {
     router.push(`/client/book/${serviceId}`);
   };
 
-  // Obtener IDs de servicios favoritos
-  const favoriteServiceIds = useFavoriteServiceIds();
 
-  // Obtener IDs de proveedores favoritos
-  const favoriteProviderIds = useFavoriteProviderIds();
-
-  // Hook de mutaciones de favoritos (sin ejecutar queries innecesarias)
-  const { toggleServiceFavorite, toggleProviderFavorite } =
-    useFavoriteMutations();
-
-  const handleToggleFavorite = (serviceId: number): void => {
-    const isFavorite = favoriteServiceIds.includes(serviceId);
-    toggleServiceFavorite(serviceId, isFavorite);
-  };
-
-  const handleToggleProviderFavorite = (providerId: number): void => {
-    const isFavorite = favoriteProviderIds.includes(providerId);
-    toggleProviderFavorite(providerId, isFavorite);
-  };
 
   // Extraer servicios y metadata - ESTRUCTURA ACTUALIZADA
   const services: Service[] = servicesResponse?.data?.data || [];
@@ -189,15 +168,11 @@ function ServicesPageContent(): ReactNode {
 
       {/* Cards Section */}
       <main className="flex flex-col gap-4 px-4 pb-6">
-        <ServicesList
-          services={services}
-          isLoading={isLoading}
-          onSelectService={handleSelectService}
-          onToggleFavorite={handleToggleFavorite}
-          favoriteIds={favoriteServiceIds}
-          onToggleProviderFavorite={handleToggleProviderFavorite}
-          favoriteProviderIds={favoriteProviderIds}
-        />
+          <ServicesList
+            services={services}
+            isLoading={isLoading}
+            onSelectService={handleSelectService}
+          />
       </main>
 
       {/* Error state */}

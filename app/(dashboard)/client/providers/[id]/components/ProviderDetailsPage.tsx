@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, Star, MapPin, Clock, Plus, Heart, Share2 } from 'lucide-react';
 import { useProvider } from '@/lib/hooks/useProviders';
-import { useProviderServices } from '@/lib/hooks/useServices';
 import { getServicesByProvider } from '@/lib/api/services';
 import type { Service } from '@/lib/types/services';
 
@@ -42,7 +41,7 @@ export const ProviderDetailsPage = ({
   const services: Service[] = servicesResponse?.data?.data || [];
   const providerImage = provider?.cover_url || provider?.avatar_url;
   const rating = provider?.average_rating || 0;
-  const reviewsCount = 215; // Valor por defecto, se podría obtener del backend
+  const reviewsCount: number = 215; // Valor por defecto, se podría obtener del backend
 
   const handleBack = (): void => {
     router.back();

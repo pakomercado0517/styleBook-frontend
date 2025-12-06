@@ -7,10 +7,6 @@ import type { Service } from '@/lib/types/services';
 interface ServiceCardProps {
   service: Service;
   onSelect?: (serviceId: number) => void;
-  onToggleFavorite?: (serviceId: number) => void;
-  isFavorite?: boolean;
-  onToggleProviderFavorite?: (providerId: number) => void;
-  isProviderFavorite?: boolean;
 }
 
 /**
@@ -20,16 +16,9 @@ interface ServiceCardProps {
 export const ServiceCard = ({
   service,
   onSelect,
-  onToggleFavorite,
-  isFavorite = false,
-  onToggleProviderFavorite,
-  isProviderFavorite = false,
 }: ServiceCardProps): ReactNode => {
   const router = useRouter();
   const canSelect = onSelect !== undefined;
-  const canFavorite = onToggleFavorite !== undefined;
-  const canFavoriteProvider =
-    onToggleProviderFavorite !== undefined && service.provider !== undefined;
 
   const handleCardClick = (): void => {
     if (canSelect) {
@@ -37,20 +26,6 @@ export const ServiceCard = ({
     } else {
       // Navegar a la página de detalles del servicio
       router.push(`/client/services/${service.id}`);
-    }
-  };
-
-  const handleFavoriteClick = (e: React.MouseEvent): void => {
-    e.stopPropagation();
-    if (canFavorite) {
-      onToggleFavorite(service.id);
-    }
-  };
-
-  const handleProviderFavoriteClick = (e: React.MouseEvent): void => {
-    e.stopPropagation();
-    if (canFavoriteProvider && service.provider) {
-      onToggleProviderFavorite(service.provider.id);
     }
   };
 

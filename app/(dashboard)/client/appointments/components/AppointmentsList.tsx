@@ -33,7 +33,15 @@ export const AppointmentsList = ({
   const limit = 12;
 
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['appointments', status, startDate, endDate, currentPage, isUpcoming, searchQuery],
+    queryKey: [
+      'appointments',
+      status,
+      startDate,
+      endDate,
+      currentPage,
+      isUpcoming,
+      searchQuery,
+    ],
     queryFn: async () => {
       const params: {
         limit: number;
@@ -133,7 +141,7 @@ export const AppointmentsList = ({
   }
 
   const { appointments, pagination } = data.data;
-  const { total, pages } = pagination;
+  const { pages } = pagination;
   const hasResults = appointments.length > 0;
   const hasPagination = pages > 1;
 

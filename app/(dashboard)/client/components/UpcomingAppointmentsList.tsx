@@ -21,7 +21,7 @@ import {
 import type { LucideIcon } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { getAppointments } from '@/lib/api/appointments';
-import { formatDateShortEn, formatTime12h, isToday } from '@/lib/utils/dateUtils';
+import { formatDateShortEn, isToday } from '@/lib/utils/dateUtils';
 import type { Appointment } from '@/lib/types/appointments';
 import type { ServiceCategory } from '@/lib/types/services';
 

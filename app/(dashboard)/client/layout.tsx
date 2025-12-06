@@ -2,7 +2,6 @@ import type { ReactNode } from 'react';
 import { BottomTabBar } from '@/components/navigation/BottomTabBar';
 import { MobileHeader } from '@/components/navigation/MobileHeader';
 import { DesktopSidebar } from '@/components/navigation/DesktopSidebar';
-import { DesktopTopBar } from '@/components/navigation/DesktopTopBar';
 
 interface ClientLayoutProps {
   children: ReactNode;

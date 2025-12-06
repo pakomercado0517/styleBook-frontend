@@ -2,10 +2,10 @@
 
 import type { ReactNode } from 'react';
 import { useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { ArrowLeft, ChevronLeft, ChevronRight, Clock, User } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { ArrowLeft, ChevronLeft, ChevronRight, Clock } from 'lucide-react';
 import { DayPicker } from 'react-day-picker';
-import { format, startOfMonth, endOfMonth, isSameDay, addMonths, subMonths } from 'date-fns';
+import { format, addMonths, subMonths } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useService } from '@/lib/hooks/useServices';
 import { useAvailabilityByEmployee } from '@/lib/hooks/useAvailability';
@@ -27,7 +27,6 @@ export function SelectDateTimeStep({
   employeeId,
 }: SelectDateTimeStepProps): ReactNode {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());

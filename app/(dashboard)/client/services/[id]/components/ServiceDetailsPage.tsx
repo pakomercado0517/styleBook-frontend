@@ -360,10 +360,15 @@ export function ServiceDetailsPage({ serviceId }: ServiceDetailsPageProps): Reac
               <h2 className="text-xl font-semibold text-white font-playfair">Proveedor</h2>
               <div className="flex items-start gap-4">
                 <div className="h-16 w-16 rounded-lg bg-white/10 flex items-center justify-center overflow-hidden">
-                  {service.provider.image_url ? (
+                  {(service.provider as { avatar_url?: string; cover_url?: string })?.avatar_url ||
+                  (service.provider as { avatar_url?: string; cover_url?: string })?.cover_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
-                      src={service.provider.image_url}
+                      src={
+                        (service.provider as { avatar_url?: string; cover_url?: string })?.avatar_url ||
+                        (service.provider as { avatar_url?: string; cover_url?: string })?.cover_url ||
+                        ''
+                      }
                       alt={`Logo de ${service.provider.business_name}`}
                       className="h-full w-full object-cover"
                     />
@@ -432,4 +437,5 @@ export function ServiceDetailsPage({ serviceId }: ServiceDetailsPageProps): Reac
     </div>
   );
 }
+
 

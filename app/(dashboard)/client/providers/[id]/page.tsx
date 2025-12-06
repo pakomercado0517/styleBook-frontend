@@ -31,3 +31,4 @@ export default function ProviderDetailPage({
   return <ProviderDetailsPage providerId={providerId} />;
 }
 
+

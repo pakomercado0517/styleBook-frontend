@@ -20,8 +20,8 @@ export function RecommendedServicesCarousel(): ReactNode {
       if (!result.success) {
         return { services: [] };
       }
-      // La respuesta puede venir en diferentes formatos según el backend
-      const servicesData = result.data?.data?.services || result.data?.services || [];
+      // La respuesta viene en formato paginado: { total, count, data: Service[] }
+      const servicesData = result.data?.data?.data || [];
       return { services: servicesData };
     },
     staleTime: 5 * 60 * 1000, // 5 minutos

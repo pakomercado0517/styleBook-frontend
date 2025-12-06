@@ -8,7 +8,6 @@ import { X } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { getAppointment, cancelAppointment } from '@/lib/api/appointments';
-import type { Appointment } from '@/lib/types/appointments';
 
 interface AppointmentDetailsSidebarProps {
   appointmentId: number;
@@ -46,18 +45,22 @@ export const AppointmentDetailsSidebar = ({
     staleTime: 5 * 60 * 1000,
   });
 
-  const { mutate: handleCancelMutation, isPending: isCancelling } = useMutation({
-    mutationFn: () => cancelAppointment(appointmentId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['appointments'] });
-      queryClient.invalidateQueries({ queryKey: ['appointment', appointmentId] });
-      toast.success('Cita cancelada exitosamente');
-      onClose();
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || 'Error al cancelar la cita');
-    },
-  });
+  const { mutate: handleCancelMutation, isPending: isCancelling } = useMutation(
+    {
+      mutationFn: () => cancelAppointment(appointmentId),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['appointments'] });
+        queryClient.invalidateQueries({
+          queryKey: ['appointment', appointmentId],
+        });
+        toast.success('Cita cancelada exitosamente');
+        onClose();
+      },
+      onError: (error: Error) => {
+        toast.error(error.message || 'Error al cancelar la cita');
+      },
+    }
+  );
 
   if (isLoading) {
     return (
@@ -78,7 +81,8 @@ export const AppointmentDetailsSidebar = ({
   }
 
   // Información del servicio
-  const serviceName = appointment.service?.name || `Servicio #${appointment.service_id}`;
+  const serviceName =
+    appointment.service?.name || `Servicio #${appointment.service_id}`;
   const serviceImage = appointment.service?.image_url;
 
   // Información del proveedor
@@ -87,8 +91,10 @@ export const AppointmentDetailsSidebar = ({
 
   // Formatear fecha y hora
   const appointmentDate = new Date(appointment.start_date_local);
-  const formattedDate = format(appointmentDate, "EEEE, d 'de' MMMM", { locale: es });
-  const formattedTime = format(appointmentDate, "HH:mm", { locale: es });
+  const formattedDate = format(appointmentDate, "EEEE, d 'de' MMMM", {
+    locale: es,
+  });
+  const formattedTime = format(appointmentDate, 'HH:mm', { locale: es });
 
   // Estado
   const statusLabel = statusLabels[appointment.status] || appointment.status;
@@ -99,7 +105,9 @@ export const AppointmentDetailsSidebar = ({
 
   const handleReschedule = (): void => {
     if (appointment.service_id) {
-      router.push(`/client/book/${appointment.service_id}?reschedule=${appointment.id}`);
+      router.push(
+        `/client/book/${appointment.service_id}?reschedule=${appointment.id}`
+      );
     }
   };
 
@@ -110,7 +118,9 @@ export const AppointmentDetailsSidebar = ({
       if (appointment.employee_id) {
         params.append('employee', appointment.employee_id.toString());
       }
-      router.push(`/client/book/${appointment.service_id}?${params.toString()}`);
+      router.push(
+        `/client/book/${appointment.service_id}?${params.toString()}`
+      );
     }
   };
 
@@ -124,7 +134,9 @@ export const AppointmentDetailsSidebar = ({
     <div className="flex flex-col">
       {/* Header del sidebar */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 sticky top-0 bg-white/5 z-10">
-        <h2 className="text-xl font-bold text-white font-playfair">Detalles de la Cita</h2>
+        <h2 className="text-xl font-bold text-white font-playfair">
+          Detalles de la Cita
+        </h2>
         <button
           onClick={onClose}
           className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-white/10 transition-colors"
@@ -147,7 +159,7 @@ export const AppointmentDetailsSidebar = ({
               className="w-full h-full object-cover"
             />
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-primary-800 to-primary-900 flex items-center justify-center">
+            <div className="w-full h-full bg-linear-to-br from-primary-800 to-primary-900 flex items-center justify-center">
               <span className="text-4xl">💇</span>
             </div>
           )}
@@ -157,13 +169,19 @@ export const AppointmentDetailsSidebar = ({
         <div className="space-y-4">
           {/* Servicio */}
           <div>
-            <p className="text-sm font-semibold text-neutral-400 font-poppins mb-1">Servicio</p>
-            <p className="text-base font-bold text-white font-playfair">{serviceName}</p>
+            <p className="text-sm font-semibold text-neutral-400 font-poppins mb-1">
+              Servicio
+            </p>
+            <p className="text-base font-bold text-white font-playfair">
+              {serviceName}
+            </p>
           </div>
 
           {/* Proveedor */}
           <div>
-            <p className="text-sm font-semibold text-neutral-400 font-poppins mb-1">Proveedor</p>
+            <p className="text-sm font-semibold text-neutral-400 font-poppins mb-1">
+              Proveedor
+            </p>
             <p className="text-base text-white font-poppins">
               {providerName}
               {providerBusinessType && ` en ${providerBusinessType}`}
@@ -182,7 +200,9 @@ export const AppointmentDetailsSidebar = ({
 
           {/* Estado */}
           <div>
-            <p className="text-sm font-semibold text-neutral-400 font-poppins mb-1">Estado</p>
+            <p className="text-sm font-semibold text-neutral-400 font-poppins mb-1">
+              Estado
+            </p>
             <p className="text-base text-white font-poppins">{statusLabel}</p>
           </div>
         </div>
@@ -241,4 +261,3 @@ export const AppointmentDetailsSidebar = ({
     </div>
   );
 };
-

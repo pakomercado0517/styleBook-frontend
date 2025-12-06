@@ -28,18 +28,9 @@ export function MobileHeader(): ReactNode {
               className="flex items-center hover:opacity-80 transition-opacity"
             >
               <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center border-2 border-white/30">
-                {user.photo_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={user.photo_url}
-                    alt={`${userName}'s profile picture`}
-                    className="w-full h-full rounded-full object-cover"
-                  />
-                ) : (
-                  <span className="text-white font-semibold text-sm">
-                    {user.name.charAt(0).toUpperCase()}
-                  </span>
-                )}
+                <span className="text-white font-semibold text-sm">
+                  {user.name.charAt(0).toUpperCase()}
+                </span>
               </div>
             </Link>
           )}

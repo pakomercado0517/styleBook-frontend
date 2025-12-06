@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react';
 import { useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import {
   ArrowLeft,
   User,
@@ -40,22 +40,25 @@ export function ConfirmBookingStep({
   endTime,
 }: ConfirmBookingStepProps): ReactNode {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('credit_card');
+  const [selectedPaymentMethod, setSelectedPaymentMethod] =
+    useState<string>('credit_card');
   const [couponCode, setCouponCode] = useState<string>('');
 
   const { data: service, isLoading: isLoadingService } = useService(serviceId);
-  const { data: employee, isLoading: isLoadingEmployee } = useEmployee(employeeId || 0);
+  const { data: employee, isLoading: isLoadingEmployee } = useEmployee(
+    employeeId || 0
+  );
 
   // Formatear fecha y hora
   const formattedDate = date
     ? format(new Date(date + 'T12:00:00'), "EEEE, d 'de' MMMM", { locale: es })
     : '';
-  const formattedTime = startTime && endTime
-    ? `${format(new Date(startTime), 'hh:mm a', { locale: es })} - ${format(new Date(endTime), 'hh:mm a', { locale: es })}`
-    : startTime
-    ? format(new Date(startTime), 'hh:mm a', { locale: es })
-    : '';
+  const formattedTime =
+    startTime && endTime
+      ? `${format(new Date(startTime), 'hh:mm a', { locale: es })} - ${format(new Date(endTime), 'hh:mm a', { locale: es })}`
+      : startTime
+        ? format(new Date(startTime), 'hh:mm a', { locale: es })
+        : '';
   const formattedTimeShort = startTime
     ? format(new Date(startTime), 'hh:mm a', { locale: es })
     : '';
@@ -129,7 +132,9 @@ export function ConfirmBookingStep({
           >
             <ArrowLeft className="w-5 h-5 text-white" strokeWidth={2} />
           </button>
-          <h1 className="text-xl font-bold text-white font-playfair">Confirmar Reserva</h1>
+          <h1 className="text-xl font-bold text-white font-playfair">
+            Confirmar Reserva
+          </h1>
         </div>
         <div className="flex-1 flex items-center justify-center">
           <p className="text-white font-poppins">Cargando...</p>
@@ -141,7 +146,9 @@ export function ConfirmBookingStep({
   if (!service) {
     return (
       <div className="min-h-screen bg-[#201d12] flex flex-col items-center justify-center px-4">
-        <p className="text-white font-poppins mb-4">No se pudo cargar el servicio.</p>
+        <p className="text-white font-poppins mb-4">
+          No se pudo cargar el servicio.
+        </p>
         <button
           onClick={handleBack}
           className="px-6 py-3 rounded-lg bg-accent-500 text-primary-900 font-semibold font-poppins"
@@ -166,7 +173,9 @@ export function ConfirmBookingStep({
         >
           <ArrowLeft className="w-5 h-5 text-white" strokeWidth={2} />
         </button>
-        <h1 className="text-xl font-bold text-white font-playfair">Confirmar Reserva</h1>
+        <h1 className="text-xl font-bold text-white font-playfair">
+          Confirmar Reserva
+        </h1>
       </div>
 
       {/* Layout Desktop: Dos columnas */}
@@ -184,7 +193,9 @@ export function ConfirmBookingStep({
               <ArrowLeft className="w-5 h-5 text-white" strokeWidth={2} />
             </button>
             <div className="flex items-center gap-2">
-              <span className="text-sm text-neutral-400 font-poppins">Paso 3 de 3</span>
+              <span className="text-sm text-neutral-400 font-poppins">
+                Paso 3 de 3
+              </span>
             </div>
           </div>
 
@@ -233,38 +244,63 @@ export function ConfirmBookingStep({
                     {/* Profesional */}
                     {employee && (
                       <div className="flex items-center gap-2">
-                        <User className="w-4 h-4 text-neutral-400" strokeWidth={2} />
-                        <p className="text-sm text-white font-poppins">{employee.name}</p>
+                        <User
+                          className="w-4 h-4 text-neutral-400"
+                          strokeWidth={2}
+                        />
+                        <p className="text-sm text-white font-poppins">
+                          {employee.name}
+                        </p>
                       </div>
                     )}
 
                     {/* Fecha */}
                     {formattedDate && (
                       <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4 text-neutral-400" strokeWidth={2} />
-                        <p className="text-sm text-white font-poppins">{formattedDate}</p>
+                        <Calendar
+                          className="w-4 h-4 text-neutral-400"
+                          strokeWidth={2}
+                        />
+                        <p className="text-sm text-white font-poppins">
+                          {formattedDate}
+                        </p>
                       </div>
                     )}
 
                     {/* Hora */}
                     {formattedTime && (
                       <div className="flex items-center gap-2">
-                        <Clock className="w-4 h-4 text-neutral-400" strokeWidth={2} />
-                        <p className="text-sm text-white font-poppins">{formattedTime}</p>
+                        <Clock
+                          className="w-4 h-4 text-neutral-400"
+                          strokeWidth={2}
+                        />
+                        <p className="text-sm text-white font-poppins">
+                          {formattedTime}
+                        </p>
                       </div>
                     )}
 
                     {/* Duración */}
                     <div className="flex items-center gap-2">
-                      <Hourglass className="w-4 h-4 text-neutral-400" strokeWidth={2} />
-                      <p className="text-sm text-white font-poppins">{formattedDuration}</p>
+                      <Hourglass
+                        className="w-4 h-4 text-neutral-400"
+                        strokeWidth={2}
+                      />
+                      <p className="text-sm text-white font-poppins">
+                        {formattedDuration}
+                      </p>
                     </div>
                   </div>
 
                   {/* Precio Total */}
                   <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/10">
-                    <p className="text-base font-semibold text-white font-poppins">Total:</p>
-                    <p className="text-xl font-bold font-poppins" style={{ color: '#D4AF37' }}>
+                    <p className="text-base font-semibold text-white font-poppins">
+                      Total:
+                    </p>
+                    <p
+                      className="text-xl font-bold font-poppins"
+                      style={{ color: '#D4AF37' }}
+                    >
                       {formattedPrice}
                     </p>
                   </div>
@@ -301,7 +337,9 @@ export function ConfirmBookingStep({
 
             {/* Método de Pago */}
             <div>
-              <h2 className="text-xl font-bold text-white font-playfair mb-4">Método de Pago</h2>
+              <h2 className="text-xl font-bold text-white font-playfair mb-4">
+                Método de Pago
+              </h2>
               <div className="space-y-3">
                 {/* Tarjeta de Crédito */}
                 <button
@@ -328,13 +366,18 @@ export function ConfirmBookingStep({
                     className="flex h-10 w-10 items-center justify-center rounded-lg"
                     style={{ backgroundColor: '#D4AF37' }}
                   >
-                    <CreditCard className="w-5 h-5 text-primary-900" strokeWidth={2} />
+                    <CreditCard
+                      className="w-5 h-5 text-primary-900"
+                      strokeWidth={2}
+                    />
                   </div>
                   <div className="flex-1 text-left">
                     <p className="text-base font-semibold text-white font-poppins">
                       Tarjeta de Crédito
                     </p>
-                    <p className="text-sm text-neutral-400 font-poppins">**** 4242</p>
+                    <p className="text-sm text-neutral-400 font-poppins">
+                      **** 4242
+                    </p>
                   </div>
                 </button>
 
@@ -363,7 +406,9 @@ export function ConfirmBookingStep({
                     <Wallet className="w-5 h-5 text-white" strokeWidth={2} />
                   </div>
                   <div className="flex-1 text-left">
-                    <p className="text-base font-semibold text-white font-poppins">PayPal</p>
+                    <p className="text-base font-semibold text-white font-poppins">
+                      PayPal
+                    </p>
                   </div>
                 </button>
 
@@ -376,7 +421,10 @@ export function ConfirmBookingStep({
                   className="w-full flex items-center justify-center gap-2 p-4 rounded-xl border-2 border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
                   type="button"
                 >
-                  <p className="text-base font-semibold font-poppins" style={{ color: '#D4AF37' }}>
+                  <p
+                    className="text-base font-semibold font-poppins"
+                    style={{ color: '#D4AF37' }}
+                  >
                     Añadir nuevo método de pago
                   </p>
                 </button>
@@ -402,7 +450,9 @@ export function ConfirmBookingStep({
                 }}
                 type="button"
               >
-                {createAppointmentMutation.isPending ? 'Confirmando...' : 'Confirmar Reserva'}
+                {createAppointmentMutation.isPending
+                  ? 'Confirmando...'
+                  : 'Confirmar Reserva'}
               </button>
             </div>
           </div>
@@ -444,7 +494,10 @@ export function ConfirmBookingStep({
                       <Clock className="w-4 h-4" strokeWidth={2} />
                       <span>{formattedDuration}</span>
                     </div>
-                    <p className="text-lg font-bold font-poppins" style={{ color: '#D4AF37' }}>
+                    <p
+                      className="text-lg font-bold font-poppins"
+                      style={{ color: '#D4AF37' }}
+                    >
                       {formattedPrice}
                     </p>
                   </div>
@@ -460,31 +513,51 @@ export function ConfirmBookingStep({
                   {/* Profesional */}
                   {employee && (
                     <div className="flex items-center gap-3">
-                      <User className="w-4 h-4 text-neutral-400" strokeWidth={2} />
-                      <p className="text-sm text-white font-poppins truncate">{employee.name}</p>
+                      <User
+                        className="w-4 h-4 text-neutral-400"
+                        strokeWidth={2}
+                      />
+                      <p className="text-sm text-white font-poppins truncate">
+                        {employee.name}
+                      </p>
                     </div>
                   )}
 
                   {/* Fecha */}
                   {formattedDate && (
                     <div className="flex items-center gap-3">
-                      <Calendar className="w-4 h-4 text-neutral-400" strokeWidth={2} />
-                      <p className="text-sm text-white font-poppins">{formattedDate}</p>
+                      <Calendar
+                        className="w-4 h-4 text-neutral-400"
+                        strokeWidth={2}
+                      />
+                      <p className="text-sm text-white font-poppins">
+                        {formattedDate}
+                      </p>
                     </div>
                   )}
 
                   {/* Hora */}
                   {formattedTimeShort && (
                     <div className="flex items-center gap-3">
-                      <Clock className="w-4 h-4 text-neutral-400" strokeWidth={2} />
-                      <p className="text-sm text-white font-poppins">{formattedTimeShort}</p>
+                      <Clock
+                        className="w-4 h-4 text-neutral-400"
+                        strokeWidth={2}
+                      />
+                      <p className="text-sm text-white font-poppins">
+                        {formattedTimeShort}
+                      </p>
                     </div>
                   )}
 
                   {/* Duración */}
                   <div className="flex items-center gap-3">
-                    <Hourglass className="w-4 h-4 text-neutral-400" strokeWidth={2} />
-                    <p className="text-sm text-white font-poppins">{formattedDuration}</p>
+                    <Hourglass
+                      className="w-4 h-4 text-neutral-400"
+                      strokeWidth={2}
+                    />
+                    <p className="text-sm text-white font-poppins">
+                      {formattedDuration}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -499,7 +572,9 @@ export function ConfirmBookingStep({
         <div className="flex-1 overflow-y-auto px-4 py-6">
           {/* Resumen de tu cita */}
           <div className="mb-6">
-            <h2 className="text-xl font-bold text-white font-playfair mb-4">Resumen de tu cita</h2>
+            <h2 className="text-xl font-bold text-white font-playfair mb-4">
+              Resumen de tu cita
+            </h2>
             <div className="bg-white/5 rounded-xl p-4 flex gap-4">
               {/* Imagen del servicio */}
               <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
@@ -531,38 +606,63 @@ export function ConfirmBookingStep({
                   {/* Profesional */}
                   {employee && (
                     <div className="flex items-center gap-2">
-                      <User className="w-4 h-4 text-neutral-400" strokeWidth={2} />
-                      <p className="text-sm text-white font-poppins">{employee.name}</p>
+                      <User
+                        className="w-4 h-4 text-neutral-400"
+                        strokeWidth={2}
+                      />
+                      <p className="text-sm text-white font-poppins">
+                        {employee.name}
+                      </p>
                     </div>
                   )}
 
                   {/* Fecha */}
                   {formattedDate && (
                     <div className="flex items-center gap-2">
-                      <Calendar className="w-4 h-4 text-neutral-400" strokeWidth={2} />
-                      <p className="text-sm text-white font-poppins">{formattedDate}</p>
+                      <Calendar
+                        className="w-4 h-4 text-neutral-400"
+                        strokeWidth={2}
+                      />
+                      <p className="text-sm text-white font-poppins">
+                        {formattedDate}
+                      </p>
                     </div>
                   )}
 
                   {/* Hora */}
                   {formattedTime && (
                     <div className="flex items-center gap-2">
-                      <Clock className="w-4 h-4 text-neutral-400" strokeWidth={2} />
-                      <p className="text-sm text-white font-poppins">{formattedTime}</p>
+                      <Clock
+                        className="w-4 h-4 text-neutral-400"
+                        strokeWidth={2}
+                      />
+                      <p className="text-sm text-white font-poppins">
+                        {formattedTime}
+                      </p>
                     </div>
                   )}
 
                   {/* Duración */}
                   <div className="flex items-center gap-2">
-                    <Hourglass className="w-4 h-4 text-neutral-400" strokeWidth={2} />
-                    <p className="text-sm text-white font-poppins">{formattedDuration}</p>
+                    <Hourglass
+                      className="w-4 h-4 text-neutral-400"
+                      strokeWidth={2}
+                    />
+                    <p className="text-sm text-white font-poppins">
+                      {formattedDuration}
+                    </p>
                   </div>
                 </div>
 
                 {/* Precio Total */}
                 <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/10">
-                  <p className="text-base font-semibold text-white font-poppins">Precio Total</p>
-                  <p className="text-xl font-bold font-poppins" style={{ color: '#D4AF37' }}>
+                  <p className="text-base font-semibold text-white font-poppins">
+                    Precio Total
+                  </p>
+                  <p
+                    className="text-xl font-bold font-poppins"
+                    style={{ color: '#D4AF37' }}
+                  >
                     {formattedPrice}
                   </p>
                 </div>
@@ -595,7 +695,9 @@ export function ConfirmBookingStep({
 
           {/* Método de Pago */}
           <div className="mb-6">
-            <h2 className="text-xl font-bold text-white font-playfair mb-4">Método de Pago</h2>
+            <h2 className="text-xl font-bold text-white font-playfair mb-4">
+              Método de Pago
+            </h2>
             <div className="space-y-3">
               {/* Tarjeta de Crédito */}
               <button
@@ -622,13 +724,18 @@ export function ConfirmBookingStep({
                   className="flex h-10 w-10 items-center justify-center rounded-lg"
                   style={{ backgroundColor: '#D4AF37' }}
                 >
-                  <CreditCard className="w-5 h-5 text-primary-900" strokeWidth={2} />
+                  <CreditCard
+                    className="w-5 h-5 text-primary-900"
+                    strokeWidth={2}
+                  />
                 </div>
                 <div className="flex-1 text-left">
                   <p className="text-base font-semibold text-white font-poppins">
                     Tarjeta de Crédito
                   </p>
-                  <p className="text-sm text-neutral-400 font-poppins">**** 4242</p>
+                  <p className="text-sm text-neutral-400 font-poppins">
+                    **** 4242
+                  </p>
                 </div>
               </button>
 
@@ -654,10 +761,14 @@ export function ConfirmBookingStep({
                 type="button"
               >
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/10">
-                  <span className="text-lg font-bold text-white font-poppins">P</span>
+                  <span className="text-lg font-bold text-white font-poppins">
+                    P
+                  </span>
                 </div>
                 <div className="flex-1 text-left">
-                  <p className="text-base font-semibold text-white font-poppins">PayPal</p>
+                  <p className="text-base font-semibold text-white font-poppins">
+                    PayPal
+                  </p>
                 </div>
               </button>
 
@@ -670,7 +781,10 @@ export function ConfirmBookingStep({
                 className="w-full flex items-center justify-center gap-2 p-4 rounded-xl border-2 border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
                 type="button"
               >
-                <p className="text-base font-semibold font-poppins" style={{ color: '#D4AF37' }}>
+                <p
+                  className="text-base font-semibold font-poppins"
+                  style={{ color: '#D4AF37' }}
+                >
                   Añadir nuevo método de pago
                 </p>
               </button>
@@ -697,11 +811,12 @@ export function ConfirmBookingStep({
             }}
             type="button"
           >
-            {createAppointmentMutation.isPending ? 'Confirmando...' : 'Confirmar Reserva'}
+            {createAppointmentMutation.isPending
+              ? 'Confirmando...'
+              : 'Confirmar Reserva'}
           </button>
         </div>
       </div>
     </div>
   );
 }
-

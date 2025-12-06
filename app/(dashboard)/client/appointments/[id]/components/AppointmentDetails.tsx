@@ -8,7 +8,6 @@ import { ArrowLeft, MoreVertical, MapPin, Star } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { getAppointment, cancelAppointment } from '@/lib/api/appointments';
-import type { Appointment } from '@/lib/types/appointments';
 
 interface AppointmentDetailsProps {
   appointmentId: number;
@@ -32,7 +31,12 @@ export const AppointmentDetails = ({
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  const { data: appointment, isLoading, isError, error } = useQuery({
+  const {
+    data: appointment,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
     queryKey: ['appointment', appointmentId],
     queryFn: async () => {
       const result = await getAppointment(appointmentId);
@@ -46,18 +50,22 @@ export const AppointmentDetails = ({
     staleTime: 5 * 60 * 1000, // 5 minutos
   });
 
-  const { mutate: handleCancelMutation, isPending: isCancelling } = useMutation({
-    mutationFn: () => cancelAppointment(appointmentId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['appointments'] });
-      queryClient.invalidateQueries({ queryKey: ['appointment', appointmentId] });
-      toast.success('Cita cancelada exitosamente');
-      router.push('/client/appointments');
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || 'Error al cancelar la cita');
-    },
-  });
+  const { mutate: handleCancelMutation, isPending: isCancelling } = useMutation(
+    {
+      mutationFn: () => cancelAppointment(appointmentId),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['appointments'] });
+        queryClient.invalidateQueries({
+          queryKey: ['appointment', appointmentId],
+        });
+        toast.success('Cita cancelada exitosamente');
+        router.push('/client/appointments');
+      },
+      onError: (error: Error) => {
+        toast.error(error.message || 'Error al cancelar la cita');
+      },
+    }
+  );
 
   const handleBack = (): void => {
     router.back();
@@ -65,7 +73,9 @@ export const AppointmentDetails = ({
 
   const handleReschedule = (): void => {
     if (appointment?.service_id) {
-      router.push(`/client/book/${appointment.service_id}?reschedule=${appointmentId}`);
+      router.push(
+        `/client/book/${appointment.service_id}?reschedule=${appointmentId}`
+      );
     }
   };
 
@@ -76,7 +86,9 @@ export const AppointmentDetails = ({
       if (appointment.employee_id) {
         params.append('employee', appointment.employee_id.toString());
       }
-      router.push(`/client/book/${appointment.service_id}?${params.toString()}`);
+      router.push(
+        `/client/book/${appointment.service_id}?${params.toString()}`
+      );
     }
   };
 
@@ -99,7 +111,9 @@ export const AppointmentDetails = ({
           >
             <ArrowLeft className="w-5 h-5 text-white" strokeWidth={2} />
           </button>
-          <h1 className="text-xl font-bold text-white font-playfair">Detalles de la Cita</h1>
+          <h1 className="text-xl font-bold text-white font-playfair">
+            Detalles de la Cita
+          </h1>
           <div className="w-10"></div>
         </div>
         <div className="flex-1 flex items-center justify-center">
@@ -125,7 +139,9 @@ export const AppointmentDetails = ({
           >
             <ArrowLeft className="w-5 h-5 text-white" strokeWidth={2} />
           </button>
-          <h1 className="text-xl font-bold text-white font-playfair">Detalles de la Cita</h1>
+          <h1 className="text-xl font-bold text-white font-playfair">
+            Detalles de la Cita
+          </h1>
           <div className="w-10"></div>
         </div>
         <div className="flex-1 flex items-center justify-center px-4">
@@ -145,7 +161,8 @@ export const AppointmentDetails = ({
   }
 
   // Información del servicio
-  const serviceName = appointment.service?.name || `Servicio #${appointment.service_id}`;
+  const serviceName =
+    appointment.service?.name || `Servicio #${appointment.service_id}`;
 
   // Información del proveedor
   const providerName = appointment.provider?.business_name || 'Salón';
@@ -158,7 +175,9 @@ export const AppointmentDetails = ({
 
   // Formatear fecha y hora
   const appointmentDate = new Date(appointment.start_date_local);
-  const formattedDate = format(appointmentDate, "EEEE, d MMM, HH:mm", { locale: es });
+  const formattedDate = format(appointmentDate, 'EEEE, d MMM, HH:mm', {
+    locale: es,
+  });
 
   // Calcular duración
   const startDate = new Date(appointment.start_date_local);
@@ -194,7 +213,7 @@ export const AppointmentDetails = ({
 
   // Información del proveedor para rating
   const providerRating = appointment.provider?.average_rating || 0;
-  const reviewsCount = 254; // Valor por defecto, se podría obtener del backend si está disponible
+  const reviewsCount: number = 254; // Valor por defecto, se podría obtener del backend si está disponible
 
   return (
     <div className="min-h-screen bg-[#201d12] flex flex-col">
@@ -208,7 +227,9 @@ export const AppointmentDetails = ({
         >
           <ArrowLeft className="w-5 h-5 text-white" strokeWidth={2} />
         </button>
-        <h1 className="text-xl font-bold text-white font-playfair">Detalles de la Cita</h1>
+        <h1 className="text-xl font-bold text-white font-playfair">
+          Detalles de la Cita
+        </h1>
         <button
           className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-white/10 transition-colors"
           aria-label="Más opciones"
@@ -253,26 +274,43 @@ export const AppointmentDetails = ({
                 <div className="space-y-4">
                   {/* Fecha y Hora */}
                   <div className="flex items-center justify-between py-3 border-b border-white/10">
-                    <span className="text-sm font-medium text-white font-poppins">Fecha y Hora</span>
-                    <span className="text-sm text-white font-poppins">{formattedDate}</span>
+                    <span className="text-sm font-medium text-white font-poppins">
+                      Fecha y Hora
+                    </span>
+                    <span className="text-sm text-white font-poppins">
+                      {formattedDate}
+                    </span>
                   </div>
 
                   {/* Profesional */}
                   <div className="flex items-center justify-between py-3 border-b border-white/10">
-                    <span className="text-sm font-medium text-white font-poppins">Profesional</span>
-                    <span className="text-sm text-white font-poppins">{employeeName}</span>
+                    <span className="text-sm font-medium text-white font-poppins">
+                      Profesional
+                    </span>
+                    <span className="text-sm text-white font-poppins">
+                      {employeeName}
+                    </span>
                   </div>
 
                   {/* Duración */}
                   <div className="flex items-center justify-between py-3 border-b border-white/10">
-                    <span className="text-sm font-medium text-white font-poppins">Duración</span>
-                    <span className="text-sm text-white font-poppins">{formattedDuration}</span>
+                    <span className="text-sm font-medium text-white font-poppins">
+                      Duración
+                    </span>
+                    <span className="text-sm text-white font-poppins">
+                      {formattedDuration}
+                    </span>
                   </div>
 
                   {/* Precio */}
                   <div className="flex items-center justify-between py-3">
-                    <span className="text-sm font-medium text-white font-poppins">Precio</span>
-                    <span className="text-lg font-bold font-poppins" style={{ color: '#D4AF37' }}>
+                    <span className="text-sm font-medium text-white font-poppins">
+                      Precio
+                    </span>
+                    <span
+                      className="text-lg font-bold font-poppins"
+                      style={{ color: '#D4AF37' }}
+                    >
                       {formattedPrice}
                     </span>
                   </div>
@@ -291,9 +329,13 @@ export const AppointmentDetails = ({
                 <div className="flex flex-col md:flex-row gap-4">
                   {/* Información del proveedor */}
                   <div className="flex-1 space-y-3">
-                    <h4 className="text-lg font-bold text-white font-playfair">{providerName}</h4>
+                    <h4 className="text-lg font-bold text-white font-playfair">
+                      {providerName}
+                    </h4>
                     {fullAddress && (
-                      <p className="text-sm text-neutral-300 font-poppins">{fullAddress}</p>
+                      <p className="text-sm text-neutral-300 font-poppins">
+                        {fullAddress}
+                      </p>
                     )}
                     <div className="flex items-center gap-2">
                       <Star
@@ -303,13 +345,14 @@ export const AppointmentDetails = ({
                         strokeWidth={2}
                       />
                       <span className="text-sm text-white font-poppins">
-                        {providerRating.toFixed(1)} ({reviewsCount} {reviewsCount === 1 ? 'reseña' : 'reseñas'})
+                        {providerRating.toFixed(1)} ({reviewsCount}{' '}
+                        {reviewsCount === 1 ? 'reseña' : 'reseñas'})
                       </span>
                     </div>
                   </div>
 
                   {/* Mapa placeholder */}
-                  <div className="w-full md:w-48 h-48 rounded-lg overflow-hidden bg-gradient-to-br from-teal-100 to-teal-200 relative flex items-center justify-center flex-shrink-0">
+                  <div className="w-full md:w-48 h-48 rounded-lg overflow-hidden bg-linear-to-br from-teal-100 to-teal-200 relative flex items-center justify-center shrink-0">
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="text-center">
                         <MapPin
@@ -317,20 +360,82 @@ export const AppointmentDetails = ({
                           style={{ color: '#0F766E' }}
                           strokeWidth={2}
                         />
-                        <p className="text-xs text-teal-800 font-semibold font-poppins">BOBO</p>
+                        <p className="text-xs text-teal-800 font-semibold font-poppins">
+                          BOBO
+                        </p>
                       </div>
                     </div>
                     {/* Líneas de mapa decorativas */}
                     <div className="absolute inset-0 opacity-20">
-                      <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-                        <line x1="0" y1="20" x2="100" y2="20" stroke="#0F766E" strokeWidth="0.5" />
-                        <line x1="0" y1="40" x2="100" y2="40" stroke="#0F766E" strokeWidth="0.5" />
-                        <line x1="0" y1="60" x2="100" y2="60" stroke="#0F766E" strokeWidth="0.5" />
-                        <line x1="0" y1="80" x2="100" y2="80" stroke="#0F766E" strokeWidth="0.5" />
-                        <line x1="20" y1="0" x2="20" y2="100" stroke="#0F766E" strokeWidth="0.5" />
-                        <line x1="40" y1="0" x2="40" y2="100" stroke="#0F766E" strokeWidth="0.5" />
-                        <line x1="60" y1="0" x2="60" y2="100" stroke="#0F766E" strokeWidth="0.5" />
-                        <line x1="80" y1="0" x2="80" y2="100" stroke="#0F766E" strokeWidth="0.5" />
+                      <svg
+                        className="w-full h-full"
+                        viewBox="0 0 100 100"
+                        preserveAspectRatio="none"
+                      >
+                        <line
+                          x1="0"
+                          y1="20"
+                          x2="100"
+                          y2="20"
+                          stroke="#0F766E"
+                          strokeWidth="0.5"
+                        />
+                        <line
+                          x1="0"
+                          y1="40"
+                          x2="100"
+                          y2="40"
+                          stroke="#0F766E"
+                          strokeWidth="0.5"
+                        />
+                        <line
+                          x1="0"
+                          y1="60"
+                          x2="100"
+                          y2="60"
+                          stroke="#0F766E"
+                          strokeWidth="0.5"
+                        />
+                        <line
+                          x1="0"
+                          y1="80"
+                          x2="100"
+                          y2="80"
+                          stroke="#0F766E"
+                          strokeWidth="0.5"
+                        />
+                        <line
+                          x1="20"
+                          y1="0"
+                          x2="20"
+                          y2="100"
+                          stroke="#0F766E"
+                          strokeWidth="0.5"
+                        />
+                        <line
+                          x1="40"
+                          y1="0"
+                          x2="40"
+                          y2="100"
+                          stroke="#0F766E"
+                          strokeWidth="0.5"
+                        />
+                        <line
+                          x1="60"
+                          y1="0"
+                          x2="60"
+                          y2="100"
+                          stroke="#0F766E"
+                          strokeWidth="0.5"
+                        />
+                        <line
+                          x1="80"
+                          y1="0"
+                          x2="80"
+                          y2="100"
+                          stroke="#0F766E"
+                          strokeWidth="0.5"
+                        />
                       </svg>
                     </div>
                   </div>
@@ -396,7 +501,7 @@ export const AppointmentDetails = ({
 
           {/* Mapa */}
           <div className="bg-white/5 rounded-xl overflow-hidden mb-6 border border-white/10">
-            <div className="w-full h-64 bg-gradient-to-br from-teal-100 to-teal-200 relative flex items-center justify-center">
+            <div className="w-full h-64 bg-linear-to-br from-teal-100 to-teal-200 relative flex items-center justify-center">
               {/* Placeholder del mapa */}
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center">
@@ -405,20 +510,82 @@ export const AppointmentDetails = ({
                     style={{ color: '#0F766E' }}
                     strokeWidth={2}
                   />
-                  <p className="text-teal-800 font-semibold font-poppins">BOBO</p>
+                  <p className="text-teal-800 font-semibold font-poppins">
+                    BOBO
+                  </p>
                 </div>
               </div>
               {/* Líneas de mapa decorativas */}
               <div className="absolute inset-0 opacity-20">
-                <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-                  <line x1="0" y1="20" x2="100" y2="20" stroke="#0F766E" strokeWidth="0.5" />
-                  <line x1="0" y1="40" x2="100" y2="40" stroke="#0F766E" strokeWidth="0.5" />
-                  <line x1="0" y1="60" x2="100" y2="60" stroke="#0F766E" strokeWidth="0.5" />
-                  <line x1="0" y1="80" x2="100" y2="80" stroke="#0F766E" strokeWidth="0.5" />
-                  <line x1="20" y1="0" x2="20" y2="100" stroke="#0F766E" strokeWidth="0.5" />
-                  <line x1="40" y1="0" x2="40" y2="100" stroke="#0F766E" strokeWidth="0.5" />
-                  <line x1="60" y1="0" x2="60" y2="100" stroke="#0F766E" strokeWidth="0.5" />
-                  <line x1="80" y1="0" x2="80" y2="100" stroke="#0F766E" strokeWidth="0.5" />
+                <svg
+                  className="w-full h-full"
+                  viewBox="0 0 100 100"
+                  preserveAspectRatio="none"
+                >
+                  <line
+                    x1="0"
+                    y1="20"
+                    x2="100"
+                    y2="20"
+                    stroke="#0F766E"
+                    strokeWidth="0.5"
+                  />
+                  <line
+                    x1="0"
+                    y1="40"
+                    x2="100"
+                    y2="40"
+                    stroke="#0F766E"
+                    strokeWidth="0.5"
+                  />
+                  <line
+                    x1="0"
+                    y1="60"
+                    x2="100"
+                    y2="60"
+                    stroke="#0F766E"
+                    strokeWidth="0.5"
+                  />
+                  <line
+                    x1="0"
+                    y1="80"
+                    x2="100"
+                    y2="80"
+                    stroke="#0F766E"
+                    strokeWidth="0.5"
+                  />
+                  <line
+                    x1="20"
+                    y1="0"
+                    x2="20"
+                    y2="100"
+                    stroke="#0F766E"
+                    strokeWidth="0.5"
+                  />
+                  <line
+                    x1="40"
+                    y1="0"
+                    x2="40"
+                    y2="100"
+                    stroke="#0F766E"
+                    strokeWidth="0.5"
+                  />
+                  <line
+                    x1="60"
+                    y1="0"
+                    x2="60"
+                    y2="100"
+                    stroke="#0F766E"
+                    strokeWidth="0.5"
+                  />
+                  <line
+                    x1="80"
+                    y1="0"
+                    x2="80"
+                    y2="100"
+                    stroke="#0F766E"
+                    strokeWidth="0.5"
+                  />
                 </svg>
               </div>
             </div>
@@ -426,9 +593,13 @@ export const AppointmentDetails = ({
 
           {/* Detalles del salón */}
           <div className="mb-6">
-            <h3 className="text-lg font-bold text-white font-playfair mb-2">{providerName}</h3>
+            <h3 className="text-lg font-bold text-white font-playfair mb-2">
+              {providerName}
+            </h3>
             {fullAddress && (
-              <p className="text-sm text-neutral-300 font-poppins">{fullAddress}</p>
+              <p className="text-sm text-neutral-300 font-poppins">
+                {fullAddress}
+              </p>
             )}
           </div>
 
@@ -436,26 +607,43 @@ export const AppointmentDetails = ({
           <div className="bg-white/5 rounded-xl border border-white/10 overflow-hidden mb-6">
             {/* Fecha y Hora */}
             <div className="flex items-center justify-between px-4 py-4 border-b border-white/10">
-              <span className="text-sm font-medium text-white font-poppins">Fecha y Hora</span>
-              <span className="text-sm text-white font-poppins">{formattedDate}</span>
+              <span className="text-sm font-medium text-white font-poppins">
+                Fecha y Hora
+              </span>
+              <span className="text-sm text-white font-poppins">
+                {formattedDate}
+              </span>
             </div>
 
             {/* Profesional */}
             <div className="flex items-center justify-between px-4 py-4 border-b border-white/10">
-              <span className="text-sm font-medium text-white font-poppins">Profesional</span>
-              <span className="text-sm text-white font-poppins">{employeeName}</span>
+              <span className="text-sm font-medium text-white font-poppins">
+                Profesional
+              </span>
+              <span className="text-sm text-white font-poppins">
+                {employeeName}
+              </span>
             </div>
 
             {/* Duración */}
             <div className="flex items-center justify-between px-4 py-4 border-b border-white/10">
-              <span className="text-sm font-medium text-white font-poppins">Duración</span>
-              <span className="text-sm text-white font-poppins">{formattedDuration}</span>
+              <span className="text-sm font-medium text-white font-poppins">
+                Duración
+              </span>
+              <span className="text-sm text-white font-poppins">
+                {formattedDuration}
+              </span>
             </div>
 
             {/* Precio */}
             <div className="flex items-center justify-between px-4 py-4">
-              <span className="text-sm font-medium text-white font-poppins">Precio</span>
-              <span className="text-lg font-bold font-poppins" style={{ color: '#D4AF37' }}>
+              <span className="text-sm font-medium text-white font-poppins">
+                Precio
+              </span>
+              <span
+                className="text-lg font-bold font-poppins"
+                style={{ color: '#D4AF37' }}
+              >
                 {formattedPrice}
               </span>
             </div>

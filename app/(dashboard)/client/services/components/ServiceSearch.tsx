@@ -29,11 +29,6 @@ export const ServiceSearch = ({
     onSearch(searchText);
   };
 
-  const handleClearSearch = (): void => {
-    setSearchText('');
-    onSearch('');
-  };
-
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>): void => {
     if (e.key === 'Enter') {
       e.preventDefault();
