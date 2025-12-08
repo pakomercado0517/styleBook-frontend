@@ -40,6 +40,7 @@ interface ButtonProps extends VariantProps<typeof buttonVariants> {
   disabled?: boolean;
   className?: string;
   type?: 'button' | 'submit' | 'reset';
+  style?: React.CSSProperties;
   aria?: {
     label?: string;
     describedBy?: string;
@@ -56,13 +57,14 @@ export function Button({
   disabled = false,
   className,
   type = 'button',
+  style,
   aria,
 }: ButtonProps): React.ReactNode {
   const baseClasses = cn(buttonVariants({ variant, size }), className);
 
   if (asLink && href) {
     return (
-      <Link href={href} className={baseClasses}>
+      <Link href={href} className={baseClasses} style={style}>
         {children}
       </Link>
     );
@@ -74,6 +76,7 @@ export function Button({
       onClick={onClick}
       disabled={disabled}
       className={cn(baseClasses, disabled && 'opacity-50 cursor-not-allowed')}
+      style={style}
       aria-label={aria?.label}
       aria-describedby={aria?.describedBy}
     >

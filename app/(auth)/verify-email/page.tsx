@@ -1,16 +1,18 @@
 'use client';
 
 import { useEffect, useState, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { toast } from 'sonner';
 import { Button } from '@/components/Button';
-import { Badge } from '@/components/Badge';
 import { useVerifyEmail } from '@/lib/hooks/useVerifyEmail';
+import { Shield, Check } from 'lucide-react';
 
 /**
  * Componente interno que usa useSearchParams
  */
 function VerifyEmailContent(): React.ReactNode {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const rawToken = searchParams.get('token');
 
@@ -25,7 +27,6 @@ function VerifyEmailContent(): React.ReactNode {
     isVerifying,
     isResending,
     verifyError,
-    redirectCountdown,
   } = useVerifyEmail();
 
   /**
@@ -50,6 +51,7 @@ function VerifyEmailContent(): React.ReactNode {
    */
   const handleResendEmail = () => {
     if (!email) {
+      toast.error('Por favor ingresa tu email para reenviar la verificación');
       return;
     }
     resendEmail(email);
@@ -63,140 +65,126 @@ function VerifyEmailContent(): React.ReactNode {
         <div className="absolute bottom-20 right-10 w-80 h-80 bg-accent-400 rounded-full mix-blend-overlay filter blur-3xl opacity-10 animate-float"></div>
       </div>
 
-      <div className="relative z-10 w-full max-w-md">
+      <div className="relative z-10 w-full max-w-md lg:max-w-lg">
         {isVerifying ? (
           // Estado: Verificando
-          <div className="bg-white rounded-2xl shadow-2xl shadow-accent-500/10 p-8 md:p-10 border border-neutral-200 text-center">
-            <div className="mb-6">
+          <div className="bg-primary-900 rounded-2xl shadow-2xl shadow-accent-500/20 p-6 md:p-8 lg:p-10 border border-accent-500/20 text-center">
+            <div className="mb-6 md:mb-8">
               {/* Spinner animado */}
-              <div className="mx-auto w-16 h-16 border-4 border-accent-500 border-t-transparent rounded-full animate-spin"></div>
+              <div className="mx-auto w-16 h-16 md:w-20 md:h-20 border-4 border-accent-500 border-t-transparent rounded-full animate-spin"></div>
             </div>
-            <h1 className="font-playfair text-2xl md:text-3xl font-bold text-primary-800 mb-2">
+            <h1 className="font-playfair text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 md:mb-6">
               Verificando email...
             </h1>
-            <p className="font-poppins text-neutral-600">
+            <p className="font-poppins text-sm md:text-base text-neutral-400">
               Por favor espera mientras verificamos tu cuenta
             </p>
           </div>
         ) : verifyError ? (
           // Estado: Error
-          <div className="bg-white rounded-2xl shadow-2xl shadow-accent-500/10 p-8 md:p-10 border border-neutral-200">
-            <div className="text-center mb-6">
-              <Badge
-                variant="secondary"
-                className="mb-4 bg-red-100 text-red-700"
-              >
-                ❌ Error de Verificación
-              </Badge>
-
-              {/* Ícono de error */}
-              <div className="mb-6">
-                <div className="mx-auto w-20 h-20 bg-red-100 rounded-full flex items-center justify-center">
-                  <svg
-                    className="w-10 h-10 text-red-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
+          <div className="bg-primary-900 rounded-2xl shadow-2xl shadow-accent-500/20 p-6 md:p-8 lg:p-10 border border-accent-500/20 text-center">
+            {/* Ícono circular dorado con exclamación */}
+            <div className="mb-6 md:mb-8">
+              <div className="mx-auto w-24 h-24 md:w-28 md:h-28 rounded-full flex items-center justify-center relative" style={{ backgroundColor: '#B8941F' }}>
+                <div className="w-20 h-20 md:w-24 md:h-24 rounded-full flex items-center justify-center" style={{ backgroundColor: '#D4AF37' }}>
+                  <span className="text-white text-4xl md:text-5xl font-bold">!</span>
                 </div>
               </div>
-
-              <h1 className="font-playfair text-2xl md:text-3xl font-bold text-primary-800 mb-3">
-                No se pudo verificar
-              </h1>
-              <p className="font-poppins text-neutral-600 mb-6">
-                {verifyError instanceof Error
-                  ? verifyError.message
-                  : 'Error al verificar email'}
-              </p>
             </div>
 
-            {/* Formulario para reenviar email */}
-            <div className="space-y-4">
-              <div className="p-4 rounded-lg bg-accent-50 border border-accent-200">
-                <p className="text-sm text-primary-800 font-poppins mb-3">
-                  Si el enlace expiró o no funciona, ingresa tu email para
-                  recibir un nuevo enlace de verificación:
-                </p>
+            {/* Título */}
+            <h1 className="font-playfair text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 md:mb-6">
+              ¡Error de Verificación!
+            </h1>
 
-                <div className="space-y-3">
-                  <input
-                    type="email"
-                    placeholder="tu@email.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full px-4 py-3 rounded-lg border-2 border-neutral-200 focus:border-accent-500 focus:outline-none font-poppins text-primary-800"
-                  />
-                  <Button
-                    variant="gold"
-                    size="md"
-                    onClick={handleResendEmail}
-                    disabled={isResending || !email}
-                    className="w-full"
-                  >
-                    {isResending
-                      ? 'Reenviando...'
-                      : '📧 Reenviar Email de Verificación'}
-                  </Button>
-                </div>
-              </div>
+            {/* Mensaje de error */}
+            <p className="font-poppins text-sm md:text-base text-neutral-400 leading-relaxed max-w-md mx-auto mb-6 md:mb-8">
+              Hubo un problema al verificar tu email. Es posible que el enlace haya caducado o sea incorrecto.
+            </p>
 
-              <Link href="/login">
-                <Button variant="outline" size="md" className="w-full">
-                  Volver a Iniciar Sesión
-                </Button>
-              </Link>
+            {/* Campo de email */}
+            <div className="mb-6 md:mb-8">
+              <input
+                type="email"
+                placeholder="Ingresa tu email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl bg-primary-800 border border-primary-700 text-white placeholder:text-neutral-400 font-poppins focus:outline-none focus:border-accent-500 transition-colors"
+                aria-label="Correo electrónico"
+              />
+            </div>
+
+            {/* Botones */}
+            <div className="space-y-3 md:space-y-4">
+              {/* Botón Primario: Reenviar Email */}
+              <Button
+                variant="gold"
+                size="md"
+                onClick={handleResendEmail}
+                disabled={isResending || !email}
+                className="w-full font-bold"
+                style={{
+                  backgroundColor: '#D4AF37',
+                  color: '#1A1A1A',
+                  borderColor: '#B8941F',
+                }}
+              >
+                {isResending ? 'Reenviando...' : 'Reenviar Email de Verificación'}
+              </Button>
+
+              {/* Botón Secundario: Volver a Login */}
+              <Button
+                variant="primary"
+                size="md"
+                onClick={() => router.push('/login')}
+                className="w-full bg-primary-800 hover:bg-primary-700 text-white border-2 border-white/10 hover:border-white/20"
+              >
+                Volver a Iniciar Sesión
+              </Button>
             </div>
           </div>
         ) : (
           // Estado: Éxito
-          <div className="bg-white rounded-2xl shadow-2xl shadow-accent-500/10 p-8 md:p-10 border border-neutral-200 text-center">
-            <Badge variant="primary" className="mb-4">
-              ✅ Verificación Exitosa
-            </Badge>
-
-            {/* Ícono de éxito */}
-            <div className="mb-6">
-              <div className="mx-auto w-20 h-20 bg-green-100 rounded-full flex items-center justify-center">
-                <svg
-                  className="w-10 h-10 text-green-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
+          <div className="bg-primary-900 rounded-2xl shadow-2xl shadow-accent-500/20 p-6 md:p-8 lg:p-10 border border-accent-500/20 text-center">
+            {/* Ícono circular dorado con escudo y checkmark */}
+            <div className="mb-6 md:mb-8">
+              <div
+                className="mx-auto w-24 h-24 md:w-28 md:h-28 rounded-full flex items-center justify-center relative"
+                style={{ backgroundColor: '#D4AF37' }}
+              >
+                <Shield className="w-12 h-12 md:w-14 md:h-14 text-white" strokeWidth={2} fill="#D4AF37" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Check className="w-6 h-6 md:w-8 md:h-8 text-white" strokeWidth={3} />
+                </div>
               </div>
             </div>
 
-            <h1 className="font-playfair text-2xl md:text-3xl font-bold text-primary-800 mb-3">
-              ¡Email Verificado!
+            {/* Título */}
+            <h1 className="font-playfair text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 md:mb-6">
+              ¡Cuenta Activada!
             </h1>
-            <p className="font-poppins text-neutral-600 mb-6">
-              ¡Email verificado exitosamente! Ya puedes iniciar sesión
+
+            {/* Texto descriptivo */}
+            <p className="font-poppins text-sm md:text-base text-neutral-400 leading-relaxed max-w-md mx-auto mb-8 md:mb-10">
+              Tu cuenta ha sido verificada con éxito. Ya puedes acceder a todas
+              nuestras funciones.
             </p>
 
+            {/* Botón */}
             <div className="space-y-3">
-              <p className="text-sm text-neutral-500 font-poppins mb-4">
-                La redirección se realizará en {redirectCountdown} segundos...
-              </p>
-              <Link href="/login">
-                <Button variant="gold" size="lg" className="w-full">
-                  Ir a Iniciar Sesión
-                </Button>
-              </Link>
+              <Button
+                variant="gold"
+                size="md"
+                onClick={() => router.push('/login')}
+                className="w-full font-bold"
+                style={{
+                  backgroundColor: '#D4AF37',
+                  color: '#1A1A1A',
+                  borderColor: '#B8941F',
+                }}
+              >
+                Ir a Iniciar Sesión
+              </Button>
             </div>
           </div>
         )}

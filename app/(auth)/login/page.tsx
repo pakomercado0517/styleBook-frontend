@@ -5,10 +5,9 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { Button } from '@/components/Button';
-import { Input } from '@/components/Input';
-import { Badge } from '@/components/Badge';
 import { login, resendVerificationEmail } from '@/lib/api/auth';
 import { useAuthStore } from '@/store/authStore';
+import { Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage(): React.ReactNode {
   const router = useRouter();
@@ -17,6 +16,7 @@ export default function LoginPage(): React.ReactNode {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [showResendButton, setShowResendButton] = useState(false);
   const [isResending, setIsResending] = useState(false);
 
@@ -93,7 +93,7 @@ export default function LoginPage(): React.ReactNode {
   };
 
   return (
-    <main className="min-h-screen gradient-luxe flex items-center justify-center p-4">
+    <main className="min-h-screen gradient-luxe flex items-center justify-center p-4 py-12 md:py-16">
       {/* Efectos decorativos dorados */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-96 h-96 bg-accent-500 rounded-full mix-blend-overlay filter blur-3xl opacity-10 animate-float"></div>
@@ -101,47 +101,73 @@ export default function LoginPage(): React.ReactNode {
       </div>
 
       {/* Card de Login */}
-      <div className="relative z-10 w-full max-w-md">
-        <div className="bg-white rounded-2xl shadow-2xl shadow-accent-500/10 p-8 md:p-10 border border-neutral-200">
+      <div className="relative z-10 w-full max-w-md lg:max-w-lg">
+        <div className="bg-primary-900 rounded-2xl shadow-2xl shadow-accent-500/20 p-6 md:p-8 lg:p-10 border border-accent-500/20">
           {/* Header */}
-          <div className="text-center mb-8">
-            <Badge variant="primary" className="mb-4">
-              ✨ Bienvenido
-            </Badge>
-            <h1 className="font-playfair text-3xl md:text-4xl font-bold text-primary-800 mb-2">
-              Inicia Sesión
+          <div className="text-center mb-8 md:mb-10">
+            <h1 className="font-playfair text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2">
+              Iniciar Sesión StyleBook
             </h1>
-            <p className="font-poppins text-neutral-600">
-              Accede a tu cuenta de StyleBook
-            </p>
           </div>
 
           {/* Formulario */}
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <Input
-              label="Email"
-              type="email"
-              placeholder="tu@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              disabled={isLoading}
-            />
+          <form onSubmit={handleSubmit} className="space-y-5 md:space-y-6">
+            {/* Campo Correo o Teléfono */}
+            <div>
+              <label className="block text-sm md:text-base font-poppins font-medium text-white mb-2">
+                Correo o Teléfono
+              </label>
+              <input
+                type="text"
+                placeholder="Tu correo o teléfono"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                disabled={isLoading}
+                className="w-full px-4 py-3 md:py-4 rounded-xl bg-primary-800 border border-primary-700 text-white placeholder:text-neutral-400 font-poppins focus:outline-none focus:border-accent-500 transition-colors"
+                aria-label="Correo o teléfono"
+              />
+            </div>
 
-            <Input
-              label="Contraseña"
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              disabled={isLoading}
-            />
+            {/* Campo Contraseña */}
+            <div>
+              <label className="block text-sm md:text-base font-poppins font-medium text-white mb-2">
+                Contraseña
+              </label>
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Escribe tu contraseña"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  disabled={isLoading}
+                  className="w-full px-4 py-3 md:py-4 pr-12 rounded-xl bg-primary-800 border border-primary-700 text-white placeholder:text-neutral-400 font-poppins focus:outline-none focus:border-accent-500 transition-colors"
+                  aria-label="Contraseña"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-accent-400 transition-colors"
+                  tabIndex={0}
+                  aria-label={
+                    showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'
+                  }
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-5 h-5 md:w-6 md:h-6" strokeWidth={2} />
+                  ) : (
+                    <Eye className="w-5 h-5 md:w-6 md:h-6" strokeWidth={2} />
+                  )}
+                </button>
+              </div>
+            </div>
 
-            <div className="flex items-center justify-between text-sm">
+            {/* Link Olvidaste tu contraseña */}
+            <div className="flex items-center justify-end">
               <Link
                 href="/forgot-password"
-                className="text-accent-600 hover:text-accent-700 font-poppins font-medium transition-colors"
+                className="text-sm md:text-base text-[#D4AF37] hover:text-[#FFD700] font-poppins font-medium transition-colors"
               >
                 ¿Olvidaste tu contraseña?
               </Link>
@@ -149,8 +175,8 @@ export default function LoginPage(): React.ReactNode {
 
             {/* Botón de reenviar verificación (solo si email no verificado) */}
             {showResendButton && (
-              <div className="p-4 rounded-lg bg-accent-50 border border-accent-200">
-                <p className="text-sm text-primary-800 font-poppins mb-3">
+              <div className="p-4 rounded-lg bg-accent-500/10 border border-accent-500/30">
+                <p className="text-sm text-white font-poppins mb-3">
                   ⚠️ Tu email no está verificado. Revisa tu bandeja de entrada o
                   reenvía el email de verificación.
                 </p>
@@ -169,59 +195,33 @@ export default function LoginPage(): React.ReactNode {
               </div>
             )}
 
+            {/* Botón Iniciar Sesión */}
             <Button
               type="submit"
               variant="gold"
               size="lg"
               disabled={isLoading}
-              className="w-full"
+              className="w-full mt-6 md:mt-8 md:py-4 md:text-lg font-bold"
+              style={{
+                backgroundColor: '#D4AF37',
+                color: '#1A1A1A',
+                borderColor: '#B8941F',
+              }}
             >
               {isLoading ? 'Iniciando...' : 'Iniciar Sesión'}
             </Button>
           </form>
 
-          {/* Divisor */}
-          <div className="relative my-8">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-neutral-200"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="bg-white px-4 text-neutral-500 font-poppins">
-                o continúa con
-              </span>
-            </div>
-          </div>
-
-          {/* Social Login */}
-          <div className="grid grid-cols-2 gap-3">
-            <Button variant="outline" size="md" className="w-full">
-              Google
-            </Button>
-            <Button variant="outline" size="md" className="w-full">
-              Facebook
-            </Button>
-          </div>
-
           {/* Footer */}
-          <p className="mt-8 text-center text-sm text-neutral-600 font-poppins">
+          <p className="mt-6 md:mt-8 text-center text-sm md:text-base text-neutral-300 font-poppins">
             ¿No tienes cuenta?{' '}
             <Link
               href="/register"
-              className="text-accent-600 hover:text-accent-700 font-semibold transition-colors"
+              className="text-[#D4AF37] hover:text-[#FFD700] font-semibold transition-colors"
             >
-              Regístrate aquí
+              Regístrate
             </Link>
           </p>
-        </div>
-
-        {/* Link a home */}
-        <div className="mt-6 text-center">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-white hover:text-accent-400 font-poppins font-medium transition-colors"
-          >
-            ← Volver al inicio
-          </Link>
         </div>
       </div>
     </main>
