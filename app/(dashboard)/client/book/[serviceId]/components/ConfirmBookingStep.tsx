@@ -43,7 +43,7 @@ export function ConfirmBookingStep({
   const [selectedPaymentMethod, setSelectedPaymentMethod] =
     useState<string>('credit_card');
   const [couponCode, setCouponCode] = useState<string>('');
-  
+
   // useQueryClient permite invalidar el cache después de crear la cita
   const queryClient = useQueryClient();
 
@@ -84,7 +84,7 @@ export function ConfirmBookingStep({
   // Mutación para crear la cita
   /**
    * Propósito: Ejecutar la creación de la cita en el servidor
-   * 
+   *
    * Pasos:
    * 1. mutationFn: Realiza la petición HTTP para crear la cita
    * 2. onSuccess: Si la cita se crea exitosamente:
@@ -114,12 +114,12 @@ export function ConfirmBookingStep({
     },
     onSuccess: () => {
       toast.success('Reservación confirmada exitosamente');
-      
+
       // OPCIÓN 2: Invalidar el cache de appointments
       // Esto fuerza que AppointmentsList refetch los datos cuando se monte
       // Clave maestra 'appointments' invalida TODOS los queries que empiezan con 'appointments'
       queryClient.invalidateQueries({ queryKey: ['appointments'] });
-      
+
       router.push('/client/appointments');
     },
     onError: (error: Error) => {

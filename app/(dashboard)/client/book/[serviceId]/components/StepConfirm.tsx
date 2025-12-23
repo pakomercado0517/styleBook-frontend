@@ -6,7 +6,10 @@ import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Button } from '@/components/Button';
 import type { Service } from '@/lib/types/services';
-import { createAppointment, rescheduleAppointment } from '@/lib/api/appointments';
+import {
+  createAppointment,
+  rescheduleAppointment,
+} from '@/lib/api/appointments';
 import { useEmployee } from '@/lib/hooks/useEmployees';
 import {
   AlertDialog,
@@ -40,14 +43,17 @@ export function StepConfirm({
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
-  
+
   // useQueryClient permite invalidar el cache después de crear la cita
   const queryClient = useQueryClient();
-  
-  const isRescheduling = rescheduleAppointmentId !== null && rescheduleAppointmentId !== undefined;
-  
+
+  const isRescheduling =
+    rescheduleAppointmentId !== null && rescheduleAppointmentId !== undefined;
+
   // Obtener datos reales del empleado
-  const { data: employee, isLoading: isLoadingEmployee } = useEmployee(employeeId || 0);
+  const { data: employee, isLoading: isLoadingEmployee } = useEmployee(
+    employeeId || 0
+  );
 
   const handleConfirm = async (): Promise<void> => {
     // Validaciones antes de crear la cita
@@ -95,56 +101,102 @@ export function StepConfirm({
 
         // Manejo por código HTTP
         if (errorCode === 409) {
-          errorMessage = 'El horario seleccionado ya no está disponible. Por favor selecciona otro horario.';
+          errorMessage =
+            'El horario seleccionado ya no está disponible. Por favor selecciona otro horario.';
         } else if (errorCode === 400) {
-          if (errorText.includes('fecha') || errorText.includes('date') || errorText.includes('pasado') || errorText.includes('past') || errorText.includes('futuro') || errorText.includes('future')) {
-            errorMessage = 'La fecha seleccionada no es válida. Por favor selecciona una fecha futura.';
-          } else if (errorText.includes('duración') || errorText.includes('duration')) {
+          if (
+            errorText.includes('fecha') ||
+            errorText.includes('date') ||
+            errorText.includes('pasado') ||
+            errorText.includes('past') ||
+            errorText.includes('futuro') ||
+            errorText.includes('future')
+          ) {
+            errorMessage =
+              'La fecha seleccionada no es válida. Por favor selecciona una fecha futura.';
+          } else if (
+            errorText.includes('duración') ||
+            errorText.includes('duration')
+          ) {
             errorMessage = 'La duración del servicio no es válida.';
           } else {
-            errorMessage = 'Los datos proporcionados no son válidos. Por favor verifica la información.';
+            errorMessage =
+              'Los datos proporcionados no son válidos. Por favor verifica la información.';
           }
         } else if (errorCode === 401) {
-          errorMessage = 'Tu sesión ha expirado. Por favor inicia sesión nuevamente.';
+          errorMessage =
+            'Tu sesión ha expirado. Por favor inicia sesión nuevamente.';
           setTimeout(() => {
             router.push('/login');
           }, 2000);
         } else if (errorCode === 404) {
-          if (errorText.includes('empleado') || errorText.includes('employee')) {
-            errorMessage = 'El profesional seleccionado no está disponible. Por favor selecciona otro profesional.';
-          } else if (errorText.includes('servicio') || errorText.includes('service')) {
-            errorMessage = 'El servicio seleccionado no está disponible. Por favor intenta con otro servicio.';
+          if (
+            errorText.includes('empleado') ||
+            errorText.includes('employee')
+          ) {
+            errorMessage =
+              'El profesional seleccionado no está disponible. Por favor selecciona otro profesional.';
+          } else if (
+            errorText.includes('servicio') ||
+            errorText.includes('service')
+          ) {
+            errorMessage =
+              'El servicio seleccionado no está disponible. Por favor intenta con otro servicio.';
           } else {
             errorMessage = 'El recurso solicitado no fue encontrado.';
           }
         } else if (errorCode === 422) {
-          errorMessage = 'Los datos proporcionados no son válidos. Por favor verifica la información.';
+          errorMessage =
+            'Los datos proporcionados no son válidos. Por favor verifica la información.';
         } else if (result.error) {
           // Manejo por texto del error
-          if (errorText.includes('conflicto') || errorText.includes('conflict')) {
-            errorMessage = 'El horario seleccionado ya no está disponible. Por favor selecciona otro horario.';
-          } else if (errorText.includes('disponible') || errorText.includes('available') || errorText.includes('ocupado') || errorText.includes('busy')) {
-            errorMessage = 'El horario seleccionado no está disponible. Por favor selecciona otro horario.';
-          } else if (errorText.includes('fecha') || errorText.includes('date')) {
-            errorMessage = 'La fecha seleccionada no es válida. Por favor selecciona una fecha futura.';
+          if (
+            errorText.includes('conflicto') ||
+            errorText.includes('conflict')
+          ) {
+            errorMessage =
+              'El horario seleccionado ya no está disponible. Por favor selecciona otro horario.';
+          } else if (
+            errorText.includes('disponible') ||
+            errorText.includes('available') ||
+            errorText.includes('ocupado') ||
+            errorText.includes('busy')
+          ) {
+            errorMessage =
+              'El horario seleccionado no está disponible. Por favor selecciona otro horario.';
+          } else if (
+            errorText.includes('fecha') ||
+            errorText.includes('date')
+          ) {
+            errorMessage =
+              'La fecha seleccionada no es válida. Por favor selecciona una fecha futura.';
           } else {
             errorMessage = result.error;
           }
         }
 
-        const errorTitle = isRescheduling ? 'Error al reagendar la cita' : 'Error al crear la cita';
-        
+        const errorTitle = isRescheduling
+          ? 'Error al reagendar la cita'
+          : 'Error al crear la cita';
+
         // Mensajes específicos para errores de reagendamiento
         if (isRescheduling) {
           if (errorCode === 403) {
             errorMessage = 'No tienes permisos para reagendar esta cita.';
           } else if (errorCode === 409) {
-            if (errorText.includes('completada') || errorText.includes('completed')) {
+            if (
+              errorText.includes('completada') ||
+              errorText.includes('completed')
+            ) {
               errorMessage = 'No se puede reagendar una cita completada.';
-            } else if (errorText.includes('cancelada') || errorText.includes('cancelled')) {
+            } else if (
+              errorText.includes('cancelada') ||
+              errorText.includes('cancelled')
+            ) {
               errorMessage = 'No se puede reagendar una cita cancelada.';
             } else {
-              errorMessage = 'El horario seleccionado no está disponible. Por favor selecciona otro horario.';
+              errorMessage =
+                'El horario seleccionado no está disponible. Por favor selecciona otro horario.';
             }
           }
         }
@@ -162,13 +214,17 @@ export function StepConfirm({
       setIsSubmitting(false);
     } catch (error) {
       console.error('Error creating appointment:', error);
-      
+
       // Manejo de errores de red
       let errorMessage = 'Por favor intenta nuevamente.';
-      
+
       if (error instanceof Error) {
-        if (error.message.includes('fetch') || error.message.includes('network')) {
-          errorMessage = 'Error de conexión. Por favor verifica tu conexión a internet e intenta nuevamente.';
+        if (
+          error.message.includes('fetch') ||
+          error.message.includes('network')
+        ) {
+          errorMessage =
+            'Error de conexión. Por favor verifica tu conexión a internet e intenta nuevamente.';
         } else {
           errorMessage = error.message;
         }
@@ -184,9 +240,9 @@ export function StepConfirm({
 
   /**
    * handleSuccessDialogClose
-   * 
+   *
    * Se ejecuta cuando el usuario cierra el diálogo de éxito después de crear/reagendar una cita
-   * 
+   *
    * Pasos:
    * 1. Cierra el diálogo de éxito
    * 2. OPCIÓN 2: Invalida el cache de appointments (fuerza refetch al montar)
@@ -194,11 +250,11 @@ export function StepConfirm({
    */
   const handleSuccessDialogClose = (): void => {
     setShowSuccessDialog(false);
-    
+
     // OPCIÓN 2: Invalidar el cache de appointments
     // Clave maestra 'appointments' invalida TODOS los queries que empiezan con 'appointments'
     queryClient.invalidateQueries({ queryKey: ['appointments'] });
-    
+
     // Redirigir a la página de citas
     router.push('/client/appointments');
   };
@@ -226,15 +282,16 @@ export function StepConfirm({
           {isRescheduling ? 'Reagenda tu cita' : 'Confirma tu reserva'}
         </h2>
         <p className="text-neutral-600">
-          {isRescheduling 
+          {isRescheduling
             ? 'Revisa los nuevos detalles antes de confirmar el reagendamiento'
-            : 'Revisa los detalles antes de confirmar'
-          }
+            : 'Revisa los detalles antes de confirmar'}
         </p>
         {isRescheduling && (
           <div className="mt-3 bg-accent-50 border-2 border-accent-200 rounded-xl p-3">
             <p className="text-sm text-accent-800 font-medium">
-              📅 Tu cita será reagendada al nuevo horario. Si estaba confirmada, volverá a estado pendiente para que el proveedor confirme nuevamente.
+              📅 Tu cita será reagendada al nuevo horario. Si estaba confirmada,
+              volverá a estado pendiente para que el proveedor confirme
+              nuevamente.
             </p>
           </div>
         )}
@@ -263,7 +320,9 @@ export function StepConfirm({
             Profesional
           </h3>
           {isLoadingEmployee ? (
-            <div className="text-neutral-500 text-sm">Cargando información del profesional...</div>
+            <div className="text-neutral-500 text-sm">
+              Cargando información del profesional...
+            </div>
           ) : employee ? (
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full overflow-hidden bg-neutral-200 flex-shrink-0">
@@ -285,18 +344,28 @@ export function StepConfirm({
                   {employee.name}
                 </p>
                 {employee.specialty && (
-                  <p className="text-xs text-neutral-500 truncate">{employee.specialty}</p>
+                  <p className="text-xs text-neutral-500 truncate">
+                    {employee.specialty}
+                  </p>
                 )}
-                {employee.rating !== null && employee.rating !== undefined && employee.rating > 0 && (
-                  <div className="flex items-center gap-1 text-xs text-accent-600 mt-1">
-                    <span>⭐</span>
-                    <span>{typeof employee.rating === 'number' ? employee.rating.toFixed(1) : employee.rating}</span>
-                  </div>
-                )}
+                {employee.rating !== null &&
+                  employee.rating !== undefined &&
+                  employee.rating > 0 && (
+                    <div className="flex items-center gap-1 text-xs text-accent-600 mt-1">
+                      <span>⭐</span>
+                      <span>
+                        {typeof employee.rating === 'number'
+                          ? employee.rating.toFixed(1)
+                          : employee.rating}
+                      </span>
+                    </div>
+                  )}
               </div>
             </div>
           ) : (
-            <div className="text-neutral-500 text-sm">Profesional no disponible</div>
+            <div className="text-neutral-500 text-sm">
+              Profesional no disponible
+            </div>
           )}
         </div>
 
@@ -330,20 +399,26 @@ export function StepConfirm({
           className="flex-1 bg-accent-500 hover:bg-accent-600 text-primary-900 font-bold border-accent-600"
           disabled={isSubmitting || !slot || !employeeId}
         >
-          {isSubmitting 
-            ? (isRescheduling ? 'Reagendando...' : 'Confirmando...') 
-            : (isRescheduling ? 'Reagendar Cita' : 'Confirmar Reserva')
-          }
+          {isSubmitting
+            ? isRescheduling
+              ? 'Reagendando...'
+              : 'Confirmando...'
+            : isRescheduling
+              ? 'Reagendar Cita'
+              : 'Confirmar Reserva'}
         </Button>
       </div>
 
       {/* Diálogo de confirmación exitosa */}
-      <AlertDialog open={showSuccessDialog} onOpenChange={(open) => {
-        if (!open) {
-          // Si se cierra el diálogo, redirigir
-          handleSuccessDialogClose();
-        }
-      }}>
+      <AlertDialog
+        open={showSuccessDialog}
+        onOpenChange={(open) => {
+          if (!open) {
+            // Si se cierra el diálogo, redirigir
+            handleSuccessDialogClose();
+          }
+        }}
+      >
         <AlertDialogContent className="sm:max-w-md">
           <AlertDialogHeader>
             <div className="flex items-center justify-center mb-4">
@@ -352,23 +427,24 @@ export function StepConfirm({
               </div>
             </div>
             <AlertDialogTitle className="text-center text-2xl">
-              {isRescheduling ? '¡Cita Reagendada con Éxito!' : '¡Cita Reservada con Éxito!'}
+              {isRescheduling
+                ? '¡Cita Reagendada con Éxito!'
+                : '¡Cita Reservada con Éxito!'}
             </AlertDialogTitle>
             <AlertDialogDescription className="text-center pt-3 space-y-2">
               <p>
-                {isRescheduling 
+                {isRescheduling
                   ? 'Tu cita ha sido reagendada exitosamente. La cita anterior ha sido cancelada.'
-                  : 'Tu cita ha sido creada exitosamente con estado pendiente.'
-                }
+                  : 'Tu cita ha sido creada exitosamente con estado pendiente.'}
               </p>
               <p>
-                {isRescheduling 
+                {isRescheduling
                   ? 'La nueva cita tiene estado pendiente y el proveedor recibirá una notificación para confirmarla.'
-                  : 'El proveedor recibirá una notificación y confirmará tu cita pronto.'
-                }
+                  : 'El proveedor recibirá una notificación y confirmará tu cita pronto.'}
               </p>
               <p className="pt-2 font-semibold text-primary-800">
-                📧 Te hemos enviado un correo con los detalles de {isRescheduling ? 'tu nueva cita' : 'tu reserva'}.
+                📧 Te hemos enviado un correo con los detalles de{' '}
+                {isRescheduling ? 'tu nueva cita' : 'tu reserva'}.
               </p>
             </AlertDialogDescription>
           </AlertDialogHeader>
