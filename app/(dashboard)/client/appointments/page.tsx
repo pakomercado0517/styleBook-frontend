@@ -17,7 +17,9 @@ type TabFilter = 'upcoming' | 'past' | 'cancelled';
 export default function AppointmentsPage(): ReactNode {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabFilter>('upcoming');
-  const [selectedAppointmentId, setSelectedAppointmentId] = useState<number | null>(null);
+  const [selectedAppointmentId, setSelectedAppointmentId] = useState<
+    number | null
+  >(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   const handleBack = (): void => {
@@ -64,7 +66,9 @@ export default function AppointmentsPage(): ReactNode {
           >
             <ArrowLeft className="w-5 h-5 text-white" strokeWidth={2} />
           </button>
-          <h1 className="text-xl font-bold text-white font-playfair">Mis Citas</h1>
+          <h1 className="text-xl font-bold text-white font-playfair">
+            Mis Citas
+          </h1>
         </div>
         <button
           className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-white/10 transition-colors"
@@ -77,7 +81,9 @@ export default function AppointmentsPage(): ReactNode {
 
       {/* Header - Desktop */}
       <div className="hidden md:flex items-center justify-between px-8 py-6 border-b border-white/10">
-        <h1 className="text-2xl font-bold text-white font-playfair">Mis Citas</h1>
+        <h1 className="text-2xl font-bold text-white font-playfair">
+          Mis Citas
+        </h1>
         <div className="flex items-center gap-4 flex-1 max-w-md mx-8">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
@@ -111,11 +117,7 @@ export default function AppointmentsPage(): ReactNode {
             onClick={() => handleTabChange('upcoming')}
             className={`
               flex-1 md:flex-none md:px-6 px-4 py-3 rounded-xl text-sm font-semibold font-poppins transition-all
-              ${
-                activeTab === 'upcoming'
-                  ? ''
-                  : 'bg-white/5 text-white'
-              }
+              ${activeTab === 'upcoming' ? '' : 'bg-white/5 text-white'}
             `}
             style={
               activeTab === 'upcoming'
@@ -133,11 +135,7 @@ export default function AppointmentsPage(): ReactNode {
             onClick={() => handleTabChange('past')}
             className={`
               flex-1 md:flex-none md:px-6 px-4 py-3 rounded-xl text-sm font-semibold font-poppins transition-all
-              ${
-                activeTab === 'past'
-                  ? ''
-                  : 'bg-white/5 text-white'
-              }
+              ${activeTab === 'past' ? '' : 'bg-white/5 text-white'}
             `}
             style={
               activeTab === 'past'
@@ -155,11 +153,7 @@ export default function AppointmentsPage(): ReactNode {
             onClick={() => handleTabChange('cancelled')}
             className={`
               flex-1 md:flex-none md:px-6 px-4 py-3 rounded-xl text-sm font-semibold font-poppins transition-all
-              ${
-                activeTab === 'cancelled'
-                  ? ''
-                  : 'bg-white/5 text-white'
-              }
+              ${activeTab === 'cancelled' ? '' : 'bg-white/5 text-white'}
             `}
             style={
               activeTab === 'cancelled'
@@ -210,8 +204,27 @@ export default function AppointmentsPage(): ReactNode {
 
       {/* Contenido Mobile */}
       <div className="md:hidden flex-1 overflow-y-auto px-4 py-6">
-        <AppointmentsList status={status} isUpcoming={isUpcoming} searchQuery={searchQuery} />
+        <AppointmentsList
+          status={status}
+          isUpcoming={isUpcoming}
+          searchQuery={searchQuery}
+        />
       </div>
+
+      {/* FAB - Floating Action Button (Mobile Only) */}
+      <button
+        onClick={handleNewAppointment}
+        className="fixed bottom-24 right-6 h-16 w-16 rounded-full shadow-lg hover:shadow-xl transition-shadow md:hidden flex items-center justify-center"
+        aria-label="Nueva cita"
+        style={{
+          backgroundColor: '#D4AF37',
+          color: '#1A1A1A',
+          boxShadow: '0 8px 24px rgba(212, 175, 55, 0.4)',
+        }}
+        type="button"
+      >
+        <Plus className="w-6 h-6" strokeWidth={3} />
+      </button>
     </div>
   );
 }

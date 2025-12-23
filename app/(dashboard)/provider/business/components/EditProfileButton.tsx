@@ -11,7 +11,9 @@ interface EditProfileButtonProps {
  * Botón para editar perfil del negocio
  * Diseño mobile: botón grande dorado con icono de lápiz
  */
-export function EditProfileButton({ onClick }: EditProfileButtonProps): ReactNode {
+export function EditProfileButton({
+  onClick,
+}: EditProfileButtonProps): ReactNode {
   return (
     <button
       onClick={onClick}
@@ -23,8 +25,7 @@ export function EditProfileButton({ onClick }: EditProfileButtonProps): ReactNod
       type="button"
     >
       <Pencil className="w-5 h-5" strokeWidth={2.5} />
-      <span>Editar Perfil</span>
+      <span>Editar Información de Negocio</span>
     </button>
   );
 }
-

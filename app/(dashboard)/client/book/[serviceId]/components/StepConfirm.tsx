@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Button } from '@/components/Button';
 import type { Service } from '@/lib/types/services';
@@ -39,6 +40,9 @@ export function StepConfirm({
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  
+  // useQueryClient permite invalidar el cache después de crear la cita
+  const queryClient = useQueryClient();
   
   const isRescheduling = rescheduleAppointmentId !== null && rescheduleAppointmentId !== undefined;
   
@@ -178,8 +182,23 @@ export function StepConfirm({
     }
   };
 
+  /**
+   * handleSuccessDialogClose
+   * 
+   * Se ejecuta cuando el usuario cierra el diálogo de éxito después de crear/reagendar una cita
+   * 
+   * Pasos:
+   * 1. Cierra el diálogo de éxito
+   * 2. OPCIÓN 2: Invalida el cache de appointments (fuerza refetch al montar)
+   * 3. Redirige a la página de citas (/client/appointments)
+   */
   const handleSuccessDialogClose = (): void => {
     setShowSuccessDialog(false);
+    
+    // OPCIÓN 2: Invalidar el cache de appointments
+    // Clave maestra 'appointments' invalida TODOS los queries que empiezan con 'appointments'
+    queryClient.invalidateQueries({ queryKey: ['appointments'] });
+    
     // Redirigir a la página de citas
     router.push('/client/appointments');
   };

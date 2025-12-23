@@ -7,6 +7,18 @@ import { getAppointments } from '@/lib/api/appointments';
 import type { Appointment, AppointmentStatus } from '@/lib/types/appointments';
 import { AppointmentCard } from './AppointmentCard';
 
+/**
+ * Componente AppointmentsList
+ * 
+ * Estrategia de actualización:
+ * 1. `refetchOnWindowFocus: true` - Refetcha cuando el usuario vuelve a la pestaña
+ * 2. `refetchOnMount: 'stale'` - Refetcha si los datos están "stale" (>1 min sin actualizar)
+ * 3. `staleTime: 1 * 60 * 1000` - Los datos se marcan como "stale" después de 1 minuto
+ * 
+ * Esto soluciona el problema donde al crear una cita en otra ruta, la lista no se actualizaba.
+ * Ahora al volver a la página, se refetcha automáticamente.
+ */
+
 interface AppointmentsListProps {
   status?: AppointmentStatus;
   startDate?: string;
@@ -101,7 +113,14 @@ export const AppointmentsList = ({
         },
       };
     },
-    staleTime: 5 * 60 * 1000, // 5 minutos
+    // OPCIÓN 1: Refetch automático cuando el usuario vuelve a la página
+    // Estrategia de actualización agresiva para sincronizar datos nuevos
+    refetchOnWindowFocus: true,
+    refetchOnMount: 'stale',
+    
+    // OPCIÓN 2: Reducir el tiempo de "staleness" (stale = cuando los datos necesitan actualización)
+    // Después de 1 minuto, los datos se marcan como stale y se refetchan
+    staleTime: 1 * 60 * 1000, // 1 minuto (antes era 5 minutos)
   });
 
   // Loading state

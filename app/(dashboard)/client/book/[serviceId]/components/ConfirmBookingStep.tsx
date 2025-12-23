@@ -16,7 +16,7 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useService } from '@/lib/hooks/useServices';
 import { useEmployee } from '@/lib/hooks/useEmployees';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createAppointment } from '@/lib/api/appointments';
 import { toast } from 'sonner';
 
@@ -43,6 +43,9 @@ export function ConfirmBookingStep({
   const [selectedPaymentMethod, setSelectedPaymentMethod] =
     useState<string>('credit_card');
   const [couponCode, setCouponCode] = useState<string>('');
+  
+  // useQueryClient permite invalidar el cache después de crear la cita
+  const queryClient = useQueryClient();
 
   const { data: service, isLoading: isLoadingService } = useService(serviceId);
   const { data: employee, isLoading: isLoadingEmployee } = useEmployee(
@@ -79,6 +82,17 @@ export function ConfirmBookingStep({
     : '';
 
   // Mutación para crear la cita
+  /**
+   * Propósito: Ejecutar la creación de la cita en el servidor
+   * 
+   * Pasos:
+   * 1. mutationFn: Realiza la petición HTTP para crear la cita
+   * 2. onSuccess: Si la cita se crea exitosamente:
+   *    - Muestra notificación de éxito
+   *    - OPCIÓN 2: Invalida el cache 'appointments' para forzar refetch
+   *    - Redirige a la página de citas (/client/appointments)
+   * 3. onError: Si hay un error, muestra un mensaje de error
+   */
   const createAppointmentMutation = useMutation({
     mutationFn: async () => {
       if (!service || !employeeId || !startTime || !endTime) {
@@ -100,6 +114,12 @@ export function ConfirmBookingStep({
     },
     onSuccess: () => {
       toast.success('Reservación confirmada exitosamente');
+      
+      // OPCIÓN 2: Invalidar el cache de appointments
+      // Esto fuerza que AppointmentsList refetch los datos cuando se monte
+      // Clave maestra 'appointments' invalida TODOS los queries que empiezan con 'appointments'
+      queryClient.invalidateQueries({ queryKey: ['appointments'] });
+      
       router.push('/client/appointments');
     },
     onError: (error: Error) => {

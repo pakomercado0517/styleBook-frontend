@@ -22,7 +22,7 @@ export function ProviderBusinessPageContent(): ReactNode {
 
   const handleEditProfile = (): void => {
     // Redirige a la página de perfil para editar
-    router.push('/provider/profile');
+    router.push('/provider/business/edit');
   };
 
   if (isLoading) {
