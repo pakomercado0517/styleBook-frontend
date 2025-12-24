@@ -171,9 +171,9 @@ export function BottomTabBar({ role }: BottomTabBarProps): ReactNode {
         // Scroll horizontal para provider con muchas opciones
         <div className="relative h-20">
           {/* Gradiente izquierdo para indicar scroll */}
-          <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-[#201d12]/95 to-transparent z-10 pointer-events-none" />
+          <div className="absolute left-0 top-0 bottom-0 w-8 bg-linear-to-r from-[#201d12]/95 to-transparent z-10 pointer-events-none" />
           {/* Gradiente derecho para indicar scroll */}
-          <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-[#201d12]/95 to-transparent z-10 pointer-events-none" />
+          <div className="absolute right-0 top-0 bottom-0 w-8 bg-linear-to-l from-[#201d12]/95 to-transparent z-10 pointer-events-none" />
           <div className="h-full overflow-x-auto overflow-y-hidden scrollbar-hide scroll-smooth">
             <div className="flex items-center h-full px-4 gap-1 min-w-max">
               {tabs.map((tab) => {
@@ -191,7 +191,7 @@ export function BottomTabBar({ role }: BottomTabBarProps): ReactNode {
                     transition-all duration-200
                     relative
                     active:scale-95
-                    flex-shrink-0
+                    flex-0
                   `}
                     aria-current={active ? 'page' : undefined}
                   >
