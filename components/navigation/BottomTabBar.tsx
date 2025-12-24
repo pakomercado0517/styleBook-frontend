@@ -11,6 +11,10 @@ import {
   Heart,
   User,
   Bell,
+  Users,
+  Clock,
+  BarChart3,
+  Star,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -82,10 +86,46 @@ export function BottomTabBar({ role }: BottomTabBarProps): ReactNode {
       activePatterns: ['/provider$'],
     },
     {
+      icon: Briefcase,
+      label: 'Servicios',
+      href: '/provider/services',
+      activePatterns: ['/provider/services'],
+    },
+    {
       icon: Calendar,
       label: 'Citas',
       href: '/provider/appointments',
       activePatterns: ['/provider/appointments'],
+    },
+    {
+      icon: ShoppingBag,
+      label: 'Negocio',
+      href: '/provider/business',
+      activePatterns: ['/provider/business'],
+    },
+    {
+      icon: Users,
+      label: 'Empleados',
+      href: '/provider/employees',
+      activePatterns: ['/provider/employees'],
+    },
+    {
+      icon: Clock,
+      label: 'Horarios',
+      href: '/provider/schedule',
+      activePatterns: ['/provider/schedule'],
+    },
+    {
+      icon: BarChart3,
+      label: 'Analíticas',
+      href: '/provider/analytics',
+      activePatterns: ['/provider/analytics'],
+    },
+    {
+      icon: Star,
+      label: 'Reseñas',
+      href: '/provider/reviews',
+      activePatterns: ['/provider/reviews'],
     },
     {
       icon: Bell,
@@ -94,14 +134,8 @@ export function BottomTabBar({ role }: BottomTabBarProps): ReactNode {
       activePatterns: ['/provider/notifications'],
     },
     {
-      icon: ShoppingBag,
-      label: 'Mi Negocio',
-      href: '/provider/business',
-      activePatterns: ['/provider/business'],
-    },
-    {
       icon: User,
-      label: 'Ajustes',
+      label: 'Perfil',
       href: '/provider/profile',
       activePatterns: ['/provider/profile'],
     },
@@ -119,6 +153,9 @@ export function BottomTabBar({ role }: BottomTabBarProps): ReactNode {
     });
   };
 
+  // Para provider, usar scroll horizontal si hay más de 5 tabs
+  const useHorizontalScroll = role === 'provider' && tabs.length > 5;
+
   return (
     <nav
       className="
@@ -130,46 +167,178 @@ export function BottomTabBar({ role }: BottomTabBarProps): ReactNode {
       role="navigation"
       aria-label="Navegación principal"
     >
-      <div className="flex items-center justify-between h-20 px-2 max-w-xl mx-auto">
-        {tabs.map((tab) => {
-          const active = isActive(tab.activePatterns);
+      {useHorizontalScroll ? (
+        // Scroll horizontal para provider con muchas opciones
+        <div className="relative h-20">
+          {/* Gradiente izquierdo para indicar scroll */}
+          <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-[#201d12]/95 to-transparent z-10 pointer-events-none" />
+          {/* Gradiente derecho para indicar scroll */}
+          <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-[#201d12]/95 to-transparent z-10 pointer-events-none" />
+          <div className="h-full overflow-x-auto overflow-y-hidden scrollbar-hide scroll-smooth">
+            <div className="flex items-center h-full px-4 gap-1 min-w-max">
+              {tabs.map((tab) => {
+                const active = isActive(tab.activePatterns);
 
-          return (
-            <Link
-              key={tab.href}
-              href={tab.href}
-              className={`
-                group
-                flex flex-col items-center justify-center
-                flex-1 h-full
-                px-1 py-2
-                transition-all duration-200
-                relative
-                active:scale-95
-              `}
-              aria-current={active ? 'page' : undefined}
-            >
-              {/* Indicador superior si está activo */}
-              {active && (
-                <div
-                  className="absolute top-0 left-1/2 -translate-x-1/2 w-10 h-1 rounded-b-full shadow-sm"
-                  style={{
-                    backgroundColor: '#D4AF37',
-                    boxShadow: '0 1px 3px rgba(212, 175, 55, 0.5)',
-                  }}
-                />
-              )}
+                return (
+                  <Link
+                    key={tab.href}
+                    href={tab.href}
+                    className={`
+                    group
+                    flex flex-col items-center justify-center
+                    min-w-[64px] h-full
+                    px-3 py-2
+                    transition-all duration-200
+                    relative
+                    active:scale-95
+                    flex-shrink-0
+                  `}
+                    aria-current={active ? 'page' : undefined}
+                  >
+                    {/* Indicador superior si está activo */}
+                    {active && (
+                      <div
+                        className="absolute top-0 left-1/2 -translate-x-1/2 w-10 h-1 rounded-b-full shadow-sm"
+                        style={{
+                          backgroundColor: '#D4AF37',
+                          boxShadow: '0 1px 3px rgba(212, 175, 55, 0.5)',
+                        }}
+                      />
+                    )}
 
-              {/* Icon */}
-              <div
+                    {/* Icon */}
+                    <div
+                      className={`
+                      relative mb-1
+                      transition-all duration-200
+                      ${active ? 'scale-110' : 'scale-100 group-hover:scale-105'}
+                    `}
+                    >
+                      <tab.icon
+                        className="w-5 h-5"
+                        style={
+                          active
+                            ? {
+                                color: '#D4AF37',
+                              }
+                            : {
+                                color: '#FFFFFF',
+                              }
+                        }
+                        strokeWidth={active ? 2.5 : 2}
+                        aria-hidden="true"
+                      />
+                      {/* Badge de notificación (opcional, para futuras features) */}
+                      {active && (
+                        <div
+                          className="absolute -top-1 -right-1 w-2 h-2 rounded-full animate-pulse"
+                          style={{ backgroundColor: '#D4AF37' }}
+                        />
+                      )}
+                    </div>
+
+                    {/* Label */}
+                    <span
+                      className={`
+                      text-[10px]
+                      font-poppins
+                      leading-tight
+                      text-center
+                      transition-colors duration-200
+                      whitespace-nowrap
+                      ${active ? 'font-bold' : 'font-medium'}
+                    `}
+                      style={
+                        active
+                          ? {
+                              color: '#D4AF37',
+                            }
+                          : {
+                              color: '#FFFFFF',
+                            }
+                      }
+                    >
+                      {tab.label}
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      ) : (
+        // Layout estándar para client o provider con pocas opciones
+        <div className="flex items-center justify-between h-20 px-2 max-w-xl mx-auto">
+          {tabs.map((tab) => {
+            const active = isActive(tab.activePatterns);
+
+            return (
+              <Link
+                key={tab.href}
+                href={tab.href}
                 className={`
-                  relative mb-1
+                  group
+                  flex flex-col items-center justify-center
+                  flex-1 h-full
+                  px-1 py-2
                   transition-all duration-200
-                  ${active ? 'scale-110' : 'scale-100 group-hover:scale-105'}
+                  relative
+                  active:scale-95
                 `}
+                aria-current={active ? 'page' : undefined}
               >
-                <tab.icon
-                  className="w-5 h-5 md:w-6 md:h-6"
+                {/* Indicador superior si está activo */}
+                {active && (
+                  <div
+                    className="absolute top-0 left-1/2 -translate-x-1/2 w-10 h-1 rounded-b-full shadow-sm"
+                    style={{
+                      backgroundColor: '#D4AF37',
+                      boxShadow: '0 1px 3px rgba(212, 175, 55, 0.5)',
+                    }}
+                  />
+                )}
+
+                {/* Icon */}
+                <div
+                  className={`
+                    relative mb-1
+                    transition-all duration-200
+                    ${active ? 'scale-110' : 'scale-100 group-hover:scale-105'}
+                  `}
+                >
+                  <tab.icon
+                    className="w-5 h-5 md:w-6 md:h-6"
+                    style={
+                      active
+                        ? {
+                            color: '#D4AF37',
+                          }
+                        : {
+                            color: '#FFFFFF',
+                          }
+                    }
+                    strokeWidth={active ? 2.5 : 2}
+                    aria-hidden="true"
+                  />
+                  {/* Badge de notificación (opcional, para futuras features) */}
+                  {active && (
+                    <div
+                      className="absolute -top-1 -right-1 w-2 h-2 rounded-full animate-pulse"
+                      style={{ backgroundColor: '#D4AF37' }}
+                    />
+                  )}
+                </div>
+
+                {/* Label - Optimizado para 6 items */}
+                <span
+                  className={`
+                    text-[10px] md:text-xs
+                    font-poppins
+                    leading-tight
+                    text-center
+                    transition-colors duration-200
+                    ${active ? 'font-bold' : 'font-medium'}
+                  `}
                   style={
                     active
                       ? {
@@ -179,44 +348,14 @@ export function BottomTabBar({ role }: BottomTabBarProps): ReactNode {
                           color: '#FFFFFF',
                         }
                   }
-                  strokeWidth={active ? 2.5 : 2}
-                  aria-hidden="true"
-                />
-                {/* Badge de notificación (opcional, para futuras features) */}
-                {active && (
-                  <div
-                    className="absolute -top-1 -right-1 w-2 h-2 rounded-full animate-pulse"
-                    style={{ backgroundColor: '#D4AF37' }}
-                  />
-                )}
-              </div>
-
-              {/* Label - Optimizado para 6 items */}
-              <span
-                className={`
-                  text-[10px] md:text-xs
-                  font-poppins
-                  leading-tight
-                  text-center
-                  transition-colors duration-200
-                  ${active ? 'font-bold' : 'font-medium'}
-                `}
-                style={
-                  active
-                    ? {
-                        color: '#D4AF37',
-                      }
-                    : {
-                        color: '#FFFFFF',
-                      }
-                }
-              >
-                {tab.label}
-              </span>
-            </Link>
-          );
-        })}
-      </div>
+                >
+                  {tab.label}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+      )}
     </nav>
   );
 }

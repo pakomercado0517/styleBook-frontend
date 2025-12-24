@@ -1,20 +1,22 @@
 'use client';
 
 import type { ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
 import { useMyProviderProfile } from '@/lib/hooks/useMyProviderProfile';
-import { useEmployeesByProvider } from '@/lib/hooks/useEmployees';
+import { useEmployeesByProvider, useDeleteEmployee } from '@/lib/hooks/useEmployees';
 import { EmployeesList } from './EmployeesList';
 import { EmployeesHeader } from './EmployeesHeader';
 import { AddEmployeeButton } from './AddEmployeeButton';
-import { toast } from 'sonner';
 
 /**
  * Contenido principal de la página de empleados del proveedor
  * Diseño mobile-first
  */
 export function EmployeesPageContent(): ReactNode {
+  const router = useRouter();
   const { data: providerProfile, isLoading: isLoadingProfile } =
     useMyProviderProfile();
+  const deleteEmployee = useDeleteEmployee();
 
   // Query para obtener empleados del proveedor
   const {
@@ -27,18 +29,15 @@ export function EmployeesPageContent(): ReactNode {
   });
 
   const handleCreateEmployee = (): void => {
-    // TODO: Implementar modal de formulario
-    toast.info('Función de crear empleado próximamente');
+    router.push('/provider/employees/create');
   };
 
-  const handleEditEmployee = (_employeeId: number): void => {
-    // TODO: Implementar modal de formulario
-    toast.info('Función de editar empleado próximamente');
+  const handleEditEmployee = (employeeId: number): void => {
+    router.push(`/provider/employees/${employeeId}/edit`);
   };
 
-  const handleDeleteEmployee = (_employeeId: number): void => {
-    // TODO: Implementar eliminación de empleado
-    toast.info('Función de eliminar empleado próximamente');
+  const handleDeleteEmployee = (employeeId: number): void => {
+    deleteEmployee.mutate(employeeId);
   };
 
   if (isLoadingProfile) {

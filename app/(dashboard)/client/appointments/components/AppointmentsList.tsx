@@ -12,7 +12,7 @@ import { AppointmentCard } from './AppointmentCard';
  *
  * Estrategia de actualización:
  * 1. `refetchOnWindowFocus: true` - Refetcha cuando el usuario vuelve a la pestaña
- * 2. `refetchOnMount: 'stale'` - Refetcha si los datos están "stale" (>1 min sin actualizar)
+ * 2. `refetchOnMount: true` - Refetcha si los datos están "stale" (>1 min sin actualizar)
  * 3. `staleTime: 1 * 60 * 1000` - Los datos se marcan como "stale" después de 1 minuto
  *
  * Esto soluciona el problema donde al crear una cita en otra ruta, la lista no se actualizaba.
@@ -116,7 +116,7 @@ export const AppointmentsList = ({
     // OPCIÓN 1: Refetch automático cuando el usuario vuelve a la página
     // Estrategia de actualización agresiva para sincronizar datos nuevos
     refetchOnWindowFocus: true,
-    refetchOnMount: 'stale',
+    refetchOnMount: true, // Refetch si los datos están stale (según staleTime)
 
     // OPCIÓN 2: Reducir el tiempo de "staleness" (stale = cuando los datos necesitan actualización)
     // Después de 1 minuto, los datos se marcan como stale y se refetchan

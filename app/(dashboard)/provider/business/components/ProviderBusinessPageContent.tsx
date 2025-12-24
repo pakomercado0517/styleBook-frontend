@@ -21,7 +21,7 @@ export function ProviderBusinessPageContent(): ReactNode {
   const { data: providerProfile, isLoading } = useMyProviderProfile();
 
   const handleEditProfile = (): void => {
-    // Redirige a la página de perfil para editar
+    // Redirige a la página de edición de negocio, independiente de la información del perfil
     router.push('/provider/business/edit');
   };
 

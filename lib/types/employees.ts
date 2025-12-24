@@ -38,7 +38,33 @@ export interface EmployeesPaginatedResponse {
   };
 }
 
+/**
+ * Datos para crear un empleado
+ */
+export interface CreateEmployeeData {
+  provider_id: number;
+  name: string;
+  email: string;
+  phone?: string;
+  specialty?: string;
+  photo_url?: string;
+}
+
+/**
+ * Datos para actualizar un empleado
+ */
+export interface UpdateEmployeeData {
+  name?: string;
+  email?: string;
+  phone?: string;
+  specialty?: string;
+  photo_url?: string;
+}
+
 // Tipos de respuestas API
 export type GetEmployeesResponse = Result<EmployeesPaginatedResponse>;
 export type GetEmployeeResponse = Result<Employee>;
+export type CreateEmployeeResponse = Result<Employee>;
+export type UpdateEmployeeResponse = Result<Employee>;
+export type DeleteEmployeeResponse = Result<{ message: string }>;
 
