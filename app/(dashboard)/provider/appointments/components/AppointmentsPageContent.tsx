@@ -69,12 +69,23 @@ export function AppointmentsPageContent(): ReactNode {
         </div>
       </div>
 
-      {/* Desktop: Layout de 2 columnas (Calendario + Panel de Hoy) */}
+      {/* Desktop: Layout de 2 columnas (Lista de Citas + Panel de Hoy) */}
       <div className="hidden md:flex flex-1 overflow-hidden">
-        {/* Columna izquierda: Calendario Interactivo */}
-        <div className="flex-1 p-6">
-          <div className="h-full">
-            <InteractiveCalendar />
+        {/* Columna izquierda: Tabs y Lista de Citas */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {/* Tabs de filtro */}
+          <div className="px-6 pt-6">
+            <AppointmentsTabs activeTab={activeTab} onTabChange={setActiveTab} />
+          </div>
+
+          {/* Lista de citas */}
+          <div className="flex-1 px-6 py-6 overflow-y-auto">
+            <ProviderAppointmentsList
+              status={statusFilter}
+              startDate={dateRange.start}
+              endDate={dateRange.end}
+              filterByTab={activeTab}
+            />
           </div>
         </div>
 

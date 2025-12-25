@@ -1,10 +1,9 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { getProviderAppointments } from '@/lib/api/appointments';
+import { useProviderAppointments, useProviderPendingAppointments } from '@/lib/hooks/useAppointments';
 import { ProviderAppointmentCard } from './ProviderAppointmentCard';
-import { isToday, isAfter } from 'date-fns';
+import { isToday, isAfter, startOfDay } from 'date-fns';
 import type { AppointmentStatus } from '@/lib/types/appointments';
 
 interface ProviderAppointmentsListProps {
@@ -16,6 +15,7 @@ interface ProviderAppointmentsListProps {
 
 /**
  * Lista de citas del proveedor con filtros
+ * Usa hooks optimizados para cada tipo de consulta
  */
 export function ProviderAppointmentsList({
   status,
@@ -23,32 +23,28 @@ export function ProviderAppointmentsList({
   endDate,
   filterByTab = 'today',
 }: ProviderAppointmentsListProps): ReactNode {
-  const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['provider-appointments', status, startDate, endDate, filterByTab],
-    queryFn: async () => {
-      const params: {
-        status?: string;
-        start_date?: string;
-        end_date?: string;
-        limit: number;
-      } = {
-        limit: 100, // Obtener más citas para filtrar en el cliente
-      };
+  // Para el tab "pending", usar el endpoint específico
+  const { data: pendingData, isLoading: isLoadingPending, isError: isErrorPending, error: errorPending } = useProviderPendingAppointments(
+    filterByTab === 'pending' ? { limit: 100 } : undefined
+  );
 
-      if (status) params.status = status;
-      if (startDate) params.start_date = startDate;
-      if (endDate) params.end_date = endDate;
+  // Para otros tabs, usar el endpoint general
+  const { data: allData, isLoading: isLoadingAll, isError: isErrorAll, error: errorAll } = useProviderAppointments(
+    filterByTab !== 'pending'
+      ? {
+          status: status,
+          start_date: startDate,
+          end_date: endDate,
+          limit: 100,
+        }
+      : undefined // No ejecutar si es pending
+  );
 
-      const result = await getProviderAppointments(params);
-
-      if (!result.success) {
-        throw new Error(result.error);
-      }
-
-      return result.data;
-    },
-    staleTime: 2 * 60 * 1000, // 2 minutos
-  });
+  // Determinar qué datos usar según el tab
+  const isLoading = filterByTab === 'pending' ? isLoadingPending : isLoadingAll;
+  const isError = filterByTab === 'pending' ? isErrorPending : isErrorAll;
+  const error = filterByTab === 'pending' ? errorPending : errorAll;
+  const data = filterByTab === 'pending' ? pendingData : allData;
 
   // Loading state
   if (isLoading) {
@@ -81,14 +77,26 @@ export function ProviderAppointmentsList({
 
   let appointments = data?.data?.appointments || [];
 
-  // Filtrar según el tab si es necesario
-  if (filterByTab === 'upcoming') {
-    const today = new Date();
+  // Filtrar según el tab activo
+  const today = new Date();
+  const todayStart = startOfDay(today);
+
+  if (filterByTab === 'today') {
+    // Solo mostrar citas de hoy
     appointments = appointments.filter((apt) => {
       const aptDate = new Date(apt.start_date_local);
-      return isAfter(aptDate, today) && !isToday(aptDate);
+      return isToday(aptDate);
+    });
+  } else if (filterByTab === 'upcoming') {
+    // Mostrar citas futuras (desde mañana en adelante)
+    appointments = appointments.filter((apt) => {
+      const aptDate = new Date(apt.start_date_local);
+      const aptDateStart = startOfDay(aptDate);
+      // Incluir solo las que son después de hoy (mañana en adelante)
+      return isAfter(aptDateStart, todayStart);
     });
   }
+  // Para "pending" no necesitamos filtrar, el endpoint ya retorna solo pendientes
 
   // Empty state
   if (appointments.length === 0) {

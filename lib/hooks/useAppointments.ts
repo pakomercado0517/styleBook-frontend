@@ -70,6 +70,7 @@ export function useProviderAppointments(params?: {
       }
       return result.data;
     },
+    enabled: params !== undefined, // Solo ejecutar si hay parámetros
     staleTime: 2 * 60 * 1000, // 2 minutos
   });
 }
@@ -92,6 +93,7 @@ export function useProviderPendingAppointments(params?: {
       }
       return result.data;
     },
+    enabled: params !== undefined, // Solo ejecutar si hay parámetros
     staleTime: 1 * 60 * 1000, // 1 minuto (más frecuente porque cambian rápido)
   });
 }

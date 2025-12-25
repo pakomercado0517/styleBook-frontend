@@ -1,8 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { getProviderAppointments } from '@/lib/api/appointments';
+import { useProviderAppointments } from '@/lib/hooks/useAppointments';
 import { format, startOfDay, endOfDay, isToday } from 'date-fns';
 import { ProviderAppointmentCard } from './ProviderAppointmentCard';
 
@@ -15,22 +14,10 @@ export function TodayAppointmentsPanel(): ReactNode {
   const todayStart = format(startOfDay(today), "yyyy-MM-dd'T'00:00:00");
   const todayEnd = format(endOfDay(today), "yyyy-MM-dd'T'23:59:59");
 
-  const { data, isLoading } = useQuery({
-    queryKey: ['provider-appointments-today', todayStart, todayEnd],
-    queryFn: async () => {
-      const result = await getProviderAppointments({
-        start_date: todayStart,
-        end_date: todayEnd,
-        limit: 50,
-      });
-
-      if (!result.success) {
-        throw new Error(result.error);
-      }
-
-      return result.data;
-    },
-    staleTime: 2 * 60 * 1000, // 2 minutos
+  const { data, isLoading } = useProviderAppointments({
+    start_date: todayStart,
+    end_date: todayEnd,
+    limit: 50,
   });
 
   const appointments = data?.data?.appointments || [];

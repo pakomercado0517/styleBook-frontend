@@ -5,7 +5,7 @@ import { Clock, User } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import type { Appointment } from '@/lib/types/appointments';
-import { useUpdateAppointment, useCancelAppointment } from '@/lib/hooks/useAppointments';
+import { useUpdateAppointment, useCancelAppointment, useConfirmAppointment } from '@/lib/hooks/useAppointments';
 import { toast } from 'sonner';
 
 interface ProviderAppointmentCardProps {
@@ -21,6 +21,7 @@ export function ProviderAppointmentCard({
 }: ProviderAppointmentCardProps): ReactNode {
   const updateAppointment = useUpdateAppointment();
   const cancelAppointment = useCancelAppointment();
+  const confirmAppointment = useConfirmAppointment();
 
   // Información del cliente
   const clientName =
@@ -79,20 +80,14 @@ export function ProviderAppointmentCard({
 
   // Handlers
   const handleConfirm = (): void => {
-    updateAppointment.mutate(
-      {
-        appointmentId: appointment.id,
-        data: { status: 'confirmed' },
+    confirmAppointment.mutate(appointment.id, {
+      onSuccess: () => {
+        toast.success('Cita confirmada exitosamente');
       },
-      {
-        onSuccess: () => {
-          toast.success('Cita confirmada exitosamente');
-        },
-        onError: (error: Error) => {
-          toast.error(error.message || 'Error al confirmar la cita');
-        },
-      }
-    );
+      onError: (error: Error) => {
+        toast.error(error.message || 'Error al confirmar la cita');
+      },
+    });
   };
 
   const handleCancel = (): void => {
@@ -167,7 +162,7 @@ export function ProviderAppointmentCard({
             <button
               onClick={handleConfirm}
               className="flex-1 text-sm font-medium text-green-400 font-poppins hover:text-green-300 transition-colors"
-              disabled={updateAppointment.isPending}
+              disabled={confirmAppointment.isPending}
               type="button"
             >
               Confirmar
