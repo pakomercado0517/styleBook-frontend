@@ -14,7 +14,7 @@ export default function FavoritesPage(): ReactNode {
   const [activeTab, setActiveTab] = useState<TabType>('services');
 
   return (
-    <div className="min-h-screen bg-[#201d12]">
+    <div className="min-h-screen bg-[#121212]">
       {/* Mobile Header */}
       <div className="md:hidden px-4 py-6">
         <h1 className="text-3xl font-bold text-white font-playfair mb-6">

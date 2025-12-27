@@ -21,5 +21,8 @@ export * from './favorites.schema';
 // Employees schemas
 export * from './employees.schema';
 
+// Reviews schemas
+export * from './reviews.schema';
+
 // Response schemas
 export * from './response.schemas';

@@ -49,7 +49,7 @@ export function AppointmentsPageContent(): ReactNode {
   const statusFilter = activeTab === 'pending' ? 'pending' : undefined;
 
   return (
-    <div className="min-h-screen bg-[#201d12] flex flex-col">
+    <div className="min-h-screen bg-[#121212] flex flex-col">
       {/* Header */}
       <AppointmentsHeader />
 

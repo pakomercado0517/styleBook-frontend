@@ -24,7 +24,7 @@ const config: Config = {
           600: '#666666',
           700: '#4D4D4D',
           800: '#2C2C2C', // Charcoal principal
-          900: '#1A1A1A',
+          900: '#121212', // Negro oscuro para fondos (antes #1A1A1A)
         },
         accent: {
           50: '#FAF7F0',

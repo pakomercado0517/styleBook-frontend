@@ -1,11 +1,12 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getAppointments } from '@/lib/api/appointments';
 import type { Appointment, AppointmentStatus } from '@/lib/types/appointments';
 import { AppointmentCard } from './AppointmentCard';
+import { datetimePickerToISO } from '@/lib/utils/dateUtils';
 
 /**
  * Componente AppointmentsList
@@ -44,6 +45,11 @@ export const AppointmentsList = ({
   const [currentPage, setCurrentPage] = useState<number>(1);
   const limit = 12;
 
+  // Resetear página cuando cambian los filtros principales
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [status, isUpcoming, searchQuery]);
+
   const { data, isLoading, isError, error } = useQuery({
     queryKey: [
       'appointments',
@@ -55,6 +61,11 @@ export const AppointmentsList = ({
       searchQuery,
     ],
     queryFn: async () => {
+      // Para "Próximas", necesitamos obtener más resultados porque filtramos en el frontend
+      // Para otros tabs, usamos la paginación del backend normalmente
+      const fetchLimit = isUpcoming ? 100 : limit; // Obtener más resultados para filtrar
+      const fetchOffset = isUpcoming ? 0 : (currentPage - 1) * limit;
+
       const params: {
         limit: number;
         offset: number;
@@ -63,23 +74,48 @@ export const AppointmentsList = ({
         end_date?: string;
         include?: string;
       } = {
-        limit,
-        offset: (currentPage - 1) * limit,
+        limit: fetchLimit,
+        offset: fetchOffset,
         include: 'service,employee,provider',
       };
 
-      // Para "Próximas", filtrar por fechas futuras
+      // Para "Próximas", filtrar por fechas futuras (desde ahora en adelante)
       if (isUpcoming) {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        params.start_date = today.toISOString().split('T')[0] || '';
-        // No filtrar por status, mostrar pending y confirmed
-      } else if (status) {
+        const now = new Date();
+        // Usar formato ISO completo con hora para el backend (formato local)
+        params.start_date = datetimePickerToISO(now);
+        // No filtrar por status aquí, lo haremos en el frontend
+      } else {
+        // Para otros tabs (past, cancelled), SIEMPRE usar el status
+        // CRÍTICO: Si no hay status, no deberíamos mostrar nada
+        // Esto previene que se muestren todas las citas cuando no hay filtro
+        if (!status) {
+          // Si no hay status y no es upcoming, retornar estructura vacía
+          // Debe retornar la misma estructura que result.data (AppointmentsPaginatedResponse)
+          return {
+            success: true,
+            message: 'Citas obtenidas',
+            data: {
+              appointments: [],
+              pagination: {
+                page: currentPage,
+                limit: limit,
+                total: 0,
+                pages: 0,
+              },
+            },
+            timestamp: new Date().toISOString(),
+          } as import('@/lib/types/appointments').AppointmentsPaginatedResponse;
+        }
         params.status = status;
       }
 
-      if (startDate) params.start_date = startDate;
-      if (endDate) params.end_date = endDate;
+      // Si hay fechas específicas pasadas como props, usarlas
+      // (solo si no estamos en modo isUpcoming, para evitar conflictos)
+      if (!isUpcoming) {
+        if (startDate) params.start_date = startDate;
+        if (endDate) params.end_date = endDate;
+      }
 
       const result = await getAppointments(params);
 
@@ -87,12 +123,30 @@ export const AppointmentsList = ({
         throw new Error(result.error);
       }
 
-      // Filtrar en el frontend para "Próximas" (solo pending y confirmed)
       let appointments = result.data.data.appointments;
+
+      // Filtrar en el frontend para "Próximas" (solo pending y confirmed, y fechas futuras)
       if (isUpcoming) {
-        appointments = appointments.filter(
-          (apt) => apt.status === 'pending' || apt.status === 'confirmed'
-        );
+        const now = new Date();
+        appointments = appointments.filter((apt) => {
+          // Verificar que el estado sea pending o confirmed
+          const isValidStatus =
+            apt.status === 'pending' || apt.status === 'confirmed';
+          // Verificar que la fecha de inicio sea futura
+          const appointmentStartDate = new Date(apt.start_date_local);
+          const isFutureDate = appointmentStartDate >= now;
+          return isValidStatus && isFutureDate;
+        });
+      } else {
+        // Para otros tabs, SIEMPRE filtrar por status en el frontend
+        // Esto asegura que solo se muestren las citas del estado correcto
+        // incluso si el backend no filtró correctamente
+        if (status) {
+          appointments = appointments.filter((apt) => apt.status === status);
+        } else {
+          // Si no hay status y no es upcoming, no deberíamos tener citas
+          appointments = [];
+        }
       }
 
       // Filtrar por búsqueda si hay query
@@ -101,10 +155,39 @@ export const AppointmentsList = ({
         appointments = appointments.filter((apt) => {
           const serviceName = apt.service?.name?.toLowerCase() || '';
           const providerName = apt.provider?.business_name?.toLowerCase() || '';
-          return serviceName.includes(query) || providerName.includes(query);
+          const employeeName = apt.employee?.name?.toLowerCase() || '';
+          return (
+            serviceName.includes(query) ||
+            providerName.includes(query) ||
+            employeeName.includes(query)
+          );
         });
       }
 
+      // Para "Próximas" o cuando hay búsqueda, paginar en el frontend
+      if (isUpcoming || searchQuery) {
+        const totalFiltered = appointments.length;
+        const totalPages = Math.ceil(totalFiltered / limit);
+        const startIndex = (currentPage - 1) * limit;
+        const endIndex = startIndex + limit;
+        const paginatedAppointments = appointments.slice(startIndex, endIndex);
+
+        return {
+          ...result.data,
+          data: {
+            ...result.data.data,
+            appointments: paginatedAppointments,
+            pagination: {
+              page: currentPage,
+              limit: limit,
+              total: totalFiltered,
+              pages: totalPages,
+            },
+          },
+        };
+      }
+
+      // Para otros tabs sin búsqueda, usar la paginación del backend
       return {
         ...result.data,
         data: {

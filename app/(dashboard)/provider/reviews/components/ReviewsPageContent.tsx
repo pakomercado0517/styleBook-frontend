@@ -1,25 +1,20 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { toast } from 'sonner';
 import { ReviewsHeader } from './ReviewsHeader';
 import { ReviewFilters } from './ReviewFilters';
 import { ReviewsList } from './ReviewsList';
 import { ReviewStatsPanel } from './ReviewStatsPanel';
+import { useMyProviderProfile } from '@/lib/hooks/useMyProviderProfile';
+import {
+  useProviderReviews,
+  useProviderReviewStats,
+} from '@/lib/hooks/useReviews';
+import type { Review } from '@/lib/types/reviews';
 
 type ReviewFilter = 'all' | '5' | '4' | '3' | '2' | '1';
-
-interface Review {
-  id: number;
-  clientName: string;
-  clientPhoto?: string;
-  rating: number;
-  comment: string;
-  createdAt: string;
-  response?: string;
-  respondedAt?: string;
-}
 
 /**
  * Contenido principal de la página de reseñas
@@ -28,51 +23,57 @@ interface Review {
 export function ReviewsPageContent(): ReactNode {
   const [selectedFilter, setSelectedFilter] = useState<ReviewFilter>('all');
 
-  // Datos de ejemplo - TODO: Obtener del backend
-  const allReviews: Review[] = [
-    {
-      id: 1,
-      clientName: 'Elena García',
-      clientPhoto: undefined,
-      rating: 5,
-      comment:
-        '¡Una experiencia increíble! El trato fue super profesional y el resultado superó mis expectativas. Volveré sin duda.',
-      createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    },
-    {
-      id: 2,
-      clientName: 'Carlos Ruiz',
-      clientPhoto: undefined,
-      rating: 4,
-      comment:
-        'Buen servicio en general, aunque la puntualidad podría mejorar un poco. El ambiente del local es muy relajante.',
-      createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-    },
-    {
-      id: 3,
-      clientName: 'Ana Torres',
-      clientPhoto: undefined,
-      rating: 5,
-      comment:
-        '¡Fantástico! Un servicio de lujo. Me sentí muy cómoda y el resultado fue perfecto.',
-      createdAt: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000).toISOString(),
-      response:
-        '¡Muchas gracias Ana! Nos alegra enormemente que hayas tenido una experiencia fantástica. ¡Esperamos verte pronto de nuevo!',
-      respondedAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(),
-    },
-  ];
+  // Obtener el perfil del proveedor autenticado
+  const { data: providerProfile, isLoading: isLoadingProvider } =
+    useMyProviderProfile();
+  const providerId = providerProfile?.id;
+
+  // Obtener reseñas del proveedor
+  const {
+    data: reviewsData,
+    isLoading: isLoadingReviews,
+    error: reviewsError,
+  } = useProviderReviews(providerId || 0, {
+    limit: 100, // Obtener todas las reseñas
+  });
+
+  // Obtener estadísticas de rating
+  const {
+    data: statsData,
+    isLoading: isLoadingStats,
+    error: statsError,
+  } = useProviderReviewStats(providerId || 0);
+
+  // Convertir reseñas del backend al formato esperado por los componentes
+  const allReviews: Review[] = useMemo(() => {
+    if (!reviewsData?.data) return [];
+
+    return reviewsData.data.map((review) => ({
+      ...review,
+      // El backend puede incluir client como relación
+      // Si no está, usar datos por defecto
+    }));
+  }, [reviewsData]);
 
   // Filtrar reseñas según el filtro seleccionado
-  const filteredReviews =
-    selectedFilter === 'all'
-      ? allReviews
-      : allReviews.filter((review) => review.rating === Number.parseInt(selectedFilter, 10));
+  const filteredReviews = useMemo(() => {
+    if (selectedFilter === 'all') {
+      return allReviews;
+    }
+    return allReviews.filter(
+      (review) => review.rating === Number.parseInt(selectedFilter, 10)
+    );
+  }, [allReviews, selectedFilter]);
 
-  // Calcular estadísticas
-  const totalReviews = allReviews.length;
+  // Calcular estadísticas desde los datos del backend o usar statsData
+  const totalReviews = statsData?.total_reviews || allReviews.length;
   const averageRating =
-    allReviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews || 0;
-  const ratingDistribution = {
+    statsData?.average_rating ||
+    (allReviews.length > 0
+      ? allReviews.reduce((sum, review) => sum + review.rating, 0) /
+        allReviews.length
+      : 0);
+  const ratingDistribution = statsData?.rating_distribution || {
     '5': allReviews.filter((r) => r.rating === 5).length,
     '4': allReviews.filter((r) => r.rating === 4).length,
     '3': allReviews.filter((r) => r.rating === 3).length,
@@ -81,15 +82,37 @@ export function ReviewsPageContent(): ReactNode {
   };
 
   const handleReply = (_reviewId: number, _response: string): void => {
-    // TODO: Implementar llamada al backend para responder
+    // TODO: Implementar llamada al backend para responder cuando esté disponible
     toast.success('Respuesta enviada', {
       description: 'Tu respuesta se ha publicado correctamente.',
     });
     // En una implementación real, actualizarías el estado o refetch de las reseñas
   };
 
+  // Estados de carga
+  const isLoading = isLoadingProvider || isLoadingReviews || isLoadingStats;
+
+  // Manejo de errores
+  if (reviewsError || statsError) {
+    return (
+      <div className="min-h-full bg-[#121212] flex flex-col">
+        <ReviewsHeader />
+        <div className="flex-1 flex items-center justify-center p-8">
+          <div className="text-center">
+            <p className="text-white text-lg mb-2 font-poppins">
+              Error al cargar las reseñas
+            </p>
+            <p className="text-neutral-400 font-poppins">
+              {reviewsError?.message || statsError?.message || 'Error desconocido'}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-full bg-[#201d12] flex flex-col">
+    <div className="min-h-full bg-[#121212] flex flex-col">
       {/* Header */}
       <ReviewsHeader />
 
@@ -106,7 +129,11 @@ export function ReviewsPageContent(): ReactNode {
         {/* Mobile: Layout vertical */}
         <div className="md:hidden">
           <div className="py-4">
-            <ReviewsList reviews={filteredReviews} onReply={handleReply} />
+            <ReviewsList
+              reviews={filteredReviews}
+              onReply={handleReply}
+              isLoading={isLoading}
+            />
           </div>
         </div>
 
@@ -114,7 +141,11 @@ export function ReviewsPageContent(): ReactNode {
         <div className="hidden md:grid md:grid-cols-3 md:gap-6 md:px-8 md:py-6">
           {/* Columna izquierda: Lista de reseñas */}
           <div className="md:col-span-2 space-y-4">
-            <ReviewsList reviews={filteredReviews} onReply={handleReply} />
+            <ReviewsList
+              reviews={filteredReviews}
+              onReply={handleReply}
+              isLoading={isLoading}
+            />
           </div>
 
           {/* Columna derecha: Estadísticas */}
@@ -124,6 +155,7 @@ export function ReviewsPageContent(): ReactNode {
                 averageRating={averageRating}
                 totalReviews={totalReviews}
                 ratingDistribution={ratingDistribution}
+                isLoading={isLoading}
               />
             </div>
           </div>

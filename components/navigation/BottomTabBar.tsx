@@ -160,7 +160,7 @@ export function BottomTabBar({ role }: BottomTabBarProps): ReactNode {
     <nav
       className="
         fixed bottom-0 left-0 right-0 z-50 md:hidden
-        bg-[#201d12]/95 backdrop-blur-sm
+        bg-[#121212]/95 backdrop-blur-sm
         border-t border-white/10
         shadow-[0_-4px_20px_rgba(0,0,0,0.3)]
       "
@@ -171,9 +171,9 @@ export function BottomTabBar({ role }: BottomTabBarProps): ReactNode {
         // Scroll horizontal para provider con muchas opciones
         <div className="relative h-20">
           {/* Gradiente izquierdo para indicar scroll */}
-          <div className="absolute left-0 top-0 bottom-0 w-8 bg-linear-to-r from-[#201d12]/95 to-transparent z-10 pointer-events-none" />
+          <div className="absolute left-0 top-0 bottom-0 w-8 bg-linear-to-r from-[#121212]/95 to-transparent z-10 pointer-events-none" />
           {/* Gradiente derecho para indicar scroll */}
-          <div className="absolute right-0 top-0 bottom-0 w-8 bg-linear-to-l from-[#201d12]/95 to-transparent z-10 pointer-events-none" />
+          <div className="absolute right-0 top-0 bottom-0 w-8 bg-linear-to-l from-[#121212]/95 to-transparent z-10 pointer-events-none" />
           <div className="h-full overflow-x-auto overflow-y-hidden scrollbar-hide scroll-smooth">
             <div className="flex items-center h-full px-4 gap-1 min-w-max">
               {tabs.map((tab) => {

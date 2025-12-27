@@ -13,6 +13,7 @@ interface ReviewStatsPanelProps {
     '2': number;
     '1': number;
   };
+  isLoading?: boolean;
 }
 
 /**
@@ -23,7 +24,17 @@ export function ReviewStatsPanel({
   averageRating,
   totalReviews,
   ratingDistribution,
+  isLoading = false,
 }: ReviewStatsPanelProps): ReactNode {
+  if (isLoading) {
+    return (
+      <div className="bg-white/5 rounded-xl p-6 border border-white/10">
+        <div className="text-center py-8">
+          <p className="text-white font-poppins">Cargando estadísticas...</p>
+        </div>
+      </div>
+    );
+  }
   const maxCount = Math.max(
     ratingDistribution['5'],
     ratingDistribution['4'],

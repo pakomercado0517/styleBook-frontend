@@ -54,7 +54,7 @@ export default function AppointmentsPage(): ReactNode {
   const isUpcoming = activeTab === 'upcoming';
 
   return (
-    <div className="min-h-screen bg-[#201d12] flex flex-col">
+    <div className="min-h-screen bg-[#121212] flex flex-col">
       {/* Header - Mobile */}
       <div className="flex items-center justify-between px-4 py-4 border-b border-white/10 md:hidden">
         <div className="flex items-center gap-4">

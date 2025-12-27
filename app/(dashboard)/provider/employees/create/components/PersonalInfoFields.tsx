@@ -134,7 +134,7 @@ export function PersonalInfoFields({
                 className="fixed inset-0 z-10"
                 onClick={() => setIsRoleDropdownOpen(false)}
               />
-              <div className="absolute top-full left-0 mt-2 w-full bg-[#201d12] border border-white/10 rounded-xl shadow-lg z-20 overflow-hidden max-h-60 overflow-y-auto">
+              <div className="absolute top-full left-0 mt-2 w-full bg-[#121212] border border-white/10 rounded-xl shadow-lg z-20 overflow-hidden max-h-60 overflow-y-auto">
                 {roleOptions.map((role) => (
                   <button
                     key={role}

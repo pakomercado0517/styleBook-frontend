@@ -60,7 +60,7 @@ export const ProviderDetailsPage = ({
   // Loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#201d12] flex flex-col">
+      <div className="min-h-screen bg-[#121212] flex flex-col">
         <div className="flex items-center justify-between px-4 py-4 border-b border-white/10">
           <div className="w-10 h-10 rounded-full bg-white/10 animate-pulse"></div>
           <div className="h-6 bg-white/10 rounded w-32 animate-pulse"></div>
@@ -79,7 +79,7 @@ export const ProviderDetailsPage = ({
       error instanceof Error ? error.message : 'Error al cargar el proveedor';
 
     return (
-      <div className="min-h-screen bg-[#201d12] flex flex-col">
+      <div className="min-h-screen bg-[#121212] flex flex-col">
         <div className="flex items-center justify-between px-4 py-4 border-b border-white/10">
           <button
             onClick={handleBack}
@@ -109,7 +109,7 @@ export const ProviderDetailsPage = ({
   }
 
   return (
-    <div className="w-full bg-[#201d12] flex flex-col md:min-h-full">
+    <div className="w-full bg-[#121212] flex flex-col md:min-h-full">
       {/* Mobile: Header con imagen */}
       <div className="relative w-full h-80 md:hidden">
         {providerImage ? (
@@ -607,7 +607,7 @@ export const ProviderDetailsPage = ({
       </div>
 
       {/* Botón fijo "Reservar Ahora" */}
-      <div className="fixed bottom-20 left-0 right-0 z-[60] mx-auto max-w-md border-t border-white/10 bg-[#201d12]/95 px-4 py-4 backdrop-blur-lg md:hidden">
+      <div className="fixed bottom-20 left-0 right-0 z-[60] mx-auto max-w-md border-t border-white/10 bg-[#121212]/95 px-4 py-4 backdrop-blur-lg md:hidden">
         <button
           onClick={handleBookNow}
           className="w-full h-14 rounded-xl font-semibold font-poppins transition-colors"

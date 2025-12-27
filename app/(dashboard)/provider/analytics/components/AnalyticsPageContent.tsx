@@ -42,7 +42,7 @@ export function AnalyticsPageContent(): ReactNode {
   ];
 
   return (
-    <div className="min-h-full bg-[#201d12] flex flex-col">
+    <div className="min-h-full bg-[#121212] flex flex-col">
       {/* Header */}
       <AnalyticsHeader
         selectedTimeFrame={selectedTimeFrame}

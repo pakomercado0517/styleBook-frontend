@@ -52,7 +52,7 @@ export function SelectProfessionalStep({
 
   if (isLoadingService || isLoadingEmployees) {
     return (
-      <div className="min-h-screen bg-[#201d12] flex flex-col">
+      <div className="min-h-screen bg-[#121212] flex flex-col">
         {/* Header */}
         <div className="flex items-center gap-4 px-4 py-4 border-b border-white/10">
           <button
@@ -89,7 +89,7 @@ export function SelectProfessionalStep({
 
   if (!service) {
     return (
-      <div className="min-h-screen bg-[#201d12] flex flex-col items-center justify-center px-4">
+      <div className="min-h-screen bg-[#121212] flex flex-col items-center justify-center px-4">
         <p className="text-white font-poppins mb-4">No se pudo cargar el servicio.</p>
         <button
           onClick={handleBack}
@@ -114,7 +114,7 @@ export function SelectProfessionalStep({
   const formattedDuration = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
 
   return (
-    <div className="min-h-screen bg-[#201d12] flex flex-col">
+    <div className="min-h-screen bg-[#121212] flex flex-col">
       {/* Header - Mobile */}
       <div className="flex items-center gap-4 px-4 py-4 border-b border-white/10 md:hidden">
         <button

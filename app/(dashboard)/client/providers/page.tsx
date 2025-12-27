@@ -28,7 +28,7 @@ export default function ProvidersPage(): ReactNode {
   const providers = providersResponse?.data?.data || [];
 
   return (
-    <div className="min-h-screen bg-[#201d12]">
+    <div className="min-h-screen bg-[#121212]">
       {/* Mobile Header */}
       <div className="md:hidden px-4 py-6">
         <div className="flex items-center justify-between mb-6">

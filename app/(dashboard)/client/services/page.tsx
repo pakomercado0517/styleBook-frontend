@@ -127,9 +127,9 @@ function ServicesPageContent(): ReactNode {
   const hasResults = services.length > 0;
 
   return (
-    <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-[#201d12]">
+    <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-[#121212]">
       {/* Top App Bar */}
-      <header className="sticky top-0 z-10 bg-[#201d12]/80 backdrop-blur-sm border-b border-white/10">
+      <header className="sticky top-0 z-10 bg-[#121212]/80 backdrop-blur-sm border-b border-white/10">
         <div className="flex items-center p-4 pb-2">
           <h1 className="text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center font-playfair">
             Búsqueda de Servicios
@@ -225,7 +225,7 @@ export default function ServicesPage(): ReactNode {
   return (
     <Suspense
       fallback={
-        <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-[#201d12]">
+        <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-[#121212]">
           <div className="px-4 py-3">
             <div className="h-14 bg-white/5 rounded-xl animate-pulse mb-4"></div>
             <div className="flex gap-3 overflow-x-auto pb-1">

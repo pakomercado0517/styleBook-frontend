@@ -154,7 +154,7 @@ export function DesktopSidebar({ role }: DesktopSidebarProps): ReactNode {
   const { logout } = useAuth();
 
   return (
-    <aside className="hidden md:flex flex-col w-64 lg:w-72 bg-[#201d12] border-r border-white/10 h-screen sticky top-0">
+    <aside className="hidden md:flex flex-col w-64 lg:w-72 bg-[#121212] border-r border-white/10 h-screen sticky top-0">
       {/* Logo */}
       <div className="flex items-center justify-center px-6 py-6 border-b border-white/10">
         <Image

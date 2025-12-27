@@ -142,7 +142,7 @@ export function ConfirmBookingStep({
 
   if (isLoadingService || isLoadingEmployee) {
     return (
-      <div className="min-h-screen bg-[#201d12] flex flex-col">
+      <div className="min-h-screen bg-[#121212] flex flex-col">
         <div className="flex items-center gap-4 px-4 py-4 border-b border-white/10">
           <button
             onClick={handleBack}
@@ -165,7 +165,7 @@ export function ConfirmBookingStep({
 
   if (!service) {
     return (
-      <div className="min-h-screen bg-[#201d12] flex flex-col items-center justify-center px-4">
+      <div className="min-h-screen bg-[#121212] flex flex-col items-center justify-center px-4">
         <p className="text-white font-poppins mb-4">
           No se pudo cargar el servicio.
         </p>
@@ -182,7 +182,7 @@ export function ConfirmBookingStep({
   const providerName = service.provider?.business_name || 'Salón';
 
   return (
-    <div className="min-h-screen bg-[#201d12] flex flex-col">
+    <div className="min-h-screen bg-[#121212] flex flex-col">
       {/* Header - Mobile */}
       <div className="flex items-center gap-4 px-4 py-4 border-b border-white/10 md:hidden">
         <button

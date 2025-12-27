@@ -15,7 +15,7 @@ export function MobileHeader(): ReactNode {
   const userName = user?.name?.split(' ')[0] || 'Usuario';
 
   return (
-    <header className="sticky top-0 z-40 bg-[#201d12] border-b border-white/10 md:hidden">
+    <header className="sticky top-0 z-40 bg-[#121212] border-b border-white/10 md:hidden">
       <div className="flex items-center justify-between h-16 px-4">
         {/* Avatar y Saludo */}
         <div className="flex items-center gap-2">

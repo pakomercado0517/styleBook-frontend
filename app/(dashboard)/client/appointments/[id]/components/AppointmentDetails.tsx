@@ -1,6 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -8,6 +9,8 @@ import { ArrowLeft, MoreVertical, MapPin, Star } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { getAppointment, cancelAppointment } from '@/lib/api/appointments';
+import { CreateReviewForm } from '../../components/CreateReviewForm';
+import { useMyReviews } from '@/lib/hooks/useReviews';
 
 interface AppointmentDetailsProps {
   appointmentId: number;
@@ -30,6 +33,7 @@ export const AppointmentDetails = ({
 }: AppointmentDetailsProps): ReactNode => {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const [isReviewFormOpen, setIsReviewFormOpen] = useState(false);
 
   const {
     data: appointment,
@@ -49,6 +53,17 @@ export const AppointmentDetails = ({
     },
     staleTime: 5 * 60 * 1000, // 5 minutos
   });
+
+  // Verificar si ya existe una reseña para esta cita (solo si hay appointment)
+  const { data: myReviewsData } = useMyReviews(
+    appointment ? { limit: 100 } : undefined
+  );
+  const hasReview =
+    appointment && myReviewsData?.data
+      ? myReviewsData.data.some(
+          (review) => review.appointment_id === appointment.id
+        )
+      : false;
 
   const { mutate: handleCancelMutation, isPending: isCancelling } = useMutation(
     {
@@ -101,7 +116,7 @@ export const AppointmentDetails = ({
   // Loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#201d12] flex flex-col">
+      <div className="min-h-screen bg-[#121212] flex flex-col">
         <div className="flex items-center justify-between px-4 py-4 border-b border-white/10">
           <button
             onClick={handleBack}
@@ -129,7 +144,7 @@ export const AppointmentDetails = ({
       error instanceof Error ? error.message : 'Error al cargar la cita';
 
     return (
-      <div className="min-h-screen bg-[#201d12] flex flex-col">
+      <div className="min-h-screen bg-[#121212] flex flex-col">
         <div className="flex items-center justify-between px-4 py-4 border-b border-white/10">
           <button
             onClick={handleBack}
@@ -155,6 +170,31 @@ export const AppointmentDetails = ({
               Volver
             </button>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Early return si no hay appointment
+  if (!appointment) {
+    return (
+      <div className="min-h-screen bg-[#121212] flex flex-col">
+        <div className="flex items-center justify-between px-4 py-4 border-b border-white/10">
+          <button
+            onClick={handleBack}
+            className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-white/10 transition-colors"
+            aria-label="Volver"
+            type="button"
+          >
+            <ArrowLeft className="w-5 h-5 text-white" strokeWidth={2} />
+          </button>
+          <h1 className="text-xl font-bold text-white font-playfair">
+            Detalles de la Cita
+          </h1>
+          <div className="w-10"></div>
+        </div>
+        <div className="flex-1 flex items-center justify-center">
+          <div className="w-8 h-8 border-4 border-accent-500 border-t-transparent rounded-full animate-spin"></div>
         </div>
       </div>
     );
@@ -207,6 +247,7 @@ export const AppointmentDetails = ({
   const canCancel = ['pending', 'confirmed'].includes(appointment.status);
   const isCompleted = appointment.status === 'completed';
   const canRebook = isCompleted && appointment.service_id;
+  const canReview = isCompleted && !hasReview;
 
   // Información del empleado
   const employeeName = appointment.employee?.name || 'No asignado';
@@ -216,7 +257,7 @@ export const AppointmentDetails = ({
   const reviewsCount: number = 254; // Valor por defecto, se podría obtener del backend si está disponible
 
   return (
-    <div className="min-h-screen bg-[#201d12] flex flex-col">
+    <div className="min-h-screen bg-[#121212] flex flex-col">
       {/* Header - Mobile */}
       <div className="flex items-center justify-between px-4 py-4 border-b border-white/10 md:hidden">
         <button
@@ -454,7 +495,20 @@ export const AppointmentDetails = ({
                     {isCancelling ? 'Cancelando...' : 'Cancelar Cita'}
                   </button>
                 )}
-                {canRebook && (
+                {canReview && (
+                  <button
+                    onClick={() => setIsReviewFormOpen(true)}
+                    className="flex-1 h-12 rounded-lg font-semibold font-poppins transition-colors"
+                    style={{
+                      backgroundColor: '#D4AF37',
+                      color: '#1A1A1A',
+                    }}
+                    type="button"
+                  >
+                    Dejar Reseña
+                  </button>
+                )}
+                {canRebook && !canReview && (
                   <button
                     onClick={handleRebook}
                     className="flex-1 h-12 rounded-lg font-semibold font-poppins transition-colors"
@@ -651,7 +705,20 @@ export const AppointmentDetails = ({
 
           {/* Botones de acción - Mobile */}
           <div className="space-y-3">
-            {canRebook && (
+            {canReview && (
+              <button
+                onClick={() => setIsReviewFormOpen(true)}
+                className="w-full h-12 rounded-xl font-semibold font-poppins transition-colors"
+                style={{
+                  backgroundColor: '#D4AF37',
+                  color: '#1A1A1A',
+                }}
+                type="button"
+              >
+                Dejar Reseña
+              </button>
+            )}
+            {canRebook && !canReview && (
               <button
                 onClick={handleRebook}
                 className="w-full h-12 rounded-xl font-semibold font-poppins transition-colors"
@@ -690,6 +757,19 @@ export const AppointmentDetails = ({
           </div>
         </div>
       </div>
+
+      {/* Modal de reseña */}
+      {isCompleted && (
+        <CreateReviewForm
+          appointment={appointment}
+          isOpen={isReviewFormOpen}
+          onClose={() => {
+            setIsReviewFormOpen(false);
+            queryClient.invalidateQueries({ queryKey: ['my-reviews'] });
+            queryClient.invalidateQueries({ queryKey: ['appointment', appointmentId] });
+          }}
+        />
+      )}
     </div>
   );
 };

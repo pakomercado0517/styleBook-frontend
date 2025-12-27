@@ -12,7 +12,7 @@ import { RecommendedServicesCarousel } from './components/RecommendedServicesCar
  */
 export default function ClientDashboardPage(): ReactNode {
   return (
-    <div className="relative mx-auto flex h-auto min-h-screen w-full max-w-md md:max-w-full flex-col overflow-x-hidden bg-[#201d12] dark:bg-[#201d12]">
+    <div className="relative mx-auto flex h-auto min-h-screen w-full max-w-md md:max-w-full flex-col overflow-x-hidden bg-[#121212] dark:bg-[#121212]">
       {/* Header con título y acciones - Solo visible en desktop */}
       <DesktopContentHeader title="Dashboard" />
 

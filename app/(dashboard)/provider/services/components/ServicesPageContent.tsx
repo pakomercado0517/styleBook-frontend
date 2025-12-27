@@ -57,7 +57,7 @@ export function ServicesPageContent(): ReactNode {
 
   if (isLoadingProfile) {
     return (
-      <div className="min-h-screen bg-[#201d12] flex flex-col">
+      <div className="min-h-screen bg-[#121212] flex flex-col">
         <ServicesHeader onCreateService={handleCreateService} />
         <div className="flex-1 flex items-center justify-center">
           <p className="text-white font-poppins">Cargando perfil del proveedor...</p>
@@ -68,7 +68,7 @@ export function ServicesPageContent(): ReactNode {
 
   if (!providerProfile) {
     return (
-      <div className="min-h-screen bg-[#201d12] flex flex-col">
+      <div className="min-h-screen bg-[#121212] flex flex-col">
         <ServicesHeader onCreateService={handleCreateService} />
         <div className="flex-1 flex items-center justify-center">
           <p className="text-red-400 font-poppins">
@@ -80,7 +80,7 @@ export function ServicesPageContent(): ReactNode {
   }
 
   return (
-    <div className="min-h-full bg-[#201d12] flex flex-col">
+    <div className="min-h-full bg-[#121212] flex flex-col">
       {/* Header */}
       <ServicesHeader onCreateService={handleCreateService} />
 

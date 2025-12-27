@@ -20,7 +20,7 @@ export default function ProviderDetailPage({
 
   if (isNaN(providerId)) {
     return (
-      <div className="min-h-screen bg-[#201d12] flex items-center justify-center px-4">
+      <div className="min-h-screen bg-[#121212] flex items-center justify-center px-4">
         <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-6 text-center">
           <p className="text-red-400 font-poppins">ID de proveedor inválido</p>
         </div>

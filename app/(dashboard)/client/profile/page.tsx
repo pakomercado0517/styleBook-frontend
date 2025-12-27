@@ -95,7 +95,7 @@ export default function ClientProfilePage(): ReactNode {
     .slice(0, 2);
 
   return (
-    <div className="min-h-screen bg-[#201d12] flex flex-col">
+    <div className="min-h-screen bg-[#121212] flex flex-col">
       {/* Header - Mobile */}
       <div className="px-4 py-4 border-b border-white/10 md:hidden">
         <h1 className="text-xl font-bold text-white font-playfair">Mi Perfil</h1>
@@ -129,7 +129,7 @@ export default function ClientProfilePage(): ReactNode {
                 {/* Botón de editar superpuesto */}
                 <button
                   onClick={handleEditProfile}
-                  className="absolute bottom-0 right-0 w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center border-2 border-[#201d12] transition-colors hover:scale-110"
+                  className="absolute bottom-0 right-0 w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center border-2 border-[#121212] transition-colors hover:scale-110"
                   style={{
                     backgroundColor: '#D4AF37',
                   }}

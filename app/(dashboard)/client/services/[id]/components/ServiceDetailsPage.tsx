@@ -30,7 +30,7 @@ export function ServiceDetailsPage({ serviceId }: ServiceDetailsPageProps): Reac
 
   if (isLoading) {
     return (
-      <div className="mx-auto flex min-h-screen max-w-md md:max-w-7xl flex-col bg-[#201d12]">
+      <div className="mx-auto flex min-h-screen max-w-md md:max-w-7xl flex-col bg-[#121212]">
         <div className="relative w-full h-80 bg-white/5 animate-pulse"></div>
         <main className="flex-grow px-6 pb-32 pt-6">
           <div className="flex flex-col gap-6">
@@ -44,7 +44,7 @@ export function ServiceDetailsPage({ serviceId }: ServiceDetailsPageProps): Reac
 
   if (error || !service) {
     return (
-      <div className="mx-auto flex min-h-screen max-w-md md:max-w-7xl flex-col bg-[#201d12] p-6">
+      <div className="mx-auto flex min-h-screen max-w-md md:max-w-7xl flex-col bg-[#121212] p-6">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-white mb-4 font-playfair">Error</h2>
           <p className="text-neutral-300 mb-6 font-poppins">No se pudo cargar el servicio.</p>
@@ -85,7 +85,7 @@ export function ServiceDetailsPage({ serviceId }: ServiceDetailsPageProps): Reac
   };
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-md md:max-w-7xl flex-col bg-[#201d12]">
+    <div className="mx-auto flex min-h-screen max-w-md md:max-w-7xl flex-col bg-[#121212]">
       {/* Botones de acción - Solo móvil */}
       <div className="md:hidden relative w-full">
         <div className="h-80 w-full bg-cover bg-center relative">
@@ -420,7 +420,7 @@ export function ServiceDetailsPage({ serviceId }: ServiceDetailsPageProps): Reac
       </main>
 
       {/* Botón fijo al final - Solo móvil */}
-      <div className="fixed bottom-0 left-0 right-0 z-[60] mx-auto max-w-md border-t border-white/10 bg-[#201d12]/95 px-6 py-4 backdrop-blur-lg md:hidden">
+      <div className="fixed bottom-0 left-0 right-0 z-[60] mx-auto max-w-md border-t border-white/10 bg-[#121212]/95 px-6 py-4 backdrop-blur-lg md:hidden">
         {/* Botón Realizar reservación */}
         <button
           onClick={handleReserveNow}

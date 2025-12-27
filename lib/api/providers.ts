@@ -2,7 +2,9 @@ import type {
   ProvidersPaginatedResponse,
   GetProvidersResponse,
   GetProviderProfileResponse,
+  ProviderProfile,
 } from '@/lib/types/provider';
+import type { Result } from '@/lib/types/common';
 import { API_BASE_URL } from '@/lib/constants';
 import { fetchWithAuth } from '@/lib/api/interceptor';
 
@@ -89,6 +91,58 @@ export const getProviderById = async (
       success: false,
       error:
         error instanceof Error ? error.message : 'Error al obtener proveedor',
+    };
+  }
+};
+
+/**
+ * Crea un nuevo perfil de proveedor
+ * @param data - Datos del negocio
+ * @returns Promise con resultado de la creación
+ */
+export const createProvider = async (data: {
+  business_name: string;
+  business_type: string;
+  description?: string;
+  opening_time?: string;
+  closing_time?: string;
+  address?: string;
+  city?: string;
+  country?: string;
+}): Promise<Result<ProviderProfile>> => {
+  try {
+    const response = await fetchWithAuth(`${API_BASE_URL}/providers`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      let errorMessage = 'Error al crear el perfil del negocio';
+      try {
+        const error = await response.json();
+        errorMessage = error.message || error.error || errorMessage;
+      } catch {
+        errorMessage = response.statusText || errorMessage;
+      }
+      return {
+        success: false,
+        error: errorMessage,
+      };
+    }
+
+    const responseData = await response.json();
+    return { success: true, data: responseData.data };
+  } catch (error) {
+    console.error('Error creating provider profile:', error);
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Error al crear el perfil del negocio',
     };
   }
 };

@@ -131,7 +131,7 @@ export function CreateEmployeePageContent(): ReactNode {
 
   if (isLoadingProfile) {
     return (
-      <div className="min-h-screen bg-[#201d12] flex flex-col">
+      <div className="min-h-screen bg-[#121212] flex flex-col">
         <CreateEmployeeHeader onSave={handleSave} isSaving={false} />
         <div className="flex-1 flex items-center justify-center">
           <p className="text-white font-poppins">Cargando perfil del proveedor...</p>
@@ -142,7 +142,7 @@ export function CreateEmployeePageContent(): ReactNode {
 
   if (!providerProfile) {
     return (
-      <div className="min-h-screen bg-[#201d12] flex flex-col">
+      <div className="min-h-screen bg-[#121212] flex flex-col">
         <CreateEmployeeHeader onSave={handleSave} isSaving={false} />
         <div className="flex-1 flex items-center justify-center">
           <p className="text-red-400 font-poppins">
@@ -156,7 +156,7 @@ export function CreateEmployeePageContent(): ReactNode {
   const isSaving = createEmployee.isPending;
 
   return (
-    <div className="min-h-screen bg-[#201d12] flex flex-col pb-20 md:pb-0">
+    <div className="min-h-screen bg-[#121212] flex flex-col pb-20 md:pb-0">
       {/* Header */}
       <CreateEmployeeHeader
         onSave={handleSave}

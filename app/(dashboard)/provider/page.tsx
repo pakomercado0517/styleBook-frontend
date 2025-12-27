@@ -61,7 +61,7 @@ export default function ProviderDashboardPage(): ReactNode {
   ).length;
 
   return (
-    <div className="min-h-screen bg-[#201d12] flex flex-col">
+    <div className="min-h-screen bg-[#121212] flex flex-col">
       {/* Header */}
       <DashboardHeader />
 

@@ -27,7 +27,7 @@ export function ProviderBusinessPageContent(): ReactNode {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#201d12] flex flex-col">
+      <div className="min-h-screen bg-[#121212] flex flex-col">
         <div className="px-4 py-6 border-b border-white/10">
           <div className="h-8 bg-white/5 rounded w-32 animate-pulse" />
         </div>
@@ -40,7 +40,7 @@ export function ProviderBusinessPageContent(): ReactNode {
 
   if (!providerProfile || !user) {
     return (
-      <div className="min-h-screen bg-[#201d12] flex flex-col">
+      <div className="min-h-screen bg-[#121212] flex flex-col">
         <div className="px-4 py-6 border-b border-white/10">
           <h1 className="text-2xl font-bold text-white font-poppins">
             Mi Negocio
@@ -56,7 +56,7 @@ export function ProviderBusinessPageContent(): ReactNode {
   }
 
   return (
-    <div className="min-h-full bg-[#201d12] flex flex-col">
+    <div className="min-h-full bg-[#121212] flex flex-col">
       {/* Header */}
       <ProfileHeader
         businessName={providerProfile.business_name}

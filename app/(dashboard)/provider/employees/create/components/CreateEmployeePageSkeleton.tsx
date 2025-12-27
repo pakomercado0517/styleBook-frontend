@@ -7,7 +7,7 @@ import type { ReactNode } from 'react';
  */
 export function CreateEmployeePageSkeleton(): ReactNode {
   return (
-    <div className="min-h-screen bg-[#201d12] flex flex-col">
+    <div className="min-h-screen bg-[#121212] flex flex-col">
       <div className="px-4 py-4 border-b border-white/10">
         <div className="h-6 w-32 bg-white/10 rounded animate-pulse"></div>
       </div>

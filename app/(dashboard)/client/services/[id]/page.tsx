@@ -14,7 +14,7 @@ export default async function ServiceDetailsPageRoute({
   const { id } = await params;
 
   return (
-    <div className="min-h-screen bg-[#201d12]">
+    <div className="min-h-screen bg-[#121212]">
       <ServiceDetailsPage serviceId={parseInt(id)} />
     </div>
   );

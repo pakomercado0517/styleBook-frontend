@@ -6,17 +6,7 @@ import { Star, Reply, Send } from 'lucide-react';
 import { useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
-
-interface Review {
-  id: number;
-  clientName: string;
-  clientPhoto?: string;
-  rating: number;
-  comment: string;
-  createdAt: string;
-  response?: string;
-  respondedAt?: string;
-}
+import type { Review } from '@/lib/types/reviews';
 
 interface ReviewCardProps {
   review: Review;
@@ -31,7 +21,11 @@ export function ReviewCard({ review, onReply }: ReviewCardProps): ReactNode {
   const [isReplying, setIsReplying] = useState(false);
   const [replyText, setReplyText] = useState('');
 
-  const clientInitial = review.clientName.charAt(0).toUpperCase();
+  // Obtener nombre del cliente desde la relación o usar valor por defecto
+  const clientName = review.client?.name || 'Cliente';
+  const clientInitial = clientName.charAt(0).toUpperCase();
+  const clientPhoto = review.client?.photo || undefined;
+  const comment = review.comment || '';
   const formattedDate = formatDistanceToNow(new Date(review.createdAt), {
     addSuffix: true,
     locale: es,
@@ -55,11 +49,11 @@ export function ReviewCard({ review, onReply }: ReviewCardProps): ReactNode {
       <div className="flex items-start gap-3 mb-3">
         {/* Foto de perfil */}
         <div className="relative shrink-0">
-          {review.clientPhoto ? (
+          {clientPhoto ? (
             <div className="w-12 h-12 rounded-full overflow-hidden">
               <Image
-                src={review.clientPhoto}
-                alt={review.clientName}
+                src={clientPhoto}
+                alt={clientName}
                 width={48}
                 height={48}
                 className="object-cover"
@@ -78,7 +72,7 @@ export function ReviewCard({ review, onReply }: ReviewCardProps): ReactNode {
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2 mb-1">
             <h3 className="text-base font-semibold text-white font-poppins truncate">
-              {review.clientName}
+              {clientName}
             </h3>
             <span className="text-xs text-neutral-400 font-poppins shrink-0">
               {formattedDate}
@@ -99,9 +93,11 @@ export function ReviewCard({ review, onReply }: ReviewCardProps): ReactNode {
       </div>
 
       {/* Comentario */}
-      <p className="text-sm text-white font-poppins leading-relaxed mb-3">
-        {review.comment}
-      </p>
+      {comment && (
+        <p className="text-sm text-white font-poppins leading-relaxed mb-3">
+          {comment}
+        </p>
+      )}
 
       {/* Respuesta del proveedor (si existe) */}
       {review.response && (

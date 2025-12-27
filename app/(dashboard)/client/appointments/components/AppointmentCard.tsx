@@ -1,6 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -8,6 +9,8 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cancelAppointment } from '@/lib/api/appointments';
 import type { Appointment } from '@/lib/types/appointments';
+import { CreateReviewForm } from './CreateReviewForm';
+import { useMyReviews } from '@/lib/hooks/useReviews';
 
 interface AppointmentCardProps {
   appointment: Appointment;
@@ -34,6 +37,7 @@ export const AppointmentCard = ({
 }: AppointmentCardProps): ReactNode => {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const [isReviewFormOpen, setIsReviewFormOpen] = useState(false);
 
   const { mutate: handleCancelMutation, isPending: isCancelling } = useMutation({
     mutationFn: () => cancelAppointment(appointment.id),
@@ -45,6 +49,12 @@ export const AppointmentCard = ({
       toast.error(error.message || 'Error al cancelar la cita');
     },
   });
+
+  // Verificar si ya existe una reseña para esta cita
+  const { data: myReviewsData } = useMyReviews({ limit: 100 });
+  const hasReview = myReviewsData?.data?.some(
+    (review) => review.appointment_id === appointment.id
+  );
 
   // Información del servicio
   const serviceName = appointment.service?.name || `Servicio #${appointment.service_id}`;
@@ -64,6 +74,7 @@ export const AppointmentCard = ({
   const canCancel = ['pending', 'confirmed'].includes(appointment.status);
   const isCompleted = appointment.status === 'completed';
   const canRebook = isCompleted && appointment.service_id;
+  const canReview = isCompleted && !hasReview;
 
   const handleViewDetails = (): void => {
     if (onSelect) {
@@ -95,6 +106,11 @@ export const AppointmentCard = ({
       }
       router.push(`/client/book/${appointment.service_id}?${params.toString()}`);
     }
+  };
+
+  const handleOpenReviewForm = (e: React.MouseEvent): void => {
+    e.stopPropagation();
+    setIsReviewFormOpen(true);
   };
 
   return (
@@ -166,7 +182,20 @@ export const AppointmentCard = ({
               {isCancelling ? 'Cancelando...' : 'Cancelar'}
             </button>
           )}
-          {canRebook && (
+          {canReview && (
+            <button
+              onClick={handleOpenReviewForm}
+              className="flex-1 h-11 rounded-lg font-semibold font-poppins transition-colors"
+              style={{
+                backgroundColor: '#D4AF37',
+                color: '#1A1A1A',
+              }}
+              type="button"
+            >
+              Dejar Reseña
+            </button>
+          )}
+          {canRebook && !canReview && (
             <button
               onClick={handleRebook}
               className="flex-1 h-11 rounded-lg font-semibold font-poppins transition-colors"
@@ -179,7 +208,7 @@ export const AppointmentCard = ({
               Re-reservar
             </button>
           )}
-          {!canRebook && (
+          {!canRebook && !canReview && (
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -197,6 +226,18 @@ export const AppointmentCard = ({
           )}
         </div>
       </div>
+
+      {/* Modal de reseña */}
+      {isCompleted && (
+        <CreateReviewForm
+          appointment={appointment}
+          isOpen={isReviewFormOpen}
+          onClose={() => {
+            setIsReviewFormOpen(false);
+            queryClient.invalidateQueries({ queryKey: ['my-reviews'] });
+          }}
+        />
+      )}
     </div>
   );
 };

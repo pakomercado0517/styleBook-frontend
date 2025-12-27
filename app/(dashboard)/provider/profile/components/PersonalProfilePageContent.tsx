@@ -119,7 +119,7 @@ export function PersonalProfilePageContent(): ReactNode {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-[#201d12] flex flex-col">
+      <div className="min-h-screen bg-[#121212] flex flex-col">
         <div className="px-4 py-4 border-b border-white/10">
           <h1 className="text-xl font-bold text-white font-poppins">Mi Perfil Personal</h1>
         </div>
@@ -131,7 +131,7 @@ export function PersonalProfilePageContent(): ReactNode {
   }
 
   return (
-    <div className="min-h-full bg-[#201d12] flex flex-col">
+    <div className="min-h-full bg-[#121212] flex flex-col">
       {/* Header */}
       <PersonalProfileHeader
         onSave={handleSave}

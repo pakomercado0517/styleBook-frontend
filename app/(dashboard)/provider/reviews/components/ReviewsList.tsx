@@ -2,17 +2,7 @@
 
 import type { ReactNode } from 'react';
 import { ReviewCard } from './ReviewCard';
-
-interface Review {
-  id: number;
-  clientName: string;
-  clientPhoto?: string;
-  rating: number;
-  comment: string;
-  createdAt: string;
-  response?: string;
-  respondedAt?: string;
-}
+import type { Review } from '@/lib/types/reviews';
 
 interface ReviewsListProps {
   reviews: Review[];

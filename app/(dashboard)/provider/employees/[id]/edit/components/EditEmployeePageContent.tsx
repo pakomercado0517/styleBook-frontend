@@ -147,7 +147,7 @@ export function EditEmployeePageContent(): ReactNode {
 
   if (isLoadingEmployee) {
     return (
-      <div className="min-h-screen bg-[#201d12] flex flex-col">
+      <div className="min-h-screen bg-[#121212] flex flex-col">
         <EditEmployeeHeader onSave={handleSave} isSaving={false} />
         <div className="flex-1 flex items-center justify-center">
           <p className="text-white font-poppins">Cargando empleado...</p>
@@ -158,7 +158,7 @@ export function EditEmployeePageContent(): ReactNode {
 
   if (!employee) {
     return (
-      <div className="min-h-screen bg-[#201d12] flex flex-col">
+      <div className="min-h-screen bg-[#121212] flex flex-col">
         <EditEmployeeHeader onSave={handleSave} isSaving={false} />
         <div className="flex-1 flex items-center justify-center">
           <p className="text-red-400 font-poppins">Empleado no encontrado</p>
@@ -173,7 +173,7 @@ export function EditEmployeePageContent(): ReactNode {
   const employeePhotoUrl = watch('photo_url') || employee.photo_url || undefined;
 
   return (
-    <div className="min-h-screen bg-[#201d12] flex flex-col pb-20 md:pb-0">
+    <div className="min-h-screen bg-[#121212] flex flex-col pb-20 md:pb-0">
       {/* Header */}
       <EditEmployeeHeader
         onSave={handleSave}

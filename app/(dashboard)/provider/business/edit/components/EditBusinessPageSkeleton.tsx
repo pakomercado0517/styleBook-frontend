@@ -7,7 +7,7 @@ import type { ReactNode } from 'react';
  */
 export function EditBusinessPageSkeleton(): ReactNode {
   return (
-    <div className="min-h-screen bg-[#201d12] flex flex-col">
+    <div className="min-h-screen bg-[#121212] flex flex-col">
       <div className="px-4 py-4 border-b border-white/10">
         <div className="h-8 bg-white/5 rounded w-32 animate-pulse" />
       </div>

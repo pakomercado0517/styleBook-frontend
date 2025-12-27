@@ -104,7 +104,7 @@ export function NotificationsHeader({
                   className="fixed inset-0 z-10"
                   onClick={() => setIsFilterDropdownOpen(false)}
                 />
-                <div className="absolute top-full left-0 mt-2 w-full bg-[#201d12] border border-white/10 rounded-xl shadow-lg z-20 overflow-hidden">
+                <div className="absolute top-full left-0 mt-2 w-full bg-[#121212] border border-white/10 rounded-xl shadow-lg z-20 overflow-hidden">
                   {filterOptions.map((option) => (
                     <button
                       key={option.value}
