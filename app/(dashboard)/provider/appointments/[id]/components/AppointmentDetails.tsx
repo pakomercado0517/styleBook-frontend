@@ -594,4 +594,3 @@ export const AppointmentDetails = ({
     </div>
   );
 };
-
