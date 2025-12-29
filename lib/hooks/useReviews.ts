@@ -11,9 +11,8 @@ import {
 import type {
   GetProviderReviewsParams,
   GetMyReviewsParams,
-  CreateReviewData,
-  UpdateReviewData,
 } from '@/lib/api/reviews';
+import type { CreateReviewData, UpdateReviewData } from '@/lib/types/reviews';
 import { toast } from 'sonner';
 
 /**
@@ -105,7 +104,7 @@ export function useCreateReview() {
       }
       return result.data;
     },
-    onSuccess: (_, variables) => {
+    onSuccess: () => {
       // Invalidar queries relacionadas
       queryClient.invalidateQueries({
         queryKey: ['provider-reviews'],
@@ -204,4 +203,3 @@ export function useDeleteReview() {
     },
   });
 }
-

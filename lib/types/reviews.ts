@@ -1,6 +1,6 @@
 import type { Result } from './common';
 import type { User } from './auth';
-import type { Provider } from './provider';
+import type { ProviderProfile } from './provider';
 import type { Appointment } from './appointments';
 
 /**
@@ -20,7 +20,7 @@ export interface Review {
   updatedAt?: string;
   // Relaciones (opcionales, vienen del backend con include)
   client?: User;
-  provider?: Provider;
+  provider?: ProviderProfile;
   appointment?: Appointment;
   // Campos para respuestas del proveedor (futuro)
   response?: string | null;

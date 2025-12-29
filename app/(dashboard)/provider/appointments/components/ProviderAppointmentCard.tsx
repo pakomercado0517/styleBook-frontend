@@ -5,7 +5,10 @@ import { Clock, User } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import type { Appointment } from '@/lib/types/appointments';
-import { useUpdateAppointment, useCancelAppointment, useConfirmAppointment } from '@/lib/hooks/useAppointments';
+import {
+  useCancelAppointment,
+  useConfirmAppointment,
+} from '@/lib/hooks/useAppointments';
 import { toast } from 'sonner';
 
 interface ProviderAppointmentCardProps {
@@ -19,7 +22,7 @@ interface ProviderAppointmentCardProps {
 export function ProviderAppointmentCard({
   appointment,
 }: ProviderAppointmentCardProps): ReactNode {
-  const updateAppointment = useUpdateAppointment();
+  // const updateAppointment = useUpdateAppointment();
   const cancelAppointment = useCancelAppointment();
   const confirmAppointment = useConfirmAppointment();
 
@@ -124,10 +127,12 @@ export function ProviderAppointmentCard({
           <h3 className="text-base font-semibold text-white font-poppins mb-1 truncate">
             {clientName}
           </h3>
-          <p className="text-sm text-neutral-300 font-poppins truncate">{serviceName}</p>
+          <p className="text-sm text-neutral-300 font-poppins truncate">
+            {serviceName}
+          </p>
         </div>
         <div
-          className={`px-3 py-1 rounded-full ${statusConfig.bgColor} ${statusConfig.textColor} text-xs font-semibold font-poppins flex-shrink-0 ml-2`}
+          className={`px-3 py-1 rounded-full ${statusConfig.bgColor} ${statusConfig.textColor} text-xs font-semibold font-poppinss shrink-0 ml-2`}
         >
           {statusConfig.text}
         </div>
@@ -136,14 +141,16 @@ export function ProviderAppointmentCard({
       {/* Información de hora y empleado */}
       <div className="space-y-2 mb-4">
         <div className="flex items-center gap-2">
-          <Clock className="w-4 h-4 text-accent-500 flex-shrink-0" strokeWidth={2} />
+          <Clock className="w-4 h-4 text-accent-500 shrink-0" strokeWidth={2} />
           <span className="text-sm text-white font-poppins">
             {startTime} - {endTime} ({durationMinutes} min)
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <User className="w-4 h-4 text-accent-500 flex-shrink-0" strokeWidth={2} />
-          <span className="text-sm text-white font-poppins truncate">& {employeeName}</span>
+          <User className="w-4 h-4 text-accent-500 shrink-0" strokeWidth={2} />
+          <span className="text-sm text-white font-poppins truncate">
+            & {employeeName}
+          </span>
         </div>
       </div>
 
@@ -194,4 +201,3 @@ export function ProviderAppointmentCard({
     </div>
   );
 }
-

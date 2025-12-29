@@ -6,7 +6,6 @@ import { format, startOfDay, endOfDay } from 'date-fns';
 import { AppointmentsHeader } from './AppointmentsHeader';
 import { AppointmentsTabs } from './AppointmentsTabs';
 import { ProviderAppointmentsList } from './ProviderAppointmentsList';
-import { InteractiveCalendar } from './InteractiveCalendar';
 import { TodayAppointmentsPanel } from './TodayAppointmentsPanel';
 
 type TabType = 'today' | 'upcoming' | 'pending';
@@ -75,7 +74,10 @@ export function AppointmentsPageContent(): ReactNode {
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Tabs de filtro */}
           <div className="px-6 pt-6">
-            <AppointmentsTabs activeTab={activeTab} onTabChange={setActiveTab} />
+            <AppointmentsTabs
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+            />
           </div>
 
           {/* Lista de citas */}

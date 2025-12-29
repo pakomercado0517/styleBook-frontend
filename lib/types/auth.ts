@@ -17,6 +17,7 @@ export interface User {
   timezone?: string;
   memberSince?: string; // Timestamp cuando se creó la cuenta (del login)
   verified?: boolean; // Si el email está verificado
+  photo?: string; // URL de la foto de perfil
 }
 
 /**
