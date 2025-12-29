@@ -99,5 +99,3 @@ export type GetMyReviewsResponse = Result<MyReviewsResponse>;
 export type UpdateReviewResponse = Result<Review>;
 export type DeleteReviewResponse = Result<{ message: string }>;
 export type GetReviewStatsResponse = Result<ReviewStats>;
-
-
