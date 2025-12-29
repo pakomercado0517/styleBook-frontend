@@ -13,7 +13,6 @@ import {
   Heart,
   User,
   Users,
-  Clock,
   BarChart3,
   Star,
   LogOut,
@@ -109,12 +108,6 @@ export function DesktopSidebar({ role }: DesktopSidebarProps): ReactNode {
       label: 'Empleados',
       href: '/provider/employees',
       activePatterns: ['/provider/employees'],
-    },
-    {
-      icon: Clock,
-      label: 'Horarios',
-      href: '/provider/schedule',
-      activePatterns: ['/provider/schedule'],
     },
     {
       icon: BarChart3,

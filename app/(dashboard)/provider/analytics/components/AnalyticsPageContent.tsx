@@ -2,13 +2,13 @@
 
 import type { ReactNode } from 'react';
 import { useState } from 'react';
+import { useProviderAnalytics, type TimeFrame } from '@/lib/hooks/useProviderAnalytics';
 import { AnalyticsHeader } from './AnalyticsHeader';
 import { TimeFrameFilters } from './TimeFrameFilters';
 import { MetricsGrid } from './MetricsGrid';
 import { IncomeTrendChart } from './IncomeTrendChart';
 import { ServiceDistributionChart } from './ServiceDistributionChart';
-
-type TimeFrame = 'today' | 'weekly' | 'monthly' | 'annual' | 'custom';
+import { RatingDistributionChart } from './RatingDistributionChart';
 
 /**
  * Contenido principal de la página de análisis
@@ -17,29 +17,46 @@ type TimeFrame = 'today' | 'weekly' | 'monthly' | 'annual' | 'custom';
 export function AnalyticsPageContent(): ReactNode {
   const [selectedTimeFrame, setSelectedTimeFrame] = useState<TimeFrame>('monthly');
 
-  // Datos de ejemplo - TODO: Obtener del backend
-  const metrics = {
-    totalAppointments: 124,
-    netIncome: 5830,
-    newClients: 18,
-    popularService: 'Corte Luxe',
-    retentionRate: 75,
-  };
+  // Obtener datos reales de la API con filtro de período
+  const {
+    metrics,
+    isLoading,
+    isError,
+    error,
+  } = useProviderAnalytics(selectedTimeFrame);
 
-  // Datos de ejemplo para gráfico de ingresos
-  const incomeTrendData = [
-    { date: 'Lun', income: 1200 },
-    { date: 'Mar', income: 1500 },
-    { date: 'Mié', income: 1100 },
-    { date: 'Jue', income: 1800 },
-    { date: 'Vie', income: 1600 },
-  ];
+  // Preparar datos de distribución de ratings para el gráfico
+  const ratingDistributionData = metrics.ratingDistribution
+    ? [
+        { rating: '5 estrellas', count: metrics.ratingDistribution['5'] },
+        { rating: '4 estrellas', count: metrics.ratingDistribution['4'] },
+        { rating: '3 estrellas', count: metrics.ratingDistribution['3'] },
+        { rating: '2 estrellas', count: metrics.ratingDistribution['2'] },
+        { rating: '1 estrella', count: metrics.ratingDistribution['1'] },
+      ]
+    : [];
 
-  // Datos de ejemplo para gráfico de distribución de servicios
-  const serviceDistributionData = [
-    { service: 'Corte Luxe', percentage: 65 },
-    { service: 'Otros', percentage: 35 },
-  ];
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-full bg-[#121212] flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-accent-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (isError) {
+    return (
+      <div className="min-h-full bg-[#121212] flex items-center justify-center px-4">
+        <div className="bg-red-500/10 border-2 border-red-500/30 rounded-2xl p-6 text-center max-w-md">
+          <p className="text-red-400 font-poppins">
+            {error instanceof Error ? error.message : 'Error al cargar las estadísticas'}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-full bg-[#121212] flex flex-col">
@@ -67,19 +84,23 @@ export function AnalyticsPageContent(): ReactNode {
             newClients={metrics.newClients}
             popularService={metrics.popularService}
             retentionRate={metrics.retentionRate}
+            averageRating={metrics.averageRating}
+            totalReviews={metrics.totalReviews}
           />
         </div>
 
         {/* Mobile: Gráficos apilados */}
-        <div className="md:hidden space-y-6">
-          <IncomeTrendChart data={incomeTrendData} />
-          <ServiceDistributionChart data={serviceDistributionData} />
+        <div className="md:hidden space-y-6 px-4">
+          <RatingDistributionChart data={ratingDistributionData} />
+          <IncomeTrendChart data={metrics.incomeTrendData} />
+          <ServiceDistributionChart data={metrics.serviceDistributionData} />
         </div>
 
         {/* Desktop: Gráficos lado a lado */}
         <div className="hidden md:grid md:grid-cols-2 md:gap-6 md:px-8">
-          <IncomeTrendChart data={incomeTrendData} />
-          <ServiceDistributionChart data={serviceDistributionData} />
+          <RatingDistributionChart data={ratingDistributionData} />
+          <IncomeTrendChart data={metrics.incomeTrendData} />
+          <ServiceDistributionChart data={metrics.serviceDistributionData} />
         </div>
       </div>
     </div>

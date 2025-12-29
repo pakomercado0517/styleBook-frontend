@@ -12,7 +12,6 @@ import {
   User,
   Bell,
   Users,
-  Clock,
   BarChart3,
   Star,
 } from 'lucide-react';
@@ -108,12 +107,6 @@ export function BottomTabBar({ role }: BottomTabBarProps): ReactNode {
       label: 'Empleados',
       href: '/provider/employees',
       activePatterns: ['/provider/employees'],
-    },
-    {
-      icon: Clock,
-      label: 'Horarios',
-      href: '/provider/schedule',
-      activePatterns: ['/provider/schedule'],
     },
     {
       icon: BarChart3,

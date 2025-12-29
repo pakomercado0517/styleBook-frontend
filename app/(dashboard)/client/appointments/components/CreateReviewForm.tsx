@@ -127,9 +127,9 @@ export function CreateReviewForm({
             >
               <X className="w-5 h-5 text-white" strokeWidth={2} />
             </button>
-            <h2 className="text-lg font-bold text-white font-playfair">
+            <DialogPrimitive.Title className="text-lg font-bold text-white font-playfair">
               Dejar una Reseña
-            </h2>
+            </DialogPrimitive.Title>
             <button
               onClick={handleSubmit(onSubmit)}
               disabled={rating === 0 || isLoading}

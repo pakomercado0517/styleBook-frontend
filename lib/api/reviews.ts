@@ -53,21 +53,17 @@ export async function createReview(
 
     if (!response.ok) {
       let errorMessage = 'Error al crear la reseña';
-      let errorCode: number | undefined;
 
       try {
         const error = await response.json();
         errorMessage = error.message || error.error || errorMessage;
-        errorCode = response.status;
       } catch {
         errorMessage = response.statusText || errorMessage;
-        errorCode = response.status;
       }
 
       return {
         success: false,
         error: errorMessage,
-        errorCode,
       };
     }
 
@@ -114,7 +110,10 @@ export async function getProviderReviews(
     });
 
     if (!response.ok) {
-      return { success: false, error: 'Error al obtener reseñas del proveedor' };
+      return {
+        success: false,
+        error: 'Error al obtener reseñas del proveedor',
+      };
     }
 
     const responseData = await response.json();
@@ -246,9 +245,7 @@ export async function updateReview(
  * Endpoint: DELETE /reviews/:id
  * Autenticación: Requerida
  */
-export async function deleteReview(
-  id: number
-): Promise<DeleteReviewResponse> {
+export async function deleteReview(id: number): Promise<DeleteReviewResponse> {
   try {
     if (!hasActiveSession()) {
       return { success: false, error: 'No hay sesión activa' };
@@ -313,5 +310,3 @@ export async function getProviderReviewStats(
     };
   }
 }
-
-

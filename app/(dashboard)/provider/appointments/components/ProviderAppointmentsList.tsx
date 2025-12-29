@@ -1,16 +1,22 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { useProviderAppointments, useProviderPendingAppointments } from '@/lib/hooks/useAppointments';
+import {
+  useProviderAppointments,
+  useProviderPendingAppointments,
+} from '@/lib/hooks/useAppointments';
 import { ProviderAppointmentCard } from './ProviderAppointmentCard';
 import { isToday, isAfter, startOfDay } from 'date-fns';
 import type { AppointmentStatus } from '@/lib/types/appointments';
+import type { TabType } from './AppointmentsTabs';
 
 interface ProviderAppointmentsListProps {
   status?: AppointmentStatus;
   startDate?: string;
   endDate?: string;
-  filterByTab?: 'today' | 'upcoming' | 'pending';
+  filterByTab?: TabType;
+  onSelectAppointment?: (id: number) => void;
+  selectedAppointmentId?: number | null;
 }
 
 /**
@@ -22,19 +28,32 @@ export function ProviderAppointmentsList({
   startDate,
   endDate,
   filterByTab = 'today',
+  onSelectAppointment,
+  selectedAppointmentId,
 }: ProviderAppointmentsListProps): ReactNode {
   // Para el tab "pending", usar el endpoint específico
-  const { data: pendingData, isLoading: isLoadingPending, isError: isErrorPending, error: errorPending } = useProviderPendingAppointments(
+  const {
+    data: pendingData,
+    isLoading: isLoadingPending,
+    isError: isErrorPending,
+    error: errorPending,
+  } = useProviderPendingAppointments(
     filterByTab === 'pending' ? { limit: 100 } : undefined
   );
 
   // Para otros tabs, usar el endpoint general
-  const { data: allData, isLoading: isLoadingAll, isError: isErrorAll, error: errorAll } = useProviderAppointments(
+  const {
+    data: allData,
+    isLoading: isLoadingAll,
+    isError: isErrorAll,
+    error: errorAll,
+  } = useProviderAppointments(
     filterByTab !== 'pending'
       ? {
-          status: status,
-          start_date: startDate,
-          end_date: endDate,
+          status: filterByTab === 'past' ? undefined : status,
+          start_date: filterByTab === 'past' ? undefined : startDate,
+          end_date: filterByTab === 'past' ? undefined : endDate,
+          past: filterByTab === 'past' ? 365 : undefined,
           limit: 100,
         }
       : undefined // No ejecutar si es pending
@@ -45,6 +64,17 @@ export function ProviderAppointmentsList({
   const isError = filterByTab === 'pending' ? isErrorPending : isErrorAll;
   const error = filterByTab === 'pending' ? errorPending : errorAll;
   const data = filterByTab === 'pending' ? pendingData : allData;
+
+  // Console log para debug - ver cómo llega la data
+  console.log('🔍 Provider Appointments Data Debug:', {
+    filterByTab,
+    isLoading,
+    isError,
+    error: error?.message,
+    data,
+    appointments: data?.data?.appointments,
+    total: data?.data?.pagination?.total,
+  });
 
   // Loading state
   if (isLoading) {
@@ -95,6 +125,13 @@ export function ProviderAppointmentsList({
       // Incluir solo las que son después de hoy (mañana en adelante)
       return isAfter(aptDateStart, todayStart);
     });
+  } else if (filterByTab === 'past') {
+    // Para "Pasadas", el backend ya filtra por fecha usando el parámetro "past"
+    // Solo necesitamos excluir las citas canceladas en el frontend
+    appointments = appointments.filter((apt) => {
+      // Excluir citas canceladas de las pasadas
+      return apt.status !== 'cancelled';
+    });
   }
   // Para "pending" no necesitamos filtrar, el endpoint ya retorna solo pendientes
 
@@ -115,9 +152,10 @@ export function ProviderAppointmentsList({
         <ProviderAppointmentCard
           key={appointment.id}
           appointment={appointment}
+          onSelect={onSelectAppointment}
+          isSelected={selectedAppointmentId === appointment.id}
         />
       ))}
     </div>
   );
 }
-

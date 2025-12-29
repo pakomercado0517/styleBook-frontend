@@ -26,6 +26,7 @@ export interface GetAppointmentsParams {
   end_date?: string;
   page?: number;
   include?: string; // Para incluir relaciones: "service,employee,provider"
+  past?: number; // Número de días hacia atrás desde la fecha actual para buscar citas pasadas
 }
 
 /**
@@ -48,8 +49,14 @@ export async function getAppointments(
     if (params?.offset) queryParams.append('offset', params.offset.toString());
     if (params?.page) queryParams.append('page', params.page.toString());
     if (params?.status) queryParams.append('status', params.status);
-    if (params?.start_date) queryParams.append('start_date', params.start_date);
-    if (params?.end_date) queryParams.append('end_date', params.end_date);
+    // Si se usa "past", NO enviar start_date ni end_date
+    if (params?.past !== undefined) {
+      queryParams.append('past', params.past.toString());
+    } else {
+      // Solo enviar start_date y end_date si NO se está usando "past"
+      if (params?.start_date) queryParams.append('start_date', params.start_date);
+      if (params?.end_date) queryParams.append('end_date', params.end_date);
+    }
     // Incluir relaciones por defecto
     if (params?.include) {
       queryParams.append('include', params.include);
@@ -395,13 +402,21 @@ export async function getProviderAppointments(params?: {
   employee_id?: number;
   limit?: number;
   offset?: number;
+  include?: string;
+  past?: number;
 }): Promise<GetAppointmentsResponse> {
   try {
     const queryParams = new URLSearchParams();
 
     if (params?.status) queryParams.append('status', params.status);
-    if (params?.start_date) queryParams.append('start_date', params.start_date);
-    if (params?.end_date) queryParams.append('end_date', params.end_date);
+    // Si se usa "past", NO enviar start_date ni end_date
+    if (params?.past !== undefined) {
+      queryParams.append('past', params.past.toString());
+    } else {
+      // Solo enviar start_date y end_date si NO se está usando "past"
+      if (params?.start_date) queryParams.append('start_date', params.start_date);
+      if (params?.end_date) queryParams.append('end_date', params.end_date);
+    }
     if (params?.employee_id)
       queryParams.append('employee_id', params.employee_id.toString());
     // Validar que el límite no exceda 100 (máximo permitido por el backend)
@@ -409,6 +424,12 @@ export async function getProviderAppointments(params?: {
     if (limit) queryParams.append('limit', limit.toString());
     if (params?.offset !== undefined)
       queryParams.append('offset', params.offset.toString());
+    // Incluir relaciones (por defecto: service, employee, client)
+    if (params?.include) {
+      queryParams.append('include', params.include);
+    } else {
+      queryParams.append('include', 'service,employee,client');
+    }
 
     const queryString = queryParams.toString();
     const url = queryString
@@ -443,23 +464,29 @@ export async function getProviderAppointments(params?: {
       appointments = backendData;
       total = backendData.length;
     } else if (typeof backendData === 'object') {
-      // Estructura oficial: { appointments: [...], total: number }
+      // Estructura oficial: { appointments: [...], pagination: { total, page, limit, pages } }
       if (Array.isArray(backendData.appointments)) {
         appointments = backendData.appointments;
-        total = backendData.total || appointments.length;
-        effectiveLimit = backendData.limit || effectiveLimit;
-        effectiveOffset = backendData.offset || effectiveOffset;
+        // Usar pagination.total si existe, sino usar total directo, sino usar length
+        total = backendData.pagination?.total || backendData.total || appointments.length;
+        effectiveLimit = backendData.pagination?.limit || backendData.limit || effectiveLimit;
+        effectiveOffset = backendData.pagination?.offset || backendData.offset || effectiveOffset;
+        effectivePage = backendData.pagination?.page || effectivePage;
       }
       // Estructura alternativa: { total, count, data: [...] }
       else if (Array.isArray(backendData.data)) {
         appointments = backendData.data;
-        total = backendData.total || backendData.count || appointments.length;
-        effectiveLimit = backendData.limit || effectiveLimit;
-        effectiveOffset = backendData.offset || effectiveOffset;
+        total = backendData.pagination?.total || backendData.total || backendData.count || appointments.length;
+        effectiveLimit = backendData.pagination?.limit || backendData.limit || effectiveLimit;
+        effectiveOffset = backendData.pagination?.offset || backendData.offset || effectiveOffset;
+        effectivePage = backendData.pagination?.page || effectivePage;
       }
     }
 
-    effectivePage = Math.floor(effectiveOffset / effectiveLimit) + 1;
+    // Si no se calculó la página desde pagination, calcularla
+    if (effectivePage === 1 && effectiveOffset > 0) {
+      effectivePage = Math.floor(effectiveOffset / effectiveLimit) + 1;
+    }
 
     const appointmentsData: import('@/lib/types/appointments').AppointmentsPaginatedResponse =
       {
@@ -496,6 +523,7 @@ export async function getProviderPendingAppointments(params?: {
   employee_id?: number;
   limit?: number;
   offset?: number;
+  include?: string;
 }): Promise<GetAppointmentsResponse> {
   try {
     const queryParams = new URLSearchParams();
@@ -507,6 +535,12 @@ export async function getProviderPendingAppointments(params?: {
     if (limit) queryParams.append('limit', limit.toString());
     if (params?.offset !== undefined)
       queryParams.append('offset', params.offset.toString());
+    // Incluir relaciones (por defecto: service, employee, client)
+    if (params?.include) {
+      queryParams.append('include', params.include);
+    } else {
+      queryParams.append('include', 'service,employee,client');
+    }
 
     const queryString = queryParams.toString();
     const url = queryString

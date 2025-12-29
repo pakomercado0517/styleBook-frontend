@@ -4,8 +4,10 @@ import type { ReactNode } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Input } from '@/components/Input';
-import { Select } from '@/components/Select';
-import { createProviderSchema, type CreateProviderInput } from '@/lib/schemas/provider.schema';
+import {
+  createProviderSchema,
+  type CreateProviderInput,
+} from '@/lib/schemas/provider.schema';
 import { cn } from '@/lib/utils/cn';
 
 interface ProviderBusinessStepProps {
@@ -236,4 +238,3 @@ export function ProviderBusinessStep({
     </form>
   );
 }
-

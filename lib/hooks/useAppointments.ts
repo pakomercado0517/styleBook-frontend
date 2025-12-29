@@ -60,6 +60,8 @@ export function useProviderAppointments(params?: {
   employee_id?: number;
   limit?: number;
   offset?: number;
+  include?: string;
+  past?: number;
 }) {
   return useQuery({
     queryKey: ['provider-appointments', params],
@@ -83,6 +85,7 @@ export function useProviderPendingAppointments(params?: {
   employee_id?: number;
   limit?: number;
   offset?: number;
+  include?: string;
 }) {
   return useQuery({
     queryKey: ['provider-pending-appointments', params],

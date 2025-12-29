@@ -1,6 +1,6 @@
 import type { Result } from './common';
 import type { User } from './auth';
-import type { Provider } from './provider';
+import type { ProviderProfile } from './provider';
 import type { Appointment } from './appointments';
 
 /**
@@ -20,7 +20,7 @@ export interface Review {
   updatedAt?: string;
   // Relaciones (opcionales, vienen del backend con include)
   client?: User;
-  provider?: Provider;
+  provider?: ProviderProfile;
   appointment?: Appointment;
   // Campos para respuestas del proveedor (futuro)
   response?: string | null;
@@ -70,11 +70,23 @@ export interface ReviewStats {
  * Respuesta paginada de reseñas del proveedor
  */
 export interface ProviderReviewsResponse {
-  total: number;
-  count: number;
-  limit: number;
-  offset: number;
-  data: Review[];
+  reviews: Review[];
+  statistics?: {
+    total: number;
+    averageRating: number;
+  };
+  pagination?: {
+    page: number;
+    limit: number;
+    total: number;
+    pages: number;
+  };
+  // Campos legacy para compatibilidad
+  total?: number;
+  count?: number;
+  limit?: number;
+  offset?: number;
+  data?: Review[];
   provider_average_rating?: number;
 }
 
@@ -82,11 +94,19 @@ export interface ProviderReviewsResponse {
  * Respuesta paginada de mis reseñas (cliente)
  */
 export interface MyReviewsResponse {
-  total: number;
-  count: number;
-  limit: number;
-  offset: number;
-  data: Review[];
+  reviews: Review[];
+  pagination?: {
+    page: number;
+    limit: number;
+    total: number;
+    pages: number;
+  };
+  // Campos legacy para compatibilidad
+  total?: number;
+  count?: number;
+  limit?: number;
+  offset?: number;
+  data?: Review[];
 }
 
 /**
@@ -99,5 +119,3 @@ export type GetMyReviewsResponse = Result<MyReviewsResponse>;
 export type UpdateReviewResponse = Result<Review>;
 export type DeleteReviewResponse = Result<{ message: string }>;
 export type GetReviewStatsResponse = Result<ReviewStats>;
-
-

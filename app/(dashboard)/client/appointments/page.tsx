@@ -41,7 +41,7 @@ export default function AppointmentsPage(): ReactNode {
       case 'upcoming':
         return undefined; // Mostrar pending y confirmed
       case 'past':
-        return 'completed';
+        return undefined; // Filtrar por fecha, no por status
       case 'cancelled':
         return 'cancelled';
       default:
@@ -50,8 +50,10 @@ export default function AppointmentsPage(): ReactNode {
   };
 
   // Para "Próximas", necesitamos filtrar por fechas futuras y estados pending/confirmed
+  // Para "Pasadas", filtramos por fecha (end_date < hoy)
   const status = getStatusFromTab(activeTab);
   const isUpcoming = activeTab === 'upcoming';
+  const isPast = activeTab === 'past';
 
   return (
     <div className="min-h-screen bg-[#121212] flex flex-col">
@@ -177,6 +179,7 @@ export default function AppointmentsPage(): ReactNode {
           <AppointmentsList
             status={status}
             isUpcoming={isUpcoming}
+            isPast={isPast}
             searchQuery={searchQuery}
             onSelectAppointment={setSelectedAppointmentId}
             selectedAppointmentId={selectedAppointmentId}
@@ -207,6 +210,7 @@ export default function AppointmentsPage(): ReactNode {
         <AppointmentsList
           status={status}
           isUpcoming={isUpcoming}
+          isPast={isPast}
           searchQuery={searchQuery}
         />
       </div>

@@ -66,8 +66,10 @@ export interface Appointment {
   client?: {
     id: number;
     name: string;
+    apellido?: string;
     email: string;
     phone?: string | null;
+    avatar_url?: string | null;
   };
 }
 
