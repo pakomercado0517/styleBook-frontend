@@ -5,10 +5,10 @@ import { useState } from 'react';
 import { format, startOfDay, endOfDay } from 'date-fns';
 import { AppointmentsHeader } from './AppointmentsHeader';
 import { AppointmentsTabs } from './AppointmentsTabs';
+import type { TabType } from './AppointmentsTabs';
 import { ProviderAppointmentsList } from './ProviderAppointmentsList';
 import { TodayAppointmentsPanel } from './TodayAppointmentsPanel';
-
-type TabType = 'today' | 'upcoming' | 'pending';
+import { ProviderAppointmentDetailsSidebar } from './ProviderAppointmentDetailsSidebar';
 
 /**
  * Contenido principal de la página de citas del proveedor
@@ -16,6 +16,9 @@ type TabType = 'today' | 'upcoming' | 'pending';
  */
 export function AppointmentsPageContent(): ReactNode {
   const [activeTab, setActiveTab] = useState<TabType>('today');
+  const [selectedAppointmentId, setSelectedAppointmentId] = useState<
+    number | null
+  >(null);
 
   // Calcular fechas según el tab activo
   const getDateRange = () => {
@@ -32,6 +35,11 @@ export function AppointmentsPageContent(): ReactNode {
           end: undefined, // Sin límite de fin
         };
       case 'pending':
+        return {
+          start: undefined,
+          end: undefined,
+        };
+      case 'past':
         return {
           start: undefined,
           end: undefined,
@@ -64,6 +72,8 @@ export function AppointmentsPageContent(): ReactNode {
             startDate={dateRange.start}
             endDate={dateRange.end}
             filterByTab={activeTab}
+            onSelectAppointment={setSelectedAppointmentId}
+            selectedAppointmentId={selectedAppointmentId}
           />
         </div>
       </div>
@@ -87,15 +97,26 @@ export function AppointmentsPageContent(): ReactNode {
               startDate={dateRange.start}
               endDate={dateRange.end}
               filterByTab={activeTab}
+              onSelectAppointment={setSelectedAppointmentId}
+              selectedAppointmentId={selectedAppointmentId}
             />
           </div>
         </div>
 
-        {/* Columna derecha: Citas para Hoy */}
-        <div className="w-96 p-6 border-l border-white/10">
-          <div className="h-full">
-            <TodayAppointmentsPanel />
-          </div>
+        {/* Columna derecha: Sidebar de Detalles o Panel de Hoy */}
+        <div className="w-96 border-l border-white/10 flex flex-col">
+          {selectedAppointmentId ? (
+            <div className="flex-1 overflow-hidden">
+              <ProviderAppointmentDetailsSidebar
+                appointmentId={selectedAppointmentId}
+                onClose={() => setSelectedAppointmentId(null)}
+              />
+            </div>
+          ) : (
+            <div className="p-6 h-full">
+              <TodayAppointmentsPanel />
+            </div>
+          )}
         </div>
       </div>
     </div>

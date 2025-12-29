@@ -39,16 +39,18 @@ export const AppointmentCard = ({
   const queryClient = useQueryClient();
   const [isReviewFormOpen, setIsReviewFormOpen] = useState(false);
 
-  const { mutate: handleCancelMutation, isPending: isCancelling } = useMutation({
-    mutationFn: () => cancelAppointment(appointment.id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['appointments'] });
-      toast.success('Cita cancelada exitosamente');
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || 'Error al cancelar la cita');
-    },
-  });
+  const { mutate: handleCancelMutation, isPending: isCancelling } = useMutation(
+    {
+      mutationFn: () => cancelAppointment(appointment.id),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['appointments'] });
+        toast.success('Cita cancelada exitosamente');
+      },
+      onError: (error: Error) => {
+        toast.error(error.message || 'Error al cancelar la cita');
+      },
+    }
+  );
 
   // Verificar si ya existe una reseña para esta cita
   const { data: myReviewsData } = useMyReviews({ limit: 100 });
@@ -57,7 +59,8 @@ export const AppointmentCard = ({
   );
 
   // Información del servicio
-  const serviceName = appointment.service?.name || `Servicio #${appointment.service_id}`;
+  const serviceName =
+    appointment.service?.name || `Servicio #${appointment.service_id}`;
   const serviceImage = appointment.service?.image_url;
 
   // Información del proveedor
@@ -66,8 +69,10 @@ export const AppointmentCard = ({
 
   // Formatear fecha y hora
   const appointmentDate = new Date(appointment.start_date_local);
-  const formattedDate = format(appointmentDate, "EEEE, d 'de' MMMM", { locale: es });
-  const formattedTime = format(appointmentDate, "HH:mm", { locale: es });
+  const formattedDate = format(appointmentDate, "EEEE, d 'de' MMMM", {
+    locale: es,
+  });
+  const formattedTime = format(appointmentDate, 'HH:mm', { locale: es });
 
   // Estado
   const statusLabel = statusLabels[appointment.status] || appointment.status;
@@ -104,7 +109,9 @@ export const AppointmentCard = ({
       if (appointment.employee_id) {
         params.append('employee', appointment.employee_id.toString());
       }
-      router.push(`/client/book/${appointment.service_id}?${params.toString()}`);
+      router.push(
+        `/client/book/${appointment.service_id}?${params.toString()}`
+      );
     }
   };
 
@@ -123,7 +130,9 @@ export const AppointmentCard = ({
     >
       {/* Estado - Mobile */}
       <div className="px-4 pt-4 md:hidden">
-        <span className="text-sm font-semibold text-white font-poppins">{statusLabel}</span>
+        <span className="text-sm font-semibold text-white font-poppins">
+          {statusLabel}
+        </span>
       </div>
 
       {/* Imagen del servicio */}
@@ -136,7 +145,7 @@ export const AppointmentCard = ({
             className="w-full h-full object-cover"
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-primary-800 to-primary-900 flex items-center justify-center">
+          <div className="w-full h-full bg-linear-to-br from-primary-800 to-primary-900 flex items-center justify-center">
             <span className="text-4xl">💇</span>
           </div>
         )}
@@ -146,7 +155,9 @@ export const AppointmentCard = ({
       <div className="px-4 pt-4 pb-4">
         {/* Título del servicio con badge de estado - Desktop */}
         <div className="hidden md:flex items-start justify-between gap-3 mb-2">
-          <h3 className="text-xl font-bold text-white font-playfair flex-1">{serviceName}</h3>
+          <h3 className="text-xl font-bold text-white font-playfair flex-1">
+            {serviceName}
+          </h3>
           <span className="text-xs font-semibold text-white font-poppins bg-white/10 px-3 py-1 rounded-full">
             {statusLabel}
           </span>

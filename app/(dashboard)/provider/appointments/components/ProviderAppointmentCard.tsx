@@ -1,6 +1,8 @@
 'use client';
 
 import type { ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { Clock, User } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -13,6 +15,8 @@ import { toast } from 'sonner';
 
 interface ProviderAppointmentCardProps {
   appointment: Appointment;
+  onSelect?: (id: number) => void;
+  isSelected?: boolean;
 }
 
 /**
@@ -21,14 +25,28 @@ interface ProviderAppointmentCardProps {
  */
 export function ProviderAppointmentCard({
   appointment,
+  onSelect,
+  isSelected,
 }: ProviderAppointmentCardProps): ReactNode {
+  const router = useRouter();
   // const updateAppointment = useUpdateAppointment();
   const cancelAppointment = useCancelAppointment();
   const confirmAppointment = useConfirmAppointment();
 
   // Información del cliente
-  const clientName =
-    appointment.client?.name || `Cliente #${appointment.client_id}`;
+  const clientFullName = appointment.client
+    ? `${appointment.client.name}${appointment.client.apellido ? ` ${appointment.client.apellido}` : ''}`
+    : `Cliente #${appointment.client_id}`;
+  const clientAvatar = appointment.client?.avatar_url;
+
+  // Debug: Verificar datos del cliente
+  if (!appointment.client) {
+    console.warn('⚠️ Cliente no disponible en appointment:', {
+      appointmentId: appointment.id,
+      clientId: appointment.client_id,
+      appointment: appointment,
+    });
+  }
 
   // Información del servicio
   const serviceName =
@@ -110,8 +128,21 @@ export function ProviderAppointmentCard({
   };
 
   const handleViewDetails = (): void => {
-    // TODO: Navegar a detalles de la cita
-    toast.info('Ver detalles de la cita');
+    // En mobile, navegar a la página de detalles
+    // En desktop, mostrar en el sidebar
+    if (window.innerWidth < 768) {
+      router.push(`/provider/appointments/${appointment.id}`);
+    } else {
+      // En desktop, usar el callback para mostrar en sidebar
+      onSelect?.(appointment.id);
+    }
+  };
+
+  const handleCardClick = (): void => {
+    // Hacer la card clickeable para mostrar detalles
+    if (window.innerWidth >= 768) {
+      onSelect?.(appointment.id);
+    }
   };
 
   // Determinar botones según el estado
@@ -120,13 +151,39 @@ export function ProviderAppointmentCard({
   const isConfirmed = appointment.status === 'confirmed';
 
   return (
-    <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+    <div
+      className={`bg-white/5 rounded-xl p-4 border transition-colors ${
+        isSelected
+          ? 'border-accent-500 bg-white/10'
+          : 'border-white/10 hover:border-white/20 cursor-pointer'
+      }`}
+      onClick={handleCardClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          handleCardClick();
+        }
+      }}
+    >
       {/* Header con nombre del cliente y estado */}
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1 min-w-0">
-          <h3 className="text-base font-semibold text-white font-poppins mb-1 truncate">
-            {clientName}
-          </h3>
+          <div className="flex items-center gap-2 mb-1">
+            {clientAvatar && (
+              <Image
+                src={clientAvatar}
+                alt={clientFullName}
+                width={24}
+                height={24}
+                className="rounded-full object-cover shrink-0"
+              />
+            )}
+            <h3 className="text-base font-semibold text-white font-poppins truncate">
+              {clientFullName}
+            </h3>
+          </div>
           <p className="text-sm text-neutral-300 font-poppins truncate">
             {serviceName}
           </p>
@@ -141,13 +198,21 @@ export function ProviderAppointmentCard({
       {/* Información de hora y empleado */}
       <div className="space-y-2 mb-4">
         <div className="flex items-center gap-2">
-          <Clock className="w-4 h-4 text-accent-500 shrink-0" strokeWidth={2} />
+          <Clock
+            className="w-4 h-4 shrink-0"
+            strokeWidth={2}
+            style={{ color: '#D4AF37' }}
+          />
           <span className="text-sm text-white font-poppins">
             {startTime} - {endTime} ({durationMinutes} min)
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <User className="w-4 h-4 text-accent-500 shrink-0" strokeWidth={2} />
+          <User
+            className="w-4 h-4 shrink-0"
+            strokeWidth={2}
+            style={{ color: '#D4AF37' }}
+          />
           <span className="text-sm text-white font-poppins truncate">
             & {employeeName}
           </span>
