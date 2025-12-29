@@ -54,16 +54,16 @@ export const AppointmentDetails = ({
     staleTime: 5 * 60 * 1000, // 5 minutos
   });
 
-  // Verificar si ya existe una reseña para esta cita (solo si hay appointment)
-  const { data: myReviewsData } = useMyReviews(
-    appointment ? { limit: 100 } : undefined
-  );
-  const hasReview =
-    appointment && myReviewsData?.data
-      ? myReviewsData.data.some(
-          (review) => review.appointment_id === appointment.id
-        )
-      : false;
+  // Verificar si ya existe una reseña para esta cita
+  const { data: myReviewsData } = useMyReviews({ limit: 100 });
+
+  // Obtener las reseñas del array correcto
+  // La estructura del backend es: { reviews: Review[], pagination: {...} }
+  const reviews = myReviewsData?.reviews || myReviewsData?.data || [];
+
+  const hasReview = appointment
+    ? reviews.some((review) => review.appointment_id === appointment.id)
+    : false;
 
   const { mutate: handleCancelMutation, isPending: isCancelling } = useMutation(
     {
@@ -247,13 +247,18 @@ export const AppointmentDetails = ({
   const canCancel = ['pending', 'confirmed'].includes(appointment.status);
   const isCompleted = appointment.status === 'completed';
   const canRebook = isCompleted && appointment.service_id;
-  const canReview = isCompleted && !hasReview;
 
   // Información del empleado
   const employeeName = appointment.employee?.name || 'No asignado';
 
   // Información del proveedor para rating
-  const providerRating = appointment.provider?.average_rating || 0;
+  const providerRatingRaw = appointment.provider?.average_rating;
+  const providerRating =
+    typeof providerRatingRaw === 'number'
+      ? providerRatingRaw
+      : typeof providerRatingRaw === 'string'
+        ? parseFloat(providerRatingRaw) || 0
+        : 0;
   const reviewsCount: number = 254; // Valor por defecto, se podría obtener del backend si está disponible
 
   return (
@@ -495,26 +500,32 @@ export const AppointmentDetails = ({
                     {isCancelling ? 'Cancelando...' : 'Cancelar Cita'}
                   </button>
                 )}
-                {canReview && (
+                {isCompleted && (
                   <button
                     onClick={() => setIsReviewFormOpen(true)}
-                    className="flex-1 h-12 rounded-lg font-semibold font-poppins transition-colors"
+                    disabled={hasReview}
+                    className="flex-1 h-12 rounded-lg font-semibold font-poppins transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     style={{
-                      backgroundColor: '#D4AF37',
+                      backgroundColor: hasReview ? '#666666' : '#D4AF37',
                       color: '#1A1A1A',
                     }}
                     type="button"
+                    title={
+                      hasReview
+                        ? 'Ya has dejado una reseña para esta cita'
+                        : 'Dejar una reseña'
+                    }
                   >
-                    Dejar Reseña
+                    {hasReview ? 'Reseña Enviada' : 'Dejar Reseña'}
                   </button>
                 )}
-                {canRebook && !canReview && (
+                {canRebook && (
                   <button
                     onClick={handleRebook}
                     className="flex-1 h-12 rounded-lg font-semibold font-poppins transition-colors"
                     style={{
                       backgroundColor: '#D4AF37',
-                      color: '#FFFFFF',
+                      color: '#1A1A1A',
                     }}
                     type="button"
                   >
@@ -705,20 +716,26 @@ export const AppointmentDetails = ({
 
           {/* Botones de acción - Mobile */}
           <div className="space-y-3">
-            {canReview && (
+            {isCompleted && (
               <button
                 onClick={() => setIsReviewFormOpen(true)}
-                className="w-full h-12 rounded-xl font-semibold font-poppins transition-colors"
+                disabled={hasReview}
+                className="w-full h-12 rounded-xl font-semibold font-poppins transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{
-                  backgroundColor: '#D4AF37',
+                  backgroundColor: hasReview ? '#666666' : '#D4AF37',
                   color: '#1A1A1A',
                 }}
                 type="button"
+                title={
+                  hasReview
+                    ? 'Ya has dejado una reseña para esta cita'
+                    : 'Dejar una reseña'
+                }
               >
-                Dejar Reseña
+                {hasReview ? 'Reseña Enviada' : 'Dejar Reseña'}
               </button>
             )}
-            {canRebook && !canReview && (
+            {canRebook && (
               <button
                 onClick={handleRebook}
                 className="w-full h-12 rounded-xl font-semibold font-poppins transition-colors"
@@ -766,7 +783,9 @@ export const AppointmentDetails = ({
           onClose={() => {
             setIsReviewFormOpen(false);
             queryClient.invalidateQueries({ queryKey: ['my-reviews'] });
-            queryClient.invalidateQueries({ queryKey: ['appointment', appointmentId] });
+            queryClient.invalidateQueries({
+              queryKey: ['appointment', appointmentId],
+            });
           }}
         />
       )}

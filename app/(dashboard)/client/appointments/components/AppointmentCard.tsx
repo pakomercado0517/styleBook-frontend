@@ -54,7 +54,12 @@ export const AppointmentCard = ({
 
   // Verificar si ya existe una reseña para esta cita
   const { data: myReviewsData } = useMyReviews({ limit: 100 });
-  const hasReview = myReviewsData?.data?.some(
+
+  // Obtener las reseñas del array correcto
+  // La estructura del backend es: { reviews: Review[], pagination: {...} }
+  const reviews = myReviewsData?.reviews || myReviewsData?.data || [];
+
+  const hasReview = reviews.some(
     (review) => review.appointment_id === appointment.id
   );
 
@@ -90,8 +95,12 @@ export const AppointmentCard = ({
   };
 
   const handleCardClick = (): void => {
+    // En mobile, siempre navegar a los detalles
+    // En desktop, si hay onSelect (sidebar), usar ese callback
     if (onSelect) {
       onSelect(appointment.id);
+    } else {
+      router.push(`/client/appointments/${appointment.id}`);
     }
   };
 
@@ -126,7 +135,7 @@ export const AppointmentCard = ({
         bg-white/5 rounded-xl overflow-hidden border mb-4 transition-all cursor-pointer
         ${isSelected ? 'border-accent-500' : 'border-white/10'}
       `}
-      onClick={onSelect ? handleCardClick : undefined}
+      onClick={handleCardClick}
     >
       {/* Estado - Mobile */}
       <div className="px-4 pt-4 md:hidden">
@@ -193,17 +202,23 @@ export const AppointmentCard = ({
               {isCancelling ? 'Cancelando...' : 'Cancelar'}
             </button>
           )}
-          {canReview && (
+          {isCompleted && (
             <button
               onClick={handleOpenReviewForm}
-              className="flex-1 h-11 rounded-lg font-semibold font-poppins transition-colors"
+              disabled={hasReview}
+              className="flex-1 h-11 rounded-lg font-semibold font-poppins transition-colors disabled:opacity-50 disabled:cursor-not-allowed relative"
               style={{
-                backgroundColor: '#D4AF37',
+                backgroundColor: hasReview ? '#666666' : '#D4AF37',
                 color: '#1A1A1A',
               }}
               type="button"
+              title={
+                hasReview
+                  ? 'Ya has dejado una reseña para esta cita'
+                  : 'Dejar una reseña'
+              }
             >
-              Dejar Reseña
+              {hasReview ? 'Reseña Enviada' : 'Dejar Reseña'}
             </button>
           )}
           {canRebook && !canReview && (

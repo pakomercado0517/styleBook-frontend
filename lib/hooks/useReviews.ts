@@ -67,7 +67,7 @@ export function useMyReviews(params?: GetMyReviewsParams) {
       }
       return result.data;
     },
-    enabled: params !== undefined, // Solo ejecutar si hay parámetros
+    enabled: true, // Siempre ejecutar si hay sesión activa
     staleTime: 2 * 60 * 1000, // 2 minutos
   });
 }

@@ -70,11 +70,23 @@ export interface ReviewStats {
  * Respuesta paginada de reseñas del proveedor
  */
 export interface ProviderReviewsResponse {
-  total: number;
-  count: number;
-  limit: number;
-  offset: number;
-  data: Review[];
+  reviews: Review[];
+  statistics?: {
+    total: number;
+    averageRating: number;
+  };
+  pagination?: {
+    page: number;
+    limit: number;
+    total: number;
+    pages: number;
+  };
+  // Campos legacy para compatibilidad
+  total?: number;
+  count?: number;
+  limit?: number;
+  offset?: number;
+  data?: Review[];
   provider_average_rating?: number;
 }
 
@@ -82,11 +94,19 @@ export interface ProviderReviewsResponse {
  * Respuesta paginada de mis reseñas (cliente)
  */
 export interface MyReviewsResponse {
-  total: number;
-  count: number;
-  limit: number;
-  offset: number;
-  data: Review[];
+  reviews: Review[];
+  pagination?: {
+    page: number;
+    limit: number;
+    total: number;
+    pages: number;
+  };
+  // Campos legacy para compatibilidad
+  total?: number;
+  count?: number;
+  limit?: number;
+  offset?: number;
+  data?: Review[];
 }
 
 /**

@@ -1,6 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -8,6 +9,8 @@ import { X } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { getAppointment, cancelAppointment } from '@/lib/api/appointments';
+import { CreateReviewForm } from './CreateReviewForm';
+import { useMyReviews } from '@/lib/hooks/useReviews';
 
 interface AppointmentDetailsSidebarProps {
   appointmentId: number;
@@ -32,6 +35,7 @@ export const AppointmentDetailsSidebar = ({
 }: AppointmentDetailsSidebarProps): ReactNode => {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const [isReviewFormOpen, setIsReviewFormOpen] = useState(false);
 
   const { data: appointment, isLoading } = useQuery({
     queryKey: ['appointment', appointmentId],
@@ -44,6 +48,19 @@ export const AppointmentDetailsSidebar = ({
     },
     staleTime: 5 * 60 * 1000,
   });
+
+  // Verificar si ya existe una reseña para esta cita
+  const { data: myReviewsData } = useMyReviews({ limit: 100 });
+
+  // Obtener las reseñas del array correcto
+  // La estructura del backend es: { reviews: Review[], pagination: {...} }
+  const reviews = myReviewsData?.reviews || myReviewsData?.data || [];
+
+  const hasReview = appointment
+    ? reviews.some(
+        (review) => review.appointment_id === appointment.id
+      )
+    : false;
 
   const { mutate: handleCancelMutation, isPending: isCancelling } = useMutation(
     {
@@ -221,6 +238,21 @@ export const AppointmentDetailsSidebar = ({
         >
           Ver Detalles
         </button>
+        {isCompleted && (
+          <button
+            onClick={() => setIsReviewFormOpen(true)}
+            disabled={hasReview}
+            className="w-full h-12 rounded-lg font-semibold font-poppins transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{
+              backgroundColor: hasReview ? '#666666' : '#D4AF37',
+              color: '#1A1A1A',
+            }}
+            type="button"
+            title={hasReview ? 'Ya has dejado una reseña para esta cita' : 'Dejar una reseña'}
+          >
+            {hasReview ? 'Reseña Enviada' : 'Dejar Reseña'}
+          </button>
+        )}
         {canRebook && (
           <button
             onClick={handleRebook}
@@ -258,6 +290,19 @@ export const AppointmentDetailsSidebar = ({
           </button>
         )}
       </div>
+
+      {/* Modal de reseña */}
+      {appointment && isCompleted && (
+        <CreateReviewForm
+          appointment={appointment}
+          isOpen={isReviewFormOpen}
+          onClose={() => {
+            setIsReviewFormOpen(false);
+            queryClient.invalidateQueries({ queryKey: ['my-reviews'] });
+            queryClient.invalidateQueries({ queryKey: ['appointment', appointmentId] });
+          }}
+        />
+      )}
     </div>
   );
 };

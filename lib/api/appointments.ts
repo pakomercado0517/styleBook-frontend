@@ -464,23 +464,29 @@ export async function getProviderAppointments(params?: {
       appointments = backendData;
       total = backendData.length;
     } else if (typeof backendData === 'object') {
-      // Estructura oficial: { appointments: [...], total: number }
+      // Estructura oficial: { appointments: [...], pagination: { total, page, limit, pages } }
       if (Array.isArray(backendData.appointments)) {
         appointments = backendData.appointments;
-        total = backendData.total || appointments.length;
-        effectiveLimit = backendData.limit || effectiveLimit;
-        effectiveOffset = backendData.offset || effectiveOffset;
+        // Usar pagination.total si existe, sino usar total directo, sino usar length
+        total = backendData.pagination?.total || backendData.total || appointments.length;
+        effectiveLimit = backendData.pagination?.limit || backendData.limit || effectiveLimit;
+        effectiveOffset = backendData.pagination?.offset || backendData.offset || effectiveOffset;
+        effectivePage = backendData.pagination?.page || effectivePage;
       }
       // Estructura alternativa: { total, count, data: [...] }
       else if (Array.isArray(backendData.data)) {
         appointments = backendData.data;
-        total = backendData.total || backendData.count || appointments.length;
-        effectiveLimit = backendData.limit || effectiveLimit;
-        effectiveOffset = backendData.offset || effectiveOffset;
+        total = backendData.pagination?.total || backendData.total || backendData.count || appointments.length;
+        effectiveLimit = backendData.pagination?.limit || backendData.limit || effectiveLimit;
+        effectiveOffset = backendData.pagination?.offset || backendData.offset || effectiveOffset;
+        effectivePage = backendData.pagination?.page || effectivePage;
       }
     }
 
-    effectivePage = Math.floor(effectiveOffset / effectiveLimit) + 1;
+    // Si no se calculó la página desde pagination, calcularla
+    if (effectivePage === 1 && effectiveOffset > 0) {
+      effectivePage = Math.floor(effectiveOffset / effectiveLimit) + 1;
+    }
 
     const appointmentsData: import('@/lib/types/appointments').AppointmentsPaginatedResponse =
       {
