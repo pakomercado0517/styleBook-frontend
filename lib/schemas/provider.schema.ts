@@ -117,4 +117,3 @@ export const createProviderSchema = z.object({
 
 // Exportar tipo inferido
 export type CreateProviderInput = z.infer<typeof createProviderSchema>;
-
