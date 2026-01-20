@@ -232,7 +232,7 @@ export function AppointmentCard({
               <AlertDialogHeader>
                 <AlertDialogTitle>¿Cancelar cita?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Esta acción cancelará la cita "{serviceName}" del cliente {clientName}.
+                  Esta acción cancelará la cita &quot;{serviceName}&quot; del cliente {clientName}.
                   ¿Estás seguro?
                 </AlertDialogDescription>
               </AlertDialogHeader>

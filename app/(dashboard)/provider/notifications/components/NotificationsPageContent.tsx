@@ -151,7 +151,7 @@ export function NotificationsPageContent(): ReactNode {
     toast.success('Todas las notificaciones marcadas como leídas');
   };
 
-  const handleNotificationClick = (_notificationId: number): void => {
+  const handleNotificationClick = (_notificationId: number): void => { // eslint-disable-line @typescript-eslint/no-unused-vars
     // TODO: Implementar navegación o acción según el tipo de notificación
     toast.info('Navegando a la notificación...');
   };

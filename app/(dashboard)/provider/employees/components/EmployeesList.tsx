@@ -52,7 +52,7 @@ export function EmployeesList({
           No tienes empleados registrados
         </p>
         <p className="text-neutral-300 font-poppins">
-          Añade tu primer empleado haciendo clic en "Añadir Nuevo Empleado"
+          Añade tu primer empleado haciendo clic en &quot;Añadir Nuevo Empleado&quot;
         </p>
       </div>
     );

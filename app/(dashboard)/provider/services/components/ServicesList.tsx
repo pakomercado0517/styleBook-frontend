@@ -51,7 +51,7 @@ export function ServicesList({
           No tienes servicios registrados
         </p>
         <p className="text-neutral-300 font-poppins">
-          Crea tu primer servicio haciendo clic en "Añadir Nuevo Servicio"
+          Crea tu primer servicio haciendo clic en &quot;Añadir Nuevo Servicio&quot;
         </p>
       </div>
     );

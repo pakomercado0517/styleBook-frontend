@@ -205,7 +205,7 @@ export function UpcomingAppointmentsList(): ReactNode {
 
               {/* Estilista y Salón */}
               <p className="text-xs font-normal leading-normal text-neutral-300 font-poppins">
-                con Estilista de Élite en '{providerName}'
+                con Estilista de Élite en &apos;{providerName}&apos;
               </p>
             </div>
 

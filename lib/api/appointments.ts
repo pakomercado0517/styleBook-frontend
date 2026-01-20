@@ -86,7 +86,6 @@ export async function getAppointments(
     let appointments: unknown[] = [];
     let total = 0;
     let effectiveLimit = params?.limit || 20;
-    let effectiveOffset = params?.offset || 0;
     let effectivePage = params?.page || 1;
 
     if (!backendData) {
@@ -114,7 +113,7 @@ export async function getAppointments(
         appointments = backendData.data;
         total = backendData.total || backendData.count || appointments.length;
         effectiveLimit = backendData.limit || effectiveLimit;
-        effectiveOffset = backendData.offset || effectiveOffset;
+        // effectiveOffset no se usa en la respuesta final, se mantiene el valor inicial
       }
     }
 

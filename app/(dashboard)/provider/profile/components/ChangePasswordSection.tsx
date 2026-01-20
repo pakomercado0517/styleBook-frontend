@@ -12,7 +12,7 @@ interface ChangePasswordSectionProps {
  * Desktop: Card con dos campos lado a lado
  */
 export function ChangePasswordSection({
-  onPasswordChange: _onPasswordChange,
+  onPasswordChange: _onPasswordChange, // eslint-disable-line @typescript-eslint/no-unused-vars
 }: ChangePasswordSectionProps): ReactNode {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');

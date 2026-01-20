@@ -81,7 +81,7 @@ export function ReviewsPageContent(): ReactNode {
     '1': allReviews.filter((r) => r.rating === 1).length,
   };
 
-  const handleReply = (_reviewId: number, _response: string): void => {
+  const handleReply = (_reviewId: number, _response: string): void => { // eslint-disable-line @typescript-eslint/no-unused-vars
     // TODO: Implementar llamada al backend para responder cuando esté disponible
     toast.success('Respuesta enviada', {
       description: 'Tu respuesta se ha publicado correctamente.',

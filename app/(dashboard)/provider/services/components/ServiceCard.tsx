@@ -113,7 +113,7 @@ export function ServiceCard({
               <AlertDialogHeader>
                 <AlertDialogTitle>¿Eliminar servicio?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Esta acción no se puede deshacer. El servicio "{service.name}" será
+                  Esta acción no se puede deshacer. El servicio &quot;{service.name}&quot; será
                   eliminado permanentemente.
                 </AlertDialogDescription>
               </AlertDialogHeader>
@@ -207,7 +207,7 @@ export function ServiceCard({
                 <AlertDialogHeader>
                   <AlertDialogTitle>¿Eliminar servicio?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Esta acción no se puede deshacer. El servicio "{service.name}" será
+                    Esta acción no se puede deshacer. El servicio &quot;{service.name}&quot; será
                     eliminado permanentemente.
                   </AlertDialogDescription>
                 </AlertDialogHeader>

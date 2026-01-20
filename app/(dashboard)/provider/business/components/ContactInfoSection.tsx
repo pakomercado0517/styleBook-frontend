@@ -21,8 +21,6 @@ export function ContactInfoSection({
   city,
   country,
   phone,
-  latitude: _latitude,
-  longitude: _longitude,
 }: ContactInfoSectionProps): ReactNode {
   const fullAddress = [address, city, country].filter(Boolean).join(', ');
 

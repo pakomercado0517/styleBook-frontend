@@ -11,6 +11,7 @@ import { Select } from '@/components/Select';
 import { Button } from '@/components/Button';
 import { createServiceSchema, updateServiceSchema } from '@/lib/schemas/services.schema';
 import type { CreateServiceInput, UpdateServiceInput } from '@/lib/schemas/services.schema';
+import type { ServiceCategory } from '@/lib/types/services';
 import { cn } from '@/lib/utils/cn';
 
 interface ServiceFormModalProps {
@@ -186,7 +187,7 @@ export function ServiceFormModal({
                 disabled={isLoading}
                 options={categoryOptions}
                 value={watch('category') || 'corte'}
-                onChange={(e) => setValue('category', e.target.value as any)}
+                onChange={(e) => setValue('category', e.target.value as ServiceCategory)}
               />
 
               <Input

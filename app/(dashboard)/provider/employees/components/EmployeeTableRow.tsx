@@ -104,7 +104,7 @@ export function EmployeeTableRow({
             <AlertDialogHeader>
               <AlertDialogTitle>¿Eliminar empleado?</AlertDialogTitle>
               <AlertDialogDescription>
-                Esta acción no se puede deshacer. El empleado "{employee.name}" será
+                Esta acción no se puede deshacer. El empleado &quot;{employee.name}&quot; será
                 eliminado permanentemente.
               </AlertDialogDescription>
             </AlertDialogHeader>
