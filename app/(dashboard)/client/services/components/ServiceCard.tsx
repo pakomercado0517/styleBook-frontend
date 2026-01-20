@@ -44,7 +44,12 @@ export const ServiceCard = ({
     minimumFractionDigits: 2,
   }).format(service.price);
 
-  const rating = service.average_rating?.toFixed(1) || '4.8';
+  const rating =
+    service.average_rating && typeof service.average_rating === 'number'
+      ? Number(service.average_rating).toFixed(1)
+      : service.average_rating && typeof service.average_rating === 'string'
+        ? Number(parseFloat(service.average_rating)).toFixed(1)
+        : '4.8';
   const reviews = service.total_reviews || 120;
   const providerName = service.provider?.business_name || 'Salón';
 

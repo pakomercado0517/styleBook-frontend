@@ -328,9 +328,12 @@ export function useProviderAnalytics(timeFrame: TimeFrame = 'monthly') {
   ];
 
   const metrics = {
-    // Estadísticas de reviews
-    averageRating:
-      reviewStats?.average_rating || reviewsStatistics.averageRating || 0,
+    // Estadísticas de reviews (asegurar que sea número)
+    averageRating: (() => {
+      const rating =
+        reviewStats?.average_rating || reviewsStatistics.averageRating || 0;
+      return typeof rating === 'string' ? parseFloat(rating) : Number(rating);
+    })(),
     totalReviews: reviewStats?.total_reviews || reviewsStatistics.total || 0,
     ratingDistribution: reviewStats?.rating_distribution || {
       '5': 0,

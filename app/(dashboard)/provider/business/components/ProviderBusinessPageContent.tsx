@@ -60,7 +60,13 @@ export function ProviderBusinessPageContent(): ReactNode {
       {/* Header */}
       <ProfileHeader
         businessName={providerProfile.business_name}
-        rating={providerProfile.average_rating || 0}
+        rating={
+          providerProfile.average_rating
+            ? typeof providerProfile.average_rating === 'string'
+              ? parseFloat(providerProfile.average_rating)
+              : Number(providerProfile.average_rating)
+            : 0
+        }
         reviewsCount={128} // TODO: Obtener del backend cuando esté disponible
         editHref="/provider/business/edit"
       />

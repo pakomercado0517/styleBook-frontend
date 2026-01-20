@@ -53,7 +53,7 @@ export function ProfileHeader({
             strokeWidth={2}
           />
           <span className="text-base font-semibold text-white font-poppins">
-            {rating.toFixed(1)}
+            {typeof rating === 'number' ? Number(rating).toFixed(1) : '0.0'}
           </span>
           <span className="text-sm text-neutral-300 font-poppins">
             ({reviewsCount} {reviewsCount === 1 ? 'reseña' : 'reseñas'})
@@ -106,7 +106,7 @@ export function ProfileHeader({
               strokeWidth={2}
             />
             <span className="text-xl font-semibold text-white font-poppins">
-              {rating.toFixed(1)}
+              {typeof rating === 'number' ? Number(rating).toFixed(1) : '0.0'}
             </span>
             <span className="text-base text-neutral-300 font-poppins">
               ({reviewsCount} {reviewsCount === 1 ? 'reseña' : 'reseñas'})

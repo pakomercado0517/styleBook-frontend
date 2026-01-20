@@ -71,7 +71,12 @@ export function ServiceDetailsPage({ serviceId }: ServiceDetailsPageProps): Reac
   const minutes = service.duration_minutes % 60;
   const formattedDuration = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
 
-  const rating = service.average_rating?.toFixed(1) || '4.9';
+  const rating =
+    service.average_rating && typeof service.average_rating === 'number'
+      ? Number(service.average_rating).toFixed(1)
+      : service.average_rating && typeof service.average_rating === 'string'
+        ? Number(parseFloat(service.average_rating)).toFixed(1)
+        : '4.9';
   const reviews = service.total_reviews || 95;
   const isFavorite = favoriteServiceIds.includes(service.id);
 
@@ -198,7 +203,14 @@ export function ServiceDetailsPage({ serviceId }: ServiceDetailsPageProps): Reac
                 <div className="flex items-center gap-2 mb-4">
                   <Star className="w-4 h-4 text-accent-500 fill-accent-500" strokeWidth={2} />
                   <p className="text-sm text-neutral-300 font-poppins">
-                    {service.provider.average_rating?.toFixed(1) || rating} ({reviews} {reviews === 1 ? 'reseña' : 'reseñas'})
+                    {service.provider.average_rating
+                      ? typeof service.provider.average_rating === 'number'
+                        ? Number(service.provider.average_rating).toFixed(1)
+                        : typeof service.provider.average_rating === 'string'
+                          ? Number(parseFloat(service.provider.average_rating)).toFixed(1)
+                          : rating
+                      : rating}{' '}
+                    ({reviews} {reviews === 1 ? 'reseña' : 'reseñas'})
                   </p>
                 </div>
                 <Link
@@ -388,7 +400,14 @@ export function ServiceDetailsPage({ serviceId }: ServiceDetailsPageProps): Reac
                   <div className="mt-1 flex items-center gap-1">
                     <Star className="w-4 h-4 text-accent-500 fill-accent-500" strokeWidth={2} />
                     <p className="text-sm text-neutral-400 font-poppins">
-                      {service.provider.average_rating?.toFixed(1) || rating} ({reviews} {reviews === 1 ? 'reseña' : 'reseñas'})
+                      {service.provider.average_rating
+                        ? typeof service.provider.average_rating === 'number'
+                          ? Number(service.provider.average_rating).toFixed(1)
+                          : typeof service.provider.average_rating === 'string'
+                            ? Number(parseFloat(service.provider.average_rating)).toFixed(1)
+                            : rating
+                        : rating}{' '}
+                      ({reviews} {reviews === 1 ? 'reseña' : 'reseñas'})
                     </p>
                   </div>
                 </div>

@@ -80,8 +80,8 @@ export default function ProviderDashboardPage(): ReactNode {
           <MetricCard
             title="Calificación Promedio"
             value={
-              stats?.averageRating
-                ? `${stats.averageRating.toFixed(1)} / 5`
+              stats?.averageRating && typeof stats.averageRating === 'number'
+                ? `${Number(stats.averageRating).toFixed(1)} / 5`
                 : '0.0 / 5'
             }
           />

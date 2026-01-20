@@ -235,8 +235,12 @@ export function useProviderStats() {
             })()
           : undefined,
 
-        // Rating promedio
-        averageRating: ratingStats?.average_rating || 0,
+        // Rating promedio (asegurar que sea número)
+        averageRating: ratingStats?.average_rating
+          ? typeof ratingStats.average_rating === 'string'
+            ? parseFloat(ratingStats.average_rating)
+            : Number(ratingStats.average_rating)
+          : 0,
 
         // Clientes activos (únicos del último mes)
         activeClients:

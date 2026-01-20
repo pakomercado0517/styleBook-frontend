@@ -40,7 +40,11 @@ export function MetricsGrid({
       <div className="grid grid-cols-2 gap-3 px-4 md:hidden">
         <MetricCard
           title="Rating Promedio"
-          value={averageRating > 0 ? `${averageRating.toFixed(1)} ⭐` : 'N/A'}
+          value={
+            averageRating > 0 && typeof averageRating === 'number'
+              ? `${Number(averageRating).toFixed(1)} ⭐`
+              : 'N/A'
+          }
         />
         <MetricCard title="Total Reseñas" value={totalReviews} />
         <MetricCard title="Citas Totales" value={totalAppointments} />
@@ -51,7 +55,11 @@ export function MetricsGrid({
       <div className="hidden md:grid md:grid-cols-6 md:gap-4 md:px-8">
         <MetricCard
           title="Rating Promedio"
-          value={averageRating > 0 ? `${averageRating.toFixed(1)} ⭐` : 'N/A'}
+          value={
+            averageRating > 0 && typeof averageRating === 'number'
+              ? `${Number(averageRating).toFixed(1)} ⭐`
+              : 'N/A'
+          }
         />
         <MetricCard title="Total Reseñas" value={totalReviews} />
         <MetricCard title="Citas Totales" value={totalAppointments} />

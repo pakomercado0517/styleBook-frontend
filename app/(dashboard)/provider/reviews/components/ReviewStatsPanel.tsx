@@ -58,7 +58,9 @@ export function ReviewStatsPanel({
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-2">
           <span className="text-4xl font-bold text-white font-poppins">
-            {averageRating.toFixed(1)}
+            {typeof averageRating === 'number'
+              ? Number(averageRating).toFixed(1)
+              : '0.0'}
           </span>
           <div className="flex items-center gap-1">
             {[1, 2, 3, 4, 5].map((star) => (
@@ -67,7 +69,9 @@ export function ReviewStatsPanel({
                 className="w-5 h-5"
                 style={{ color: '#D4AF37' }}
                 fill={
-                  star <= Math.round(averageRating) ? '#D4AF37' : 'transparent'
+                  star <= Math.round(typeof averageRating === 'number' ? averageRating : 0)
+                    ? '#D4AF37'
+                    : 'transparent'
                 }
                 strokeWidth={2}
               />
